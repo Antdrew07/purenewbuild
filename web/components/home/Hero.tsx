@@ -6,6 +6,7 @@ import { useRef } from "react";
 import { ButtonLink } from "@/components/ui/Button";
 import { StarDivider } from "@/components/ui/Chrome";
 import { ParticleField } from "@/components/fx/ParticleField";
+import { AmericanFlagBackdrop } from "@/components/fx/AmericanFlagBackdrop";
 import { EASE, fadeUp, stagger, trackIn } from "@/lib/motion";
 
 export function Hero() {
@@ -20,80 +21,83 @@ export function Hero() {
   return (
     <section
       ref={ref}
-      className="relative flex min-h-[92vh] items-center justify-center overflow-hidden pt-20"
+      className="flag-hero relative overflow-hidden pt-20"
     >
-      {/* Layer 1 — flag-toned radial wash */}
+      <AmericanFlagBackdrop />
+
+      {/* The film gets its own plane so the logo and words stay legible. */}
       <motion.div aria-hidden="true" style={{ y: bgY }} className="absolute inset-0">
-        <div className="absolute inset-0 bg-bg-base" />
-        <div className="absolute left-1/2 top-1/3 h-[46rem] w-[46rem] -translate-x-1/2 -translate-y-1/2 rounded-full bg-red/18 blur-[130px]" />
-        <div className="absolute right-[8%] top-[18%] h-[30rem] w-[30rem] rounded-full bg-navy/25 blur-[120px]" />
-        <div className="absolute bottom-[6%] left-[4%] h-[24rem] w-[24rem] rounded-full bg-blue/12 blur-[110px]" />
-        <div className="stars-strip absolute inset-0 opacity-[0.14]" />
+        <div className="flag-hero__content-wash" />
+        <div className="flag-hero__stars stars-strip" />
       </motion.div>
 
       {/* Layer 2 — drifting particles */}
       <ParticleField />
 
-      {/* Layer 3 — content */}
+      {/* The reading path is content first, then the existing circular identity mark. */}
       <motion.div
         style={{ y: contentY, opacity }}
         variants={stagger}
         initial="hidden"
         animate="visible"
-        className="relative z-10 mx-auto max-w-5xl px-5 py-20 text-center sm:px-8"
+        className="relative z-10 mx-auto grid min-h-[calc(100svh-5rem)] max-w-7xl items-center gap-12 px-5 py-24 sm:px-8 lg:grid-cols-[minmax(0,1.08fr)_minmax(18rem,0.72fr)] lg:gap-6"
       >
-        <motion.div variants={fadeUp} className="flex justify-center">
-          <Image
-            src="/brand/logo-pure-peptide.jpeg"
-            alt="Pure Peptide"
-            width={190}
-            height={190}
-            priority
-            className="h-32 w-32 rounded-full shadow-2xl shadow-red/30 ring-1 ring-border-hair sm:h-44 sm:w-44"
-          />
+        <div className="flag-hero__copy text-center lg:text-left">
+          <motion.p
+            variants={fadeUp}
+            className="flag-hero__kicker font-mono text-[10px] uppercase tracking-[0.36em] sm:text-[11px]"
+          >
+            Veteran Owned <span aria-hidden="true">·</span> American Made
+          </motion.p>
+
+          <motion.h1
+            variants={trackIn}
+            className="mt-5 font-display text-6xl font-black uppercase leading-[0.82] sm:text-8xl lg:text-9xl"
+          >
+            <span className="chrome-text block">Pure</span>
+            <span className="flag-hero__red-word block">Peptide</span>
+          </motion.h1>
+
+          <motion.div variants={fadeUp} className="mt-7 lg:flex lg:justify-start">
+            <StarDivider />
+          </motion.div>
+
+          <motion.p
+            variants={fadeUp}
+            className="flag-hero__body mx-auto mt-7 max-w-xl text-base leading-relaxed sm:text-lg lg:mx-0"
+          >
+            Research-grade peptides held to a standard you can verify. Every lot is
+            third-party tested for identity and purity, sealed in the USA, and
+            shipped with a Certificate of Analysis on request.
+          </motion.p>
+
+          <motion.div variants={fadeUp} className="mt-9 flex flex-wrap items-center justify-center gap-4 lg:justify-start">
+            <ButtonLink href="/products">Browse the catalog</ButtonLink>
+            <ButtonLink href="/about" variant="outline">Why researchers choose us</ButtonLink>
+          </motion.div>
+
+          <motion.p
+            variants={fadeUp}
+            className="flag-hero__disclaimer mt-9 font-mono text-[10px] uppercase tracking-[0.25em] sm:text-[11px]"
+          >
+            Research use only · Not for human consumption
+          </motion.p>
+        </div>
+
+        <motion.div variants={fadeUp} className="flex justify-center lg:justify-end">
+          <div className="flag-hero__seal">
+            <div className="flag-hero__seal-inner">
+              <Image
+                src="/brand/logo-pure-peptide.jpeg"
+                alt="Pure Peptide"
+                width={310}
+                height={310}
+                priority
+                className="h-48 w-48 rounded-full object-cover sm:h-64 sm:w-64 lg:h-72 lg:w-72"
+              />
+            </div>
+          </div>
         </motion.div>
-
-        <motion.p
-          variants={fadeUp}
-          className="mt-8 font-mono text-[11px] uppercase tracking-[0.42em] text-blue"
-        >
-          Veteran Owned · American Made
-        </motion.p>
-
-        <motion.h1
-          variants={trackIn}
-          className="mt-4 font-display text-6xl font-black uppercase leading-[0.86] sm:text-8xl lg:text-9xl"
-        >
-          <span className="chrome-text block">Pure</span>
-          <span className="block text-red drop-shadow-[0_0_28px_rgba(232,18,28,0.45)]">
-            Peptide
-          </span>
-        </motion.h1>
-
-        <motion.div variants={fadeUp} className="mt-8">
-          <StarDivider />
-        </motion.div>
-
-        <motion.p
-          variants={fadeUp}
-          className="mx-auto mt-8 max-w-2xl text-base leading-relaxed text-text-secondary sm:text-lg"
-        >
-          Research-grade peptides held to a standard you can verify. Every lot is
-          third-party tested for identity and purity, sealed in the USA, and
-          shipped with a Certificate of Analysis on request.
-        </motion.p>
-
-        <motion.div variants={fadeUp} className="mt-10 flex flex-wrap items-center justify-center gap-4">
-          <ButtonLink href="/products">Browse the catalog</ButtonLink>
-          <ButtonLink href="/about" variant="outline">Why researchers choose us</ButtonLink>
-        </motion.div>
-
-        <motion.p
-          variants={fadeUp}
-          className="mt-10 font-mono text-[11px] uppercase tracking-[0.3em] text-text-secondary"
-        >
-          Research use only · Not for human consumption
-        </motion.p>
       </motion.div>
 
       {/* Scroll cue */}
@@ -114,7 +118,7 @@ export function Hero() {
       </motion.div>
 
       {/* Bottom fade into the next section */}
-      <div aria-hidden="true" className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-bg-base to-transparent" />
+      <div aria-hidden="true" className="absolute inset-x-0 bottom-0 z-[1] h-32 bg-gradient-to-t from-bg-base to-transparent" />
     </section>
   );
 }
