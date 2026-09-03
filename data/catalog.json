@@ -1,0 +1,767 @@
+{
+  "source": "Pure Peptides price sheet (reference image, 2026-08-22)",
+  "currency": "USD",
+  "disclaimer": "Research use only. Not for human consumption.",
+  "freeGifts": [
+    {
+      "min": 0,
+      "max": 150,
+      "gift": "Free PBS Solution"
+    },
+    {
+      "min": 150,
+      "max": 250,
+      "gift": "Free Acetic Water"
+    },
+    {
+      "min": 250,
+      "max": null,
+      "gift": "Free PBS Solution"
+    }
+  ],
+  "categories": [
+    {
+      "slug": "metabolic",
+      "name": "Metabolic & GLP-1",
+      "blurb": "Research compounds studied for metabolic and weight regulation pathways."
+    },
+    {
+      "slug": "recovery",
+      "name": "Repair & Recovery",
+      "blurb": "Compounds investigated for tissue repair, healing, and inflammatory response."
+    },
+    {
+      "slug": "growth",
+      "name": "Growth & Performance",
+      "blurb": "Secretagogues and growth-axis research peptides."
+    },
+    {
+      "slug": "cognitive",
+      "name": "Cognitive & Neuro",
+      "blurb": "Nootropic and neuro-modulating research compounds."
+    },
+    {
+      "slug": "longevity",
+      "name": "Longevity & Cellular",
+      "blurb": "Mitochondrial, NAD+, and cellular-senescence research materials."
+    },
+    {
+      "slug": "wellness",
+      "name": "Wellness & Vitamins",
+      "blurb": "Vitamin, antioxidant, and general wellness research blends."
+    },
+    {
+      "slug": "sexual",
+      "name": "Hormone & Sexual Health",
+      "blurb": "Melanocortin and gonadotropin research compounds."
+    },
+    {
+      "slug": "blends",
+      "name": "Blends & Stacks",
+      "blurb": "Multi-compound research blends supplied in a single vial."
+    },
+    {
+      "slug": "accessories",
+      "name": "Supplies & Accessories",
+      "blurb": "Reconstitution supplies, pens, and lab consumables."
+    }
+  ],
+  "products": [
+    {
+      "name": "5-Amino-1MQ",
+      "dosage": "50mg",
+      "price": 60,
+      "category": "longevity",
+      "status": "active"
+    },
+    {
+      "name": "Adamax",
+      "dosage": "10mg",
+      "price": 55,
+      "category": "cognitive",
+      "status": "active"
+    },
+    {
+      "name": "AHK-Cu",
+      "dosage": "100mg",
+      "price": 45,
+      "category": "recovery",
+      "status": "active"
+    },
+    {
+      "name": "AOD 9604",
+      "dosage": "10mg",
+      "price": 45,
+      "category": "metabolic",
+      "status": "active"
+    },
+    {
+      "name": "ARA 290",
+      "dosage": "10mg",
+      "price": 45,
+      "category": "recovery",
+      "status": "active"
+    },
+    {
+      "name": "ARA 290",
+      "dosage": "16mg",
+      "price": 55,
+      "category": "recovery",
+      "status": "active"
+    },
+    {
+      "name": "BPC-157",
+      "dosage": "10mg",
+      "price": 45,
+      "category": "recovery",
+      "status": "active",
+      "featured": true
+    },
+    {
+      "name": "BPC-157",
+      "dosage": "20mg",
+      "price": 60,
+      "category": "recovery",
+      "status": "active"
+    },
+    {
+      "name": "Cagrilintide",
+      "dosage": "10mg",
+      "price": null,
+      "category": "metabolic",
+      "status": "active"
+    },
+    {
+      "name": "CJC-1295 / Ipamorelin",
+      "dosage": "5mg/5mg",
+      "price": 50,
+      "category": "growth",
+      "status": "active",
+      "featured": true
+    },
+    {
+      "name": "CoQ10",
+      "dosage": "5ml",
+      "price": 50,
+      "category": "wellness",
+      "status": "active"
+    },
+    {
+      "name": "DSIP",
+      "dosage": "10mg",
+      "price": 40,
+      "category": "cognitive",
+      "status": "active"
+    },
+    {
+      "name": "Dr. Lipo",
+      "dosage": "",
+      "price": 50,
+      "category": "metabolic",
+      "status": "active"
+    },
+    {
+      "name": "Eloralintide",
+      "dosage": "10mg",
+      "price": 115,
+      "category": "metabolic",
+      "status": "active"
+    },
+    {
+      "name": "Endurance",
+      "dosage": "3ml",
+      "price": 60,
+      "category": "growth",
+      "status": "active"
+    },
+    {
+      "name": "Epithalon",
+      "dosage": "10mg",
+      "price": 45,
+      "category": "longevity",
+      "status": "active"
+    },
+    {
+      "name": "Fat Blaster Lipo-C",
+      "dosage": "10ml",
+      "price": 55,
+      "category": "metabolic",
+      "status": "active"
+    },
+    {
+      "name": "GHK-Cu",
+      "dosage": "50mg",
+      "price": 40,
+      "category": "recovery",
+      "status": "active"
+    },
+    {
+      "name": "GHK-Cu",
+      "dosage": "100mg",
+      "price": 55,
+      "category": "recovery",
+      "status": "active"
+    },
+    {
+      "name": "Glutathione",
+      "dosage": "1200mg",
+      "price": 60,
+      "category": "wellness",
+      "status": "active"
+    },
+    {
+      "name": "HCG",
+      "dosage": "5000iu",
+      "price": 45,
+      "category": "sexual",
+      "status": "active"
+    },
+    {
+      "name": "Humanin",
+      "dosage": "10mg",
+      "price": 60,
+      "category": "longevity",
+      "status": "active"
+    },
+    {
+      "name": "IGF-1 LR3",
+      "dosage": "1mg",
+      "price": 55,
+      "category": "growth",
+      "status": "active"
+    },
+    {
+      "name": "Ipamorelin",
+      "dosage": "10mg",
+      "price": 45,
+      "category": "growth",
+      "status": "active"
+    },
+    {
+      "name": "Jabber Dream Blend",
+      "dosage": "5-compound",
+      "price": 65,
+      "category": "blends",
+      "status": "active",
+      "note": "500mcg KPV, 300mcg DSIP, 1.75mg Glycine, 50mg GABA, 25mg L-Theanine"
+    },
+    {
+      "name": "KLOW",
+      "dosage": "80mg",
+      "price": 85,
+      "category": "blends",
+      "status": "active"
+    },
+    {
+      "name": "Korean B-12",
+      "dosage": "10ml",
+      "price": 60,
+      "category": "wellness",
+      "status": "active"
+    },
+    {
+      "name": "Korean Multivitamin",
+      "dosage": "10ml",
+      "price": 60,
+      "category": "wellness",
+      "status": "active"
+    },
+    {
+      "name": "Korean Glutathione",
+      "dosage": "1200mg",
+      "price": 45,
+      "category": "wellness",
+      "status": "active"
+    },
+    {
+      "name": "KPV",
+      "dosage": "10mg",
+      "price": 45,
+      "category": "recovery",
+      "status": "active"
+    },
+    {
+      "name": "KPV",
+      "dosage": "30mg",
+      "price": 60,
+      "category": "recovery",
+      "status": "active"
+    },
+    {
+      "name": "KPV / GHK-Cu Blend",
+      "dosage": "10mg/50mg",
+      "price": 50,
+      "category": "blends",
+      "status": "active"
+    },
+    {
+      "name": "KPV / GHK-Cu Blend",
+      "dosage": "10mg/100mg",
+      "price": 60,
+      "category": "blends",
+      "status": "active"
+    },
+    {
+      "name": "Kisspeptin-10",
+      "dosage": "10mg",
+      "price": 45,
+      "category": "sexual",
+      "status": "active"
+    },
+    {
+      "name": "L-Carnitine",
+      "dosage": "1200mg/10ml",
+      "price": 60,
+      "category": "metabolic",
+      "status": "active"
+    },
+    {
+      "name": "Lipo Lab",
+      "dosage": "",
+      "price": 50,
+      "category": "metabolic",
+      "status": "active"
+    },
+    {
+      "name": "Lipo-C MIC B-12",
+      "dosage": "10ml",
+      "price": 60,
+      "category": "metabolic",
+      "status": "active",
+      "note": "with B5 & B6"
+    },
+    {
+      "name": "LL-37",
+      "dosage": "10mg",
+      "price": 55,
+      "category": "recovery",
+      "status": "active"
+    },
+    {
+      "name": "Melanotan I",
+      "dosage": "10mg",
+      "price": 35,
+      "category": "sexual",
+      "status": "active"
+    },
+    {
+      "name": "Melanotan II",
+      "dosage": "10mg",
+      "price": 45,
+      "category": "sexual",
+      "status": "active"
+    },
+    {
+      "name": "Methylene Blue",
+      "dosage": "60ml",
+      "price": 60,
+      "category": "longevity",
+      "status": "active",
+      "form": "dropper"
+    },
+    {
+      "name": "MITO-PRIME",
+      "dosage": "5-amino/MOTS-c/NAD",
+      "price": 45,
+      "category": "longevity",
+      "status": "active"
+    },
+    {
+      "name": "NAD+",
+      "dosage": "500mg",
+      "price": 45,
+      "category": "longevity",
+      "status": "active"
+    },
+    {
+      "name": "NAD+",
+      "dosage": "1000mg",
+      "price": 55,
+      "category": "longevity",
+      "status": "active",
+      "featured": true
+    },
+    {
+      "name": "PE 22-28",
+      "dosage": "10mg",
+      "price": 45,
+      "category": "cognitive",
+      "status": "active"
+    },
+    {
+      "name": "PT-141",
+      "dosage": "10mg",
+      "price": 45,
+      "category": "sexual",
+      "status": "active"
+    },
+    {
+      "name": "Retatrutide",
+      "dosage": "10mg",
+      "price": 60,
+      "category": "metabolic",
+      "status": "active"
+    },
+    {
+      "name": "Retatrutide",
+      "dosage": "15mg",
+      "price": 70,
+      "category": "metabolic",
+      "status": "active",
+      "featured": true
+    },
+    {
+      "name": "Retatrutide",
+      "dosage": "20mg",
+      "price": 85,
+      "category": "metabolic",
+      "status": "active"
+    },
+    {
+      "name": "Retatrutide",
+      "dosage": "30mg",
+      "price": 100,
+      "category": "metabolic",
+      "status": "active"
+    },
+    {
+      "name": "Retatrutide",
+      "dosage": "60mg",
+      "price": 160,
+      "category": "metabolic",
+      "status": "active"
+    },
+    {
+      "name": "Selank",
+      "dosage": "10mg",
+      "price": 45,
+      "category": "cognitive",
+      "status": "active"
+    },
+    {
+      "name": "Semax",
+      "dosage": "10mg",
+      "price": 45,
+      "category": "cognitive",
+      "status": "active"
+    },
+    {
+      "name": "SS-31",
+      "dosage": "10mg",
+      "price": 45,
+      "category": "longevity",
+      "status": "active"
+    },
+    {
+      "name": "Super Human",
+      "dosage": "10ml",
+      "price": 60,
+      "category": "blends",
+      "status": "active"
+    },
+    {
+      "name": "Tesamorelin",
+      "dosage": "10mg",
+      "price": 45,
+      "category": "growth",
+      "status": "active"
+    },
+    {
+      "name": "Tesa / Ipa / CJC",
+      "dosage": "6mg/3mg/3mg",
+      "price": 60,
+      "category": "growth",
+      "status": "active"
+    },
+    {
+      "name": "TB-500",
+      "dosage": "10mg",
+      "price": 45,
+      "category": "recovery",
+      "status": "active",
+      "featured": true
+    },
+    {
+      "name": "TB-500",
+      "dosage": "20mg",
+      "price": 55,
+      "category": "recovery",
+      "status": "active"
+    },
+    {
+      "name": "Tirzepatide",
+      "dosage": "15mg",
+      "price": 60,
+      "category": "metabolic",
+      "status": "active",
+      "featured": true
+    },
+    {
+      "name": "Tirzepatide",
+      "dosage": "20mg",
+      "price": 75,
+      "category": "metabolic",
+      "status": "active"
+    },
+    {
+      "name": "Tirzepatide",
+      "dosage": "30mg",
+      "price": 85,
+      "category": "metabolic",
+      "status": "active"
+    },
+    {
+      "name": "Tirzepatide",
+      "dosage": "60mg",
+      "price": 110,
+      "category": "metabolic",
+      "status": "active"
+    },
+    {
+      "name": "Wolverine Blend",
+      "dosage": "10mg",
+      "price": 55,
+      "category": "blends",
+      "status": "active"
+    },
+    {
+      "name": "Wolverine Blend",
+      "dosage": "20mg",
+      "price": 65,
+      "category": "blends",
+      "status": "active"
+    },
+    {
+      "name": "Ready-Use Pen",
+      "dosage": "3 cartridges / 10 needles",
+      "price": 50,
+      "category": "accessories",
+      "status": "active",
+      "form": "pen"
+    },
+    {
+      "name": "ARA 290",
+      "dosage": "40mg",
+      "price": 100,
+      "category": "recovery",
+      "status": "active"
+    },
+    {
+      "name": "Eloralintide",
+      "dosage": "5mg",
+      "price": 95,
+      "category": "metabolic",
+      "status": "active"
+    },
+    {
+      "name": "CJC-1295 / Ipamorelin",
+      "dosage": "10mg/10mg",
+      "price": 65,
+      "category": "growth",
+      "status": "active"
+    },
+    {
+      "name": "CJC-1295 / Ipamorelin (No DAC)",
+      "dosage": "10mg",
+      "price": 55,
+      "category": "growth",
+      "status": "active"
+    },
+    {
+      "name": "Epithalon",
+      "dosage": "50mg",
+      "price": 75,
+      "category": "longevity",
+      "status": "active"
+    },
+    {
+      "name": "Deadpool Blend",
+      "dosage": "40mg",
+      "price": 90,
+      "category": "blends",
+      "status": "active",
+      "note": "Cartalax 20mg · BPC-157 10mg · TB-500 10mg"
+    },
+    {
+      "name": "Dihexa",
+      "dosage": "10mg",
+      "price": 45,
+      "category": "cognitive",
+      "status": "active"
+    },
+    {
+      "name": "Follistatin 344",
+      "dosage": "1mg",
+      "price": 95,
+      "category": "growth",
+      "status": "active"
+    },
+    {
+      "name": "HHB Hair, Skin & Nail Blend",
+      "dosage": "10ml",
+      "price": 60,
+      "category": "wellness",
+      "status": "active"
+    },
+    {
+      "name": "Red Line B-12",
+      "dosage": "10ml",
+      "price": 45,
+      "category": "wellness",
+      "status": "active"
+    },
+    {
+      "name": "SS-31",
+      "dosage": "50mg",
+      "price": 70,
+      "category": "longevity",
+      "status": "active"
+    },
+    {
+      "name": "Tesamorelin / Ipamorelin",
+      "dosage": "5mg/5mg",
+      "price": 60,
+      "category": "growth",
+      "status": "active"
+    },
+    {
+      "name": "Tri-Heal Blend",
+      "dosage": "45mg",
+      "price": 85,
+      "category": "blends",
+      "status": "active",
+      "note": "KPV 10mg · BPC-157 10mg · TB-500 25mg"
+    },
+    {
+      "name": "Vasugen",
+      "dosage": "10mg",
+      "price": 45,
+      "category": "recovery",
+      "status": "active"
+    },
+    {
+      "name": "VIP",
+      "dosage": "10mg",
+      "price": 45,
+      "category": "recovery",
+      "status": "active"
+    },
+    {
+      "name": "Thymosin Alpha-1",
+      "dosage": "10mg",
+      "price": 55,
+      "category": "recovery",
+      "status": "active"
+    },
+    {
+      "name": "Prostamax",
+      "dosage": "10mg",
+      "price": 45,
+      "category": "wellness",
+      "status": "active"
+    },
+    {
+      "name": "Oxytocin",
+      "dosage": "10mg",
+      "price": 50,
+      "category": "sexual",
+      "status": "active"
+    },
+    {
+      "name": "Selank Spray",
+      "dosage": "30ml",
+      "price": 40,
+      "category": "cognitive",
+      "status": "active",
+      "form": "spray"
+    },
+    {
+      "name": "Semax Spray",
+      "dosage": "30ml",
+      "price": 40,
+      "category": "cognitive",
+      "status": "active",
+      "form": "spray"
+    },
+    {
+      "name": "Semax / Selank Spray",
+      "dosage": "30ml",
+      "price": 45,
+      "category": "cognitive",
+      "status": "active",
+      "form": "spray"
+    },
+    {
+      "name": "KPV Spray",
+      "dosage": "10mg / 30ml",
+      "price": 40,
+      "category": "recovery",
+      "status": "active",
+      "form": "spray"
+    },
+    {
+      "name": "KPV Spray",
+      "dosage": "30mg / 30ml",
+      "price": 55,
+      "category": "recovery",
+      "status": "active",
+      "form": "spray"
+    },
+    {
+      "name": "BPC-157 Spray",
+      "dosage": "20mg / 30ml",
+      "price": 55,
+      "category": "recovery",
+      "status": "active",
+      "form": "spray"
+    },
+    {
+      "name": "TB-500 Spray",
+      "dosage": "20mg / 30ml",
+      "price": 55,
+      "category": "recovery",
+      "status": "active",
+      "form": "spray"
+    },
+    {
+      "name": "NAD+ Spray",
+      "dosage": "500mg / 30ml",
+      "price": 50,
+      "category": "longevity",
+      "status": "active",
+      "form": "spray"
+    },
+    {
+      "name": "NAD+ Spray",
+      "dosage": "1000mg / 30ml",
+      "price": 65,
+      "category": "longevity",
+      "status": "active",
+      "form": "spray"
+    },
+    {
+      "name": "Oxytocin Spray",
+      "dosage": "10mg / 30ml",
+      "price": 50,
+      "category": "sexual",
+      "status": "active",
+      "form": "spray"
+    },
+    {
+      "name": "PT-141 Spray",
+      "dosage": "10mg / 30ml",
+      "price": 40,
+      "category": "sexual",
+      "status": "active",
+      "form": "spray"
+    },
+    {
+      "name": "PT-141 / Oxytocin Spray",
+      "dosage": "30ml",
+      "price": 55,
+      "category": "sexual",
+      "status": "active",
+      "form": "spray"
+    }
+  ]
+}

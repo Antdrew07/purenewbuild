@@ -1,0 +1,265 @@
+@import "tailwindcss";
+
+/**
+ * `light:` targets light mode in both ways it can be reached: an explicit
+ * data-theme from the toggle, and the pre-hydration system preference.
+ */
+@custom-variant light {
+  &:where(:root[data-theme="light"] *) { @slot; }
+  @media (prefers-color-scheme: light) {
+    &:where(:root:not([data-theme="dark"]) *) { @slot; }
+  }
+}
+
+/* ==========================================================================
+   Pure Peptide — design tokens
+   Every colour below was sampled from the supplied brand artwork
+   (round logo, RETA/NAD+ vial labels, price sheet), not invented.
+     black   #000000 – #010101   20–52% of every reference image
+     red     #F6000E #F01C19 #FF0001 #E00101 #FC0715  -> #E8121C
+     blue    #04AAFF #0583F1 #0790FF (neon edge)      -> #0790FF
+     navy    #1A55D7 #0134BB (flag field)             -> #0B3AA8
+     chrome  #FDFDFD #D6D9DB #C0C0C0 #A5A5A5 #8C8B89 #727071 #595A5A #3D3D3F
+   ========================================================================== */
+
+@theme inline {
+  --color-bg-base: var(--pp-bg-base);
+  --color-bg-elevated: var(--pp-bg-elevated);
+  --color-bg-glass: var(--pp-bg-glass);
+  --color-border-hair: var(--pp-border);
+  --color-text-primary: var(--pp-text-primary);
+  --color-text-secondary: var(--pp-text-secondary);
+  --color-text-dim: var(--pp-text-dim);
+
+  --color-red: var(--pp-red);
+  --color-red-hot: var(--pp-red-hot);
+  --color-red-deep: var(--pp-red-deep);
+  --color-blue: var(--pp-blue);
+  --color-navy: var(--pp-navy);
+
+  --color-chrome-50: #fdfdfd;
+  --color-chrome-100: #d6d9db;
+  --color-chrome-200: #c0c0c0;
+  --color-chrome-300: #a5a5a5;
+  --color-chrome-400: #8c8b89;
+  --color-chrome-500: #727071;
+  --color-chrome-600: #595a5a;
+  --color-chrome-700: #3d3d3f;
+  --color-chrome-800: #242524;
+  --color-chrome-900: #121317;
+
+  --font-display: var(--font-saira), "Arial Narrow", system-ui, sans-serif;
+  --font-sans: var(--font-inter), system-ui, -apple-system, sans-serif;
+  --font-mono: var(--font-jetbrains), ui-monospace, monospace;
+}
+
+/* ---------- dark (default) ---------- */
+:root {
+  --pp-red: #e8121c;
+  --pp-red-hot: #ff1420;
+  --pp-red-deep: #8e0710;
+  --pp-blue: #0790ff;
+  --pp-navy: #0b3aa8;
+
+  --pp-bg-base: #000000;
+  --pp-bg-elevated: #0a0b0d;
+  --pp-bg-glass: rgb(255 255 255 / 0.045);
+  --pp-border: rgb(255 255 255 / 0.09);
+  --pp-text-primary: #f7f8f9;
+  --pp-text-secondary: #a5a5a5;
+  --pp-text-dim: #595a5a;
+
+  --pp-chrome-grad: linear-gradient(
+    177deg,
+    #ffffff 0%, #d6d9db 18%, #8c8b89 38%,
+    #3d3d3f 50%, #8c8b89 62%, #e8eaec 82%, #a5a5a5 100%
+  );
+  --vial-rim: #eef3f8;
+  --vial-rim-2: #c9d6e2;
+  --vial-body: #aebecd;
+  --vial-sheen: #ffffff;
+  --vial-outline: rgb(255 255 255 / 0.34);
+  --vial-shadow: 0 18px 34px -12px rgb(0 0 0 / 0.75);
+  --vial-stage: linear-gradient(180deg, #16181c 0%, #0d0f12 100%);
+  --pp-chrome-stroke: 0.6px rgb(255 255 255 / 0.22);
+  --pp-chrome-shadow: drop-shadow(0 1px 0 rgb(255 255 255 / 0.35))
+                      drop-shadow(0 3px 10px rgb(0 0 0 / 0.55));
+  --pp-scrim: rgb(0 0 0 / 0.72);
+  color-scheme: dark;
+}
+
+/* ---------- light ---------- */
+:root[data-theme="light"] {
+  --pp-red: #c40d16;
+  --pp-red-hot: #e8121c;
+  --pp-red-deep: #7a060d;
+  --pp-blue: #0064c8;
+  --pp-navy: #0b3aa8;
+
+  --pp-bg-base: #f7f8fa;
+  --pp-bg-elevated: #ffffff;
+  --pp-bg-glass: rgb(255 255 255 / 0.86);
+  --pp-border: rgb(10 11 13 / 0.10);
+  --pp-text-primary: #0a0b0d;
+  --pp-text-secondary: #4a4d52;
+  --pp-text-dim: #83878e;
+
+  --pp-chrome-grad: linear-gradient(
+    177deg,
+    #6b6e73 0%, #2b2d31 20%, #55585d 42%,
+    #16171a 52%, #55585d 64%, #83878e 84%, #3d3f43 100%
+  );
+  --vial-rim: #5d6773;
+  --vial-rim-2: #97a1ac;
+  --vial-body: #dfe5ec;
+  --vial-sheen: #ffffff;
+  --vial-outline: rgb(74 83 94 / 0.5);
+  --vial-shadow: 0 18px 28px -14px rgb(20 26 34 / 0.45);
+  --vial-stage: linear-gradient(180deg, #ffffff 0%, #eef1f5 100%);
+  --pp-chrome-stroke: 0.4px rgb(10 11 13 / 0.28);
+  --pp-chrome-shadow: drop-shadow(0 1px 0 rgb(255 255 255 / 0.85))
+                      drop-shadow(0 2px 4px rgb(10 11 13 / 0.22));
+  --pp-scrim: rgb(255 255 255 / 0.7);
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    --pp-red: #c40d16;
+    --pp-red-hot: #e8121c;
+    --pp-red-deep: #7a060d;
+    --pp-blue: #0064c8;
+
+    --pp-bg-base: #f7f8fa;
+    --pp-bg-elevated: #ffffff;
+    --pp-bg-glass: rgb(255 255 255 / 0.86);
+    --pp-border: rgb(10 11 13 / 0.10);
+    --pp-text-primary: #0a0b0d;
+    --pp-text-secondary: #4a4d52;
+    --pp-text-dim: #83878e;
+
+    --pp-chrome-grad: linear-gradient(
+      177deg,
+      #6b6e73 0%, #2b2d31 20%, #55585d 42%,
+      #16171a 52%, #55585d 64%, #83878e 84%, #3d3f43 100%
+    );
+    --vial-rim: #5d6773;
+    --vial-rim-2: #97a1ac;
+    --vial-body: #dfe5ec;
+    --vial-sheen: #ffffff;
+    --vial-outline: rgb(74 83 94 / 0.5);
+    --vial-shadow: 0 18px 28px -14px rgb(20 26 34 / 0.45);
+    --vial-stage: linear-gradient(180deg, #ffffff 0%, #eef1f5 100%);
+  --vial-stage: linear-gradient(180deg, #ffffff 0%, #eef1f5 100%);
+    --pp-chrome-stroke: 0.4px rgb(10 11 13 / 0.28);
+    --pp-chrome-shadow: drop-shadow(0 1px 0 rgb(255 255 255 / 0.85))
+                        drop-shadow(0 2px 4px rgb(10 11 13 / 0.22));
+    --pp-scrim: rgb(255 255 255 / 0.7);
+    color-scheme: light;
+  }
+}
+
+* { border-color: var(--pp-border); }
+
+body {
+  background: var(--pp-bg-base);
+  color: var(--pp-text-primary);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+::selection { background: var(--pp-red); color: #fff; }
+
+/* ---------- brand primitives ---------- */
+
+/* Beveled chrome lettering, as on the logo and vial labels. */
+.chrome-text {
+  background: var(--pp-chrome-grad);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-stroke: var(--pp-chrome-stroke);
+  filter: var(--pp-chrome-shadow);
+}
+
+/* The red/blue neon rule that frames every product label. */
+.neon-rule {
+  background: linear-gradient(90deg,
+    var(--pp-blue) 0%, var(--pp-blue) 22%,
+    transparent 34%, transparent 66%,
+    var(--pp-red) 78%, var(--pp-red) 100%);
+  box-shadow: 0 0 12px rgb(7 144 255 / 0.5), 0 0 12px rgb(232 18 28 / 0.5);
+}
+
+.glass {
+  background: var(--pp-bg-glass);
+  backdrop-filter: blur(14px) saturate(140%);
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
+  border: 1px solid var(--pp-border);
+}
+
+/* Brushed-metal tint used behind panels and the price table. */
+.brushed::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: repeating-linear-gradient(
+    93deg,
+    rgb(255 255 255 / 0.030) 0px,
+    rgb(255 255 255 / 0.030) 1px,
+    transparent 1px,
+    transparent 3px
+  );
+  pointer-events: none;
+}
+
+.stars-strip {
+  background-image: radial-gradient(circle, var(--pp-text-dim) 1px, transparent 1px);
+  background-size: 14px 14px;
+}
+
+@keyframes pp-sheen {
+  0%   { background-position: -160% 0; }
+  100% { background-position: 260% 0; }
+}
+/* Slow specular sweep across chrome surfaces. */
+.sheen::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(100deg,
+    transparent 38%, rgb(255 255 255 / 0.16) 50%, transparent 62%);
+  background-size: 220% 100%;
+  animation: pp-sheen 7s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes pp-pulse-glow {
+  0%, 100% { opacity: 0.55; }
+  50%      { opacity: 1; }
+}
+.pulse-glow { animation: pp-pulse-glow 3.6s ease-in-out infinite; }
+
+/* Respect reduced-motion for every decorative animation. */
+@media (prefers-reduced-motion: reduce) {
+  .sheen::after, .pulse-glow { animation: none; }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Visible keyboard focus on every interactive element. */
+:where(a, button, input, textarea, select, [tabindex]):focus-visible {
+  outline: 2px solid var(--pp-red);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Clean, near-white stage the product shot sits on — the reference look. */
+.bg-vial-stage { background: var(--vial-stage); }
+
+/* Vial sits on its own ground and casts a real shadow, as in the reference photo. */
+.vial-shadow { filter: drop-shadow(var(--vial-shadow)); }
