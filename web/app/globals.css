@@ -234,8 +234,8 @@ body {
     pp-red-pulse 3.8s ease-in-out 0.7s infinite;
 }
 @keyframes pp-red-pulse {
-  0%, 100% { filter: drop-shadow(0 1px 0 rgb(255 255 255 / 0.14)) drop-shadow(0 6px 22px rgb(232 18 28 / 0.45)); }
-  50%      { filter: drop-shadow(0 1px 0 rgb(255 255 255 / 0.14)) drop-shadow(0 6px 30px rgb(255 42 52 / 0.90)); }
+  0%, 100% { filter: drop-shadow(0 1px 0 rgb(255 255 255 / 0.14)) drop-shadow(0 4px 12px rgb(0 0 0 / 0.70)) drop-shadow(0 6px 22px rgb(232 18 28 / 0.45)); }
+  50%      { filter: drop-shadow(0 1px 0 rgb(255 255 255 / 0.14)) drop-shadow(0 4px 12px rgb(0 0 0 / 0.70)) drop-shadow(0 6px 30px rgb(255 42 52 / 0.90)); }
 }
 
 /* Ambient orbs (see components/fx/GlowOrbs.tsx). */
@@ -987,14 +987,14 @@ body {
   color: #f7f8f9;
   color-scheme: dark;
   --pp-text-primary: #f7f8f9;
-  --pp-text-secondary: #c9cdd4;
-  --pp-text-dim: #8b9099;
+  --pp-text-secondary: #f1f3f6;
+  --pp-text-dim: #d9dde3;
   --pp-border: rgb(255 255 255 / 0.12);
-  --pp-blue: #4db2ff;
+  --pp-blue: #8fd0ff;
   --pp-red: #ff2a34;
   --pp-chrome-grad: linear-gradient(177deg, #ffffff 0%, #d6d9db 18%, #8c8b89 38%, #3d3d3f 50%, #8c8b89 62%, #e8eaec 82%, #a5a5a5 100%);
   --pp-chrome-stroke: 0.6px rgb(255 255 255 / 0.22);
-  --pp-chrome-shadow: drop-shadow(0 1px 0 rgb(255 255 255 / 0.35)) drop-shadow(0 3px 10px rgb(0 0 0 / 0.55));
+  --pp-chrome-shadow: drop-shadow(0 1px 0 rgb(255 255 255 / 0.35)) drop-shadow(0 4px 14px rgb(0 0 0 / 0.85));
   background: #020305;
   border-right: 1px solid rgb(255 255 255 / 0.10);
   isolation: isolate;
@@ -1009,8 +1009,8 @@ body {
   z-index: -2;
   inset: 0;
   background:
-    linear-gradient(180deg, rgb(2 3 5 / 0.50) 0%, rgb(2 3 5 / 0.22) 38%, rgb(2 3 5 / 0.66) 100%),
-    linear-gradient(90deg, rgb(2 3 5 / 0.72) 0%, rgb(2 3 5 / 0.34) 58%, rgb(2 3 5 / 0.12) 100%),
+    linear-gradient(180deg, rgb(2 3 5 / 0.50) 0%, rgb(2 3 5 / 0.30) 38%, rgb(2 3 5 / 0.74) 100%),
+    linear-gradient(90deg, rgb(2 3 5 / 0.78) 0%, rgb(2 3 5 / 0.42) 58%, rgb(2 3 5 / 0.14) 100%),
     radial-gradient(circle at 18% 28%, rgb(232 18 28 / 0.20), transparent 34%),
     radial-gradient(circle at 82% 72%, rgb(7 144 255 / 0.18), transparent 34%);
 }
@@ -1026,6 +1026,7 @@ body {
   pointer-events: none;
 }
 .member-gate__seal { padding: 9px; }
+.member-gate__brand p { text-shadow: 0 1px 2px rgb(0 0 0 / 0.9), 0 2px 18px rgb(0 0 0 / 0.7); }
 
 /* display comes from the markup (hidden md:grid) so Tailwind's breakpoint wins. */
 .member-gate__proof {
@@ -1195,8 +1196,9 @@ body {
   .member-gate__brand .flag-film__video { object-position: 66% 68%; transform: scale(1.08); }
   .member-gate__wash {
     background:
-      linear-gradient(180deg, rgb(2 3 5 / 0.34) 0%, rgb(2 3 5 / 0.06) 30%, rgb(2 3 5 / 0.40) 62%, rgb(2 3 5 / 0.86) 100%),
-      radial-gradient(circle at 50% 42%, rgb(232 18 28 / 0.16), transparent 42%);
+      linear-gradient(180deg, rgb(2 3 5 / 0.34) 0%, rgb(2 3 5 / 0.06) 24%, rgb(2 3 5 / 0.56) 50%, rgb(2 3 5 / 0.90) 100%),
+      radial-gradient(ellipse 95% 60% at 50% 74%, rgb(2 3 5 / 0.58), transparent 72%),
+      radial-gradient(circle at 50% 40%, rgb(232 18 28 / 0.14), transparent 42%);
   }
   .member-gate__seal { padding: 7px; }
   .member-gate__seal::before { inset: -14px; }
