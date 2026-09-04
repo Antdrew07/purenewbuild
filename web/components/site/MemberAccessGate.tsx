@@ -111,7 +111,7 @@ export function MemberAccessGate({ children }: { children: ReactNode }) {
             <div className="min-w-0 md:mt-9">
               <p className="font-mono text-[9px] uppercase tracking-[0.26em] text-blue md:text-[10px] md:tracking-[0.34em]">Veteran owned <span aria-hidden="true" className="text-red">·</span> American made</p>
               <h1 id="member-gate-title" className="mt-1.5 font-display text-[1.85rem] font-black uppercase leading-[0.86] text-white md:mt-3 md:text-5xl xl:text-6xl">
-                <span className="chrome-text chrome-shine">Member</span> <span className="text-red">access</span>
+                <span className="chrome-text chrome-shine">Member</span> <span className="text-red red-chrome">access</span>
               </h1>
             </div>
           </div>
@@ -179,7 +179,7 @@ export function MemberAccessGate({ children }: { children: ReactNode }) {
 
             <TurnstileField action={mode === "register" ? "member_register" : "member_login"} onToken={onTurnstileToken} disabled={pending || unavailable} />
             {error && <p role="alert" className="member-gate__error">{error}</p>}
-            <button type="submit" disabled={pending || unavailable} className="member-gate__submit">
+            <button type="submit" disabled={pending || unavailable} className="member-gate__submit brand-button">
               {pending ? "Verifying…" : mode === "register" ? "Create account and enter" : "Sign in and enter"}
             </button>
           </form>

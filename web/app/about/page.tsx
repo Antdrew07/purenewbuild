@@ -52,7 +52,7 @@ export default function AboutPage() {
             Veteran owned · American made
           </p>
           <h1 className="mt-4 font-display text-6xl font-black uppercase leading-[0.9] sm:text-8xl">
-            <span className="chrome-text chrome-shine">About</span> <span className="text-red">us</span>
+            <span className="chrome-text chrome-shine">About</span> <span className="text-red red-chrome">us</span>
           </h1>
           <div className="mt-8"><StarDivider count={7} /></div>
           <p className="mx-auto mt-8 max-w-2xl text-lg leading-relaxed text-text-secondary">

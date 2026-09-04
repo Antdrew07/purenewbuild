@@ -1,3 +1,4 @@
+import { GlowOrbs } from "@/components/fx/GlowOrbs";
 import { Reveal } from "@/components/fx/Reveal";
 import { ButtonLink } from "@/components/ui/Button";
 import { StarDivider } from "@/components/ui/Chrome";
@@ -8,6 +9,7 @@ export function CTA() {
       <div aria-hidden="true" className="pointer-events-none absolute inset-0">
         <div className="absolute left-1/2 top-1/2 h-[34rem] w-[64rem] -translate-x-1/2 -translate-y-1/2 rounded-full bg-red/[0.07] blur-[130px]" />
         <div className="stars-strip absolute inset-0 opacity-[0.04]" />
+        <GlowOrbs />
       </div>
 
       <div className="relative mx-auto max-w-4xl px-5 text-center sm:px-8">
@@ -16,7 +18,7 @@ export function CTA() {
           <h2 className="mt-8 font-display text-5xl font-black uppercase leading-[0.9] sm:text-7xl">
             <span className="chrome-text chrome-shine">Every order</span>
             <br />
-            <span className="text-red">includes reconstitution liquid</span>
+            <span className="text-red red-chrome">includes reconstitution liquid</span>
           </h2>
           <p className="mx-auto mt-6 max-w-xl text-text-secondary">
             Reconstitution liquid ships with every order. Ready-use pens

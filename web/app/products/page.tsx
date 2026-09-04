@@ -29,7 +29,7 @@ export default async function ProductsPage() {
             Quality products · Fast shipping
           </p>
           <h1 className="mt-4 font-display text-6xl font-black uppercase leading-none sm:text-7xl">
-            <span className="chrome-text chrome-shine">The</span> <span className="text-red">catalog</span>
+            <span className="chrome-text chrome-shine">The</span> <span className="text-red red-chrome">catalog</span>
           </h1>
           <div className="mt-6"><StarDivider /></div>
           <div className="mt-6 flex justify-center">

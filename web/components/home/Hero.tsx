@@ -7,7 +7,8 @@ import { ButtonLink } from "@/components/ui/Button";
 import { StarDivider } from "@/components/ui/Chrome";
 import { ParticleField } from "@/components/fx/ParticleField";
 import { AmericanFlagBackdrop } from "@/components/fx/AmericanFlagBackdrop";
-import { EASE, fadeUp, trackIn } from "@/lib/motion";
+import { GlowOrbs } from "@/components/fx/GlowOrbs";
+import { EASE, fadeUp, stagger, trackIn } from "@/lib/motion";
 
 export function Hero() {
   const ref = useRef<HTMLElement>(null);
@@ -35,8 +36,14 @@ export function Hero() {
       {/* Layer 2 — drifting particles */}
       <ParticleField />
 
+      {/* Layer 3 - slow drifting colour, the ambient life under the copy */}
+      <GlowOrbs />
+
       {/* The reading path is content first, then the existing circular identity mark. */}
       <motion.div
+        variants={stagger}
+        initial={reduceMotion ? false : "hidden"}
+        animate="visible"
         style={reduceMotion ? undefined : { y: contentY }}
         className="relative z-10 mx-auto grid min-h-[calc(100svh-5rem)] max-w-7xl items-center gap-12 px-5 py-24 sm:px-8 lg:grid-cols-[minmax(0,1.08fr)_minmax(18rem,0.72fr)] lg:gap-6"
       >
@@ -53,7 +60,7 @@ export function Hero() {
             className="mt-5 font-display text-6xl font-black uppercase leading-[0.82] sm:text-8xl lg:text-9xl"
           >
             <span className="chrome-text chrome-shine block">Pure</span>
-            <span className="flag-hero__red-word block">Peptide</span>
+            <span className="flag-hero__red-word red-chrome block">Peptide</span>
           </motion.h1>
 
           <motion.div variants={fadeUp} className="mt-7 lg:flex lg:justify-start">
@@ -83,7 +90,7 @@ export function Hero() {
         </div>
 
         <motion.div variants={fadeUp} className="flex justify-center lg:justify-end">
-          <div className="flag-hero__seal">
+          <div className="flag-hero__seal flag-hero__seal--float">
             <div className="flag-hero__seal-inner">
               <Image
                 src="/brand/logo-pure-peptide.jpeg"

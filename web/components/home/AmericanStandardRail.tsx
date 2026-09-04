@@ -19,14 +19,14 @@ export function AmericanStandardRail() {
               <span className="mt-1 block font-display text-xl font-black uppercase tracking-wide text-text-primary">Built for the bench</span>
             </div>
             <div className="american-standard__items">
-              {STANDARDS.map((standard) => (
-                <div key={standard.value} className="american-standard__item">
+              {STANDARDS.map((standard, i) => (
+                <Reveal key={standard.value} delay={0.08 + i * 0.07} className="american-standard__item">
                   <span className="font-mono text-[10px] text-red">{standard.value}</span>
                   <div>
                     <p className="font-display text-sm font-bold uppercase tracking-wide text-text-primary">{standard.label}</p>
                     <p className="mt-0.5 font-mono text-[9px] uppercase tracking-wider text-text-dim">{standard.detail}</p>
                   </div>
-                </div>
+                </Reveal>
               ))}
             </div>
           </div>
