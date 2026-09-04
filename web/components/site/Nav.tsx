@@ -7,6 +7,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import { CartLink } from "@/components/cart/CartLink";
 import { ThemeToggle } from "./ThemeToggle";
+import { MemberControl } from "./MemberControl";
 import { EASE } from "@/lib/motion";
 
 const LINKS = [
@@ -84,6 +85,7 @@ export function Nav() {
         </div>
 
         <div className="flex items-center gap-2">
+          <MemberControl />
           <CartLink />
           <ThemeToggle />
           <button

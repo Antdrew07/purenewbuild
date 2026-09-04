@@ -37,7 +37,7 @@ export class OrderError extends Error {
  * Places an order. Only slug + quantity are sent — the API prices every line
  * from the catalog, so nothing the browser claims about price is trusted.
  */
-export async function placeOrder(input: PlaceOrderInput): Promise<PlacedOrder> {
+export async function placeOrder(input: PlaceOrderInput, memberToken?: string | null): Promise<PlacedOrder> {
   if (!API_URL) {
     throw new OrderError(503, "Checkout is not connected yet — NEXT_PUBLIC_API_URL is not set.");
   }
@@ -45,7 +45,10 @@ export async function placeOrder(input: PlaceOrderInput): Promise<PlacedOrder> {
   try {
     res = await fetch(`${API_URL}/api/orders`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        ...(memberToken ? { Authorization: `Bearer ${memberToken}` } : {}),
+      },
       body: JSON.stringify({ country: "US", ...input }),
     });
   } catch {

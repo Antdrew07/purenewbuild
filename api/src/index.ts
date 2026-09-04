@@ -12,6 +12,7 @@ import { authRouter } from "./routes/auth.js";
 import { adminRouter } from "./routes/admin.js";
 import { ordersRouter } from "./routes/orders.js";
 import { adminOrdersRouter } from "./routes/adminOrders.js";
+import { membersRouter } from "./routes/members.js";
 import { errorHandler, notFound } from "./middleware/error.js";
 
 const app = express();
@@ -35,6 +36,7 @@ app.use("/api/products", productsRouter);
 app.use("/api/categories", categoriesRouter);
 app.use("/api/contact", contactRouter);
 app.use("/api/orders", ordersRouter);
+app.use("/api/members", membersRouter);
 app.use("/api/admin", authRouter);
 app.use("/api/admin", adminRouter);
 app.use("/api/admin", adminOrdersRouter);

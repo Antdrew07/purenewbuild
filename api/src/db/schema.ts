@@ -60,6 +60,18 @@ export const adminUsers = pgTable("admin_users", {
   emailIdx: uniqueIndex("admin_users_email_idx").on(t.email),
 }));
 
+/** Storefront accounts. Age confirmation is recorded at registration time. */
+export const memberUsers = pgTable("member_users", {
+  id: serial("id").primaryKey(),
+  email: text("email").notNull(),
+  passwordHash: text("password_hash").notNull(),
+  ageVerifiedAt: timestamp("age_verified_at").notNull(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+}, (t) => ({
+  emailIdx: uniqueIndex("member_users_email_idx").on(t.email),
+}));
+
 export type Product = typeof products.$inferSelect;
 export type Category = typeof categories.$inferSelect;
 

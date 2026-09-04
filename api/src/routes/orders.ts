@@ -5,6 +5,7 @@ import { z } from "zod";
 import { db, schema } from "../db/index.js";
 import { asyncHandler, HttpError } from "../middleware/error.js";
 import { validateBody } from "../middleware/validate.js";
+import { requireMember } from "../middleware/auth.js";
 import { priceCart, reserveOrderNumber, paymentLinks, money } from "../lib/orders.js";
 import { sendOrderPlaced, sendOwnerNewOrder } from "../lib/email.js";
 
@@ -39,13 +40,17 @@ const PlaceBody = z.object({
   website: z.string().max(0).optional(),
 });
 
-/** POST /api/orders — place an order. Public. */
+/** POST /api/orders — place an order. An authenticated member owns the order. */
 ordersRouter.post(
   "/",
   placeLimiter,
+  requireMember,
   validateBody(PlaceBody),
   asyncHandler(async (req, res) => {
     const b = req.body as z.infer<typeof PlaceBody>;
+    if (req.member?.email !== b.email) {
+      throw new HttpError(403, "Use the email address associated with your member account");
+    }
     const priced = await priceCart(b.items);
     const orderNumber = await reserveOrderNumber();
 

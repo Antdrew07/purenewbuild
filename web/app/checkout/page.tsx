@@ -1,11 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { formatCents, useCart } from "@/lib/cart";
 import { OrderError, ordersApiConfigured, placeOrder, type PlacedOrder } from "@/lib/orders-client";
 import { PaymentPanel } from "@/components/cart/PaymentPanel";
+import { useMember } from "@/lib/member";
 
 type Field =
   | "name" | "email" | "phone" | "address1" | "address2"
@@ -27,6 +28,7 @@ const LABELS: Record<Field, string> = {
 
 export default function CheckoutPage() {
   const { lines, subtotalCents, clear, hydrated } = useCart();
+  const { member, token } = useMember();
   const [form, setForm] = useState<Record<Field, string>>({
     name: "", email: "", phone: "", address1: "", address2: "",
     city: "", state: "", postalCode: "", customerNote: "",
@@ -34,6 +36,10 @@ export default function CheckoutPage() {
   const [errors, setErrors] = useState<Partial<Record<Field, string>>>({});
   const [pending, setPending] = useState(false);
   const [placed, setPlaced] = useState<PlacedOrder | null>(null);
+
+  useEffect(() => {
+    if (member?.email) setForm((current) => ({ ...current, email: member.email }));
+  }, [member?.email]);
 
   const set = (f: Field, v: string) => {
     setForm((s) => ({ ...s, [f]: v }));
@@ -72,6 +78,10 @@ export default function CheckoutPage() {
 
     setPending(true);
     try {
+      if (!member || !token) {
+        toast.error("Member sign-in is required");
+        return;
+      }
       const order = await placeOrder({
         name: form.name.trim(),
         email: form.email.trim().toLowerCase(),
@@ -83,7 +93,7 @@ export default function CheckoutPage() {
         postalCode: form.postalCode.trim(),
         customerNote: form.customerNote.trim() || undefined,
         items: lines.map((l) => ({ slug: l.slug, quantity: l.quantity })),
-      });
+      }, token);
       // Only clear once the server has the order — a failed request must not
       // silently destroy someone's cart.
       clear();

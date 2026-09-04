@@ -4,6 +4,7 @@ import { Nav } from "@/components/site/Nav";
 import { Footer } from "@/components/site/Footer";
 import { ReturnToTop } from "@/components/site/ReturnToTop";
 import { PageTransition } from "@/components/fx/PageTransition";
+import { MemberAccessGate } from "@/components/site/MemberAccessGate";
 import { Providers } from "./providers";
 import "./globals.css";
 
@@ -61,16 +62,18 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     >
       <body>
         <Providers>
-          <a
-            href="#main"
-            className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-lg focus:bg-red focus:px-4 focus:py-2 focus:text-white"
-          >
-            Skip to content
-          </a>
-          <Nav />
-          <main id="main"><PageTransition>{children}</PageTransition></main>
-          <Footer />
-          <ReturnToTop />
+          <MemberAccessGate>
+            <a
+              href="#main"
+              className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-lg focus:bg-red focus:px-4 focus:py-2 focus:text-white"
+            >
+              Skip to content
+            </a>
+            <Nav />
+            <main id="main"><PageTransition>{children}</PageTransition></main>
+            <Footer />
+            <ReturnToTop />
+          </MemberAccessGate>
         </Providers>
       </body>
     </html>
