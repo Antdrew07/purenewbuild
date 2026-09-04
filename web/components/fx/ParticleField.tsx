@@ -10,6 +10,8 @@ interface Particle {
 /**
  * Ambient drifting star/particle field. Canvas-only, painted after mount, so it
  * contributes nothing to server markup and cannot cause a hydration mismatch.
+ * It automatically becomes a single static frame on constrained connections,
+ * low-power devices, and reduced-motion preferences.
  */
 export function ParticleField({ density = 0.00012 }: { density?: number }) {
   const ref = useRef<HTMLCanvasElement>(null);
@@ -21,6 +23,11 @@ export function ParticleField({ density = 0.00012 }: { density?: number }) {
     if (!ctx) return;
 
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const connection = (navigator as Navigator & {
+      connection?: { saveData?: boolean; effectiveType?: string };
+    }).connection;
+    const constrainedConnection = connection?.saveData || ["slow-2g", "2g", "3g"].includes(connection?.effectiveType ?? "");
+    const lowPower = reduce || constrainedConnection || (navigator.hardwareConcurrency ?? 8) <= 4;
     let raf = 0;
     let particles: Particle[] = [];
     let w = 0, h = 0;
@@ -32,7 +39,8 @@ export function ParticleField({ density = 0.00012 }: { density?: number }) {
     } as const;
 
     function seed() {
-      const count = Math.min(160, Math.floor(w * h * density));
+      const maximum = lowPower ? 72 : 160;
+      const count = Math.min(maximum, Math.floor(w * h * density));
       particles = Array.from({ length: count }, () => ({
         x: Math.random() * w,
         y: Math.random() * h,
@@ -56,6 +64,7 @@ export function ParticleField({ density = 0.00012 }: { density?: number }) {
     }
 
     function draw() {
+      if (document.hidden) return;
       ctx!.clearRect(0, 0, w, h);
       for (const p of particles) {
         p.x += p.vx;
@@ -75,24 +84,31 @@ export function ParticleField({ density = 0.00012 }: { density?: number }) {
       raf = requestAnimationFrame(draw);
     }
 
+    function paintStaticFrame() {
+      for (const p of particles) {
+        ctx!.beginPath();
+        ctx!.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        ctx!.fillStyle = `rgba(${COLORS[p.hue]}, ${p.a})`;
+        ctx!.fill();
+      }
+    }
+
+    function onVisibilityChange() {
+      cancelAnimationFrame(raf);
+      if (!document.hidden && !lowPower) raf = requestAnimationFrame(draw);
+    }
+
     resize();
     window.addEventListener("resize", resize);
+    document.addEventListener("visibilitychange", onVisibilityChange);
 
-    if (reduce) {
-      // Paint one static frame instead of animating.
-      for (const p of particles) {
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(${COLORS[p.hue]}, ${p.a})`;
-        ctx.fill();
-      }
-    } else {
-      raf = requestAnimationFrame(draw);
-    }
+    if (lowPower) paintStaticFrame();
+    else raf = requestAnimationFrame(draw);
 
     return () => {
       cancelAnimationFrame(raf);
       window.removeEventListener("resize", resize);
+      document.removeEventListener("visibilitychange", onVisibilityChange);
     };
   }, [density]);
 
