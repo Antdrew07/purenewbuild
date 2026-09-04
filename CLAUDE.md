@@ -67,9 +67,9 @@ text into a master — image models garble small label copy (`PUREPEPTIDDE.US`,
 **rename the file**. Overwriting a master in place leaves Next's image optimiser
 and the CDN serving the old bytes — that is why the dropper is `-v2`.
 
-Vial labels print aliases, not catalog names: Retatrutide → **RT3**,
-Tirzepatide → **TR3** (`vialLabelName` in `VialMockup.tsx`). Catalog data,
-slugs and headings keep the full names.
+Catalog names ARE the vial names: **RT3** and **TR3** (renamed 2026-09-04; the
+old compound names must not appear anywhere on the site). `vialLabelName` in
+`VialMockup.tsx` still maps the old names as a safety net.
 
 The label artwork reads "PURE PEPTIDES" (plural) but the correct domain is
 `purepeptide.us` (singular) — the SVG footer overlay renders the singular form.

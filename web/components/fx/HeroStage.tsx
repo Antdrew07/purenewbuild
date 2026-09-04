@@ -81,7 +81,7 @@ export function HeroStage() {
       <motion.div style={{ rotateX: rx, rotateY: ry, boxShadow: edgeGlow }} className="hero-stage__tile">
         <span aria-hidden="true" className="neon-rule absolute inset-x-6 top-0 h-px" />
         <span aria-hidden="true" className="neon-rule absolute inset-x-6 bottom-0 h-px" />
-        <VialMockup name="Retatrutide" dosage="15mg" priority className="hero-stage__vial" />
+        <VialMockup name="RT3" dosage="15mg" priority className="hero-stage__vial" />
         <motion.div aria-hidden="true" style={{ backgroundPositionX: sheenX }} className="hero-stage__sheen" />
         <p className="hero-stage__caption">Sealed · lot-traceable · COA on request</p>
       </motion.div>

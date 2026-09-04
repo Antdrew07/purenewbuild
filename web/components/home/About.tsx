@@ -63,7 +63,7 @@ export function About() {
 
                 <div className="relative z-10 flex items-end justify-center gap-3 py-4 sm:gap-6 md:gap-10">
                   <VialMockup
-                    name="Retatrutide"
+                    name="RT3"
                     dosage="15mg"
                     className="h-40 sm:h-64 md:h-80"
                   />

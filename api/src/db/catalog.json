@@ -401,14 +401,14 @@
       "status": "active"
     },
     {
-      "name": "Retatrutide",
+      "name": "RT3",
       "dosage": "10mg",
       "price": 60,
       "category": "metabolic",
       "status": "active"
     },
     {
-      "name": "Retatrutide",
+      "name": "RT3",
       "dosage": "15mg",
       "price": 70,
       "category": "metabolic",
@@ -416,21 +416,21 @@
       "featured": true
     },
     {
-      "name": "Retatrutide",
+      "name": "RT3",
       "dosage": "20mg",
       "price": 85,
       "category": "metabolic",
       "status": "active"
     },
     {
-      "name": "Retatrutide",
+      "name": "RT3",
       "dosage": "30mg",
       "price": 100,
       "category": "metabolic",
       "status": "active"
     },
     {
-      "name": "Retatrutide",
+      "name": "RT3",
       "dosage": "60mg",
       "price": 160,
       "category": "metabolic",
@@ -494,7 +494,7 @@
       "status": "active"
     },
     {
-      "name": "Tirzepatide",
+      "name": "TR3",
       "dosage": "15mg",
       "price": 60,
       "category": "metabolic",
@@ -502,21 +502,21 @@
       "featured": true
     },
     {
-      "name": "Tirzepatide",
+      "name": "TR3",
       "dosage": "20mg",
       "price": 75,
       "category": "metabolic",
       "status": "active"
     },
     {
-      "name": "Tirzepatide",
+      "name": "TR3",
       "dosage": "30mg",
       "price": 85,
       "category": "metabolic",
       "status": "active"
     },
     {
-      "name": "Tirzepatide",
+      "name": "TR3",
       "dosage": "60mg",
       "price": 110,
       "category": "metabolic",
