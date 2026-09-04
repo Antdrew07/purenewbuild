@@ -45,7 +45,7 @@ export function Hero() {
         initial={reduceMotion ? false : "hidden"}
         animate="visible"
         style={reduceMotion ? undefined : { y: contentY }}
-        className="relative z-10 mx-auto grid min-h-[calc(100svh-5rem)] max-w-7xl items-center gap-12 px-5 py-24 sm:px-8 lg:grid-cols-[minmax(0,1.08fr)_minmax(18rem,0.72fr)] lg:gap-6"
+        className="relative z-10 mx-auto grid max-w-7xl items-center gap-10 px-5 pb-16 pt-6 sm:px-8 sm:pb-20 sm:pt-10 lg:min-h-[calc(100svh-5rem)] lg:grid-cols-[minmax(0,1.08fr)_minmax(18rem,0.72fr)] lg:gap-6 lg:py-24"
       >
         <div className="flag-hero__copy text-center lg:text-left">
           <motion.p

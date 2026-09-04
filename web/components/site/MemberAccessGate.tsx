@@ -109,7 +109,7 @@ export function MemberAccessGate({ children }: { children: ReactNode }) {
               </div>
             </div>
             <div className="min-w-0 md:mt-9">
-              <p className="font-mono text-[9px] uppercase tracking-[0.26em] text-blue md:text-[10px] md:tracking-[0.34em]">Veteran owned <span aria-hidden="true" className="text-red">·</span> American made</p>
+              <p className="font-mono text-[10px] uppercase tracking-[0.24em] text-blue md:tracking-[0.34em]">Veteran owned <span aria-hidden="true" className="text-red">·</span> American made</p>
               <h1 id="member-gate-title" className="mt-1.5 font-display text-[1.85rem] font-black uppercase leading-[0.86] text-white md:mt-3 md:text-5xl xl:text-6xl">
                 <span className="chrome-text chrome-shine">Member</span> <span className="text-red red-chrome">access</span>
               </h1>
@@ -185,7 +185,7 @@ export function MemberAccessGate({ children }: { children: ReactNode }) {
           </form>
 
           <p className="mt-4 text-center text-[11px] leading-relaxed text-text-dim">
-            By continuing, you agree to our <Link href="/terms" className="text-text-secondary underline underline-offset-2">Terms</Link> and <Link href="/privacy" className="text-text-secondary underline underline-offset-2">Privacy Policy</Link>.
+            By continuing, you agree to our <Link href="/terms" className="inline-block px-1 py-2.5 text-text-secondary underline underline-offset-2">Terms</Link> and <Link href="/privacy" className="inline-block px-1 py-2.5 text-text-secondary underline underline-offset-2">Privacy Policy</Link>.
           </p>
         </div>
       </div>

@@ -122,7 +122,7 @@ export default async function ProductPage({
             <p className="mt-4 text-sm text-text-secondary">
               Every order comes with reconstitution liquid. COAs available —
               email{" "}
-              <a href="mailto:support@purepeptide.us" className="text-red hover:underline">
+              <a href="mailto:support@purepeptide.us" className="inline-block py-2.5 -my-2.5 text-red hover:underline">
                 support@purepeptide.us
               </a>
               .
