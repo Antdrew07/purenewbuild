@@ -101,7 +101,7 @@ export function OrderTable({
 
   return (
     <div>
-      <div className="flex flex-wrap gap-2">
+      <div className="admin-filters flex flex-wrap gap-2">
         {(["all", "awaiting_payment", "paid", "shipped", "cancelled"] as const).map((f) => (
           <button
             key={f}
@@ -124,7 +124,7 @@ export function OrderTable({
           No orders here yet.
         </p>
       ) : (
-        <div className="mt-5 overflow-x-auto rounded-2xl border border-border-hair">
+        <div className="admin-table mt-5 overflow-x-auto rounded-2xl border border-border-hair">
           <table className="w-full min-w-[54rem] text-left text-sm">
             <thead className="bg-bg-base/50 text-xs uppercase tracking-wider text-text-dim">
               <tr>
@@ -138,7 +138,7 @@ export function OrderTable({
             </thead>
             <tbody>
               {shown.map((o) => (
-                <tr key={o.id} className="border-t border-border-hair align-middle">
+                <tr key={o.id} className="border-t border-border-hair align-middle transition-colors hover:bg-bg-glass">
                   <td className="p-3">
                     <button
                       type="button"
@@ -212,7 +212,7 @@ export function OrderTable({
       {detail && (
         <div className="fixed inset-0 z-50 grid place-items-center bg-black/60 p-4" onClick={() => setDetail(null)}>
           <div
-            className="max-h-[88vh] w-full max-w-lg overflow-y-auto rounded-2xl border border-border-hair bg-bg-elevated p-6"
+            className="admin-dialog max-h-[88vh] w-full max-w-lg overflow-y-auto rounded-2xl border border-border-hair bg-bg-elevated p-6"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-start justify-between gap-4">

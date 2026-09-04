@@ -89,7 +89,7 @@ export function ProductTable({
         <Button onClick={startCreate}>New product</Button>
       </div>
 
-      <div className="mt-5 overflow-x-auto rounded-2xl border border-border-hair">
+      <div className="admin-table mt-5 overflow-x-auto rounded-2xl border border-border-hair">
         <table className="w-full min-w-[46rem] text-left text-sm">
           <thead className="bg-bg-elevated">
             <tr className="font-mono text-[10px] uppercase tracking-widest text-text-dim">
@@ -102,7 +102,7 @@ export function ProductTable({
           </thead>
           <tbody>
             {products.map((p) => (
-              <tr key={p.id} className="border-t border-border-hair">
+              <tr key={p.id} className="border-t border-border-hair transition-colors hover:bg-bg-glass">
                 <td className="px-4 py-3">
                   <span className="font-medium text-text-primary">{p.name}</span>
                   {p.dosage && <span className="ml-2 font-mono text-xs text-blue">{p.dosage}</span>}
@@ -128,7 +128,7 @@ export function ProductTable({
       {editing && (
         <div className="fixed inset-0 z-50 grid place-items-center bg-black/70 p-5 backdrop-blur-sm">
           <div role="dialog" aria-modal="true" aria-label={editing.id === null ? "New product" : "Edit product"}
-               className="max-h-[88vh] w-full max-w-lg overflow-y-auto rounded-2xl border border-border-hair bg-bg-elevated p-6">
+               className="admin-dialog max-h-[88vh] w-full max-w-lg overflow-y-auto rounded-2xl border border-border-hair bg-bg-elevated p-6">
             <h3 className="font-display text-2xl font-black uppercase text-text-primary">
               {editing.id === null ? "New product" : "Edit product"}
             </h3>
@@ -181,7 +181,7 @@ export function ProductTable({
 }
 
 const INPUT =
-  "w-full rounded-xl border border-border-hair bg-bg-base/60 px-4 py-2.5 text-sm text-text-primary focus:border-red/60 focus:outline-none";
+  "admin-input w-full rounded-xl border border-border-hair bg-bg-base/60 px-4 py-2.5 text-sm text-text-primary focus:border-red/60 focus:outline-none";
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (

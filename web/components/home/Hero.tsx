@@ -1,22 +1,23 @@
 "use client";
 
 import Image from "next/image";
-import { motion, useScroll, useTransform } from "framer-motion";
+import { motion, useReducedMotion, useScroll, useTransform } from "framer-motion";
 import { useRef } from "react";
 import { ButtonLink } from "@/components/ui/Button";
 import { StarDivider } from "@/components/ui/Chrome";
 import { ParticleField } from "@/components/fx/ParticleField";
 import { AmericanFlagBackdrop } from "@/components/fx/AmericanFlagBackdrop";
-import { EASE, fadeUp, stagger, trackIn } from "@/lib/motion";
+import { EASE, fadeUp, trackIn } from "@/lib/motion";
 
 export function Hero() {
   const ref = useRef<HTMLElement>(null);
+  const reduceMotion = useReducedMotion();
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end start"] });
 
-  // Parallax: background drifts slower than content, content fades as it leaves.
+  // Parallax: the background and content drift at different rates. Content stays
+  // opaque so it remains dependable in short/mobile viewports and assistive modes.
   const bgY = useTransform(scrollYProgress, [0, 1], ["0%", "28%"]);
   const contentY = useTransform(scrollYProgress, [0, 1], ["0%", "-14%"]);
-  const opacity = useTransform(scrollYProgress, [0, 0.75], [1, 0]);
 
   return (
     <section
@@ -36,10 +37,7 @@ export function Hero() {
 
       {/* The reading path is content first, then the existing circular identity mark. */}
       <motion.div
-        style={{ y: contentY, opacity }}
-        variants={stagger}
-        initial="hidden"
-        animate="visible"
+        style={reduceMotion ? undefined : { y: contentY }}
         className="relative z-10 mx-auto grid min-h-[calc(100svh-5rem)] max-w-7xl items-center gap-12 px-5 py-24 sm:px-8 lg:grid-cols-[minmax(0,1.08fr)_minmax(18rem,0.72fr)] lg:gap-6"
       >
         <div className="flag-hero__copy text-center lg:text-left">
@@ -109,8 +107,8 @@ export function Hero() {
         className="absolute bottom-8 left-1/2 z-10 -translate-x-1/2"
       >
         <motion.div
-          animate={{ y: [0, 9, 0] }}
-          transition={{ duration: 2.2, repeat: Infinity, ease: "easeInOut" }}
+          animate={reduceMotion ? undefined : { y: [0, 9, 0] }}
+          transition={reduceMotion ? { duration: 0 } : { duration: 2.2, repeat: Infinity, ease: "easeInOut" }}
           className="flex h-9 w-6 items-start justify-center rounded-full border border-border-hair pt-2"
         >
           <span className="h-1.5 w-1 rounded-full bg-red" />

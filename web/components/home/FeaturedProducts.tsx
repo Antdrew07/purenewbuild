@@ -7,7 +7,7 @@ export async function FeaturedProducts() {
   const products = await getFeaturedProducts();
 
   return (
-    <section className="relative py-28">
+    <section className="section-stage relative py-28">
       {/* Section wash */}
       <div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden">
         <div className="absolute left-1/2 top-0 h-[28rem] w-[70rem] -translate-x-1/2 rounded-full bg-navy/[0.06] blur-[120px]" />

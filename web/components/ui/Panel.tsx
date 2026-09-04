@@ -20,7 +20,7 @@ export function Panel({
 
   return (
     <div
-      className={`brushed glass relative overflow-hidden rounded-2xl p-6 shadow-xl shadow-black/40 transition-all duration-200 ${className}`}
+      className={`brand-panel brushed glass relative overflow-hidden rounded-2xl p-6 shadow-xl shadow-black/40 transition-all duration-200 ${className}`}
     >
       {glowColor && (
         <div

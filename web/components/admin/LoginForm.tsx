@@ -26,9 +26,10 @@ export function LoginForm({ onSignedIn }: { onSignedIn: (email: string) => void 
 
   return (
     <div className="mx-auto max-w-md">
-      <div className="brushed glass relative overflow-hidden rounded-2xl p-8">
+      <div className="admin-login brushed glass relative overflow-hidden rounded-2xl p-8">
         <span aria-hidden="true" className="neon-rule absolute inset-x-0 top-0 h-px" />
         <div className="relative z-10">
+          <p className="font-mono text-[10px] uppercase tracking-[0.28em] text-blue">Pure Peptide operations</p>
           <h1 className="font-display text-3xl font-black uppercase text-text-primary">
             <span className="chrome-text">Admin</span> <span className="text-red">sign in</span>
           </h1>

@@ -11,7 +11,7 @@ const TRUST = [
 
 export function Footer() {
   return (
-    <footer className="relative mt-24 border-t border-border-hair bg-bg-elevated">
+    <footer className="site-footer relative mt-24 border-t border-border-hair bg-bg-elevated">
       <NeonRule className="absolute inset-x-0 top-0" />
 
       <div className="mx-auto max-w-7xl px-5 py-16 sm:px-8">
@@ -34,7 +34,7 @@ export function Footer() {
               materials. Every lot is third-party tested for identity and purity,
               with a Certificate of Analysis available on request.
             </p>
-            <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
+            <div className="footer-trust mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
               {TRUST.map((t) => (
                 <div key={t.label} className="flex flex-col items-start gap-2">
                   <svg viewBox="0 0 24 24" className="h-5 w-5 fill-red" aria-hidden="true">
@@ -90,7 +90,7 @@ export function Footer() {
         </div>
 
         {/* Compliance block — must stay on every page. */}
-        <div className="mt-14 rounded-xl border border-red/25 bg-red/5 p-5">
+        <div className="footer-compliance mt-14 rounded-xl border border-red/25 bg-red/5 p-5">
           <p className="font-display text-sm font-bold uppercase tracking-[0.18em] text-red">
             Research use only — not for human consumption
           </p>

@@ -66,6 +66,7 @@ export default function CheckoutPage() {
     if (Object.keys(next).length) {
       setErrors(next);
       toast.error("Check the highlighted fields");
+      window.requestAnimationFrame(() => document.getElementById(Object.keys(next)[0])?.focus());
       return;
     }
 
@@ -96,16 +97,22 @@ export default function CheckoutPage() {
   }
 
   const inputCls = (f: Field) =>
-    `min-h-11 w-full rounded-xl border bg-bg-base/60 px-4 py-3 text-sm text-text-primary placeholder:text-text-dim focus:outline-none ${
+    `commerce-input min-h-11 w-full rounded-xl border bg-bg-base/60 px-4 py-3 text-sm text-text-primary placeholder:text-text-dim focus:outline-none ${
       errors[f] ? "border-red" : "border-border-hair focus:border-red/60"
     }`;
 
   return (
-    <section className="mx-auto max-w-5xl px-5 py-20 sm:px-8">
+    <section className="commerce-page mx-auto max-w-5xl px-5 pb-20 pt-32 sm:px-8">
       <p className="font-mono text-[11px] uppercase tracking-[0.4em] text-blue">Almost there</p>
       <h1 className="mt-3 font-display text-5xl font-black uppercase leading-[0.9] sm:text-6xl">
         <span className="chrome-text">Check</span><span className="text-red">out</span>
       </h1>
+
+      {Object.keys(errors).length > 0 && (
+        <div role="alert" className="mt-6 rounded-xl border border-red/50 bg-red/10 px-4 py-3 text-sm text-text-primary">
+          Check the highlighted fields
+        </div>
+      )}
 
       {!ordersApiConfigured && (
         <p className="mt-6 rounded-xl border border-red/40 bg-red/5 p-4 text-sm text-text-primary">
@@ -114,8 +121,8 @@ export default function CheckoutPage() {
         </p>
       )}
 
-      <form onSubmit={onSubmit} noValidate className="mt-10 grid gap-10 lg:grid-cols-[1fr_20rem]">
-        <div className="space-y-4">
+      <form onSubmit={onSubmit} noValidate className="checkout-layout mt-10 grid gap-10 lg:grid-cols-[1fr_20rem]">
+        <div className="checkout-fields space-y-4">
           <div className="grid gap-4 sm:grid-cols-2">
             {(["name", "email"] as Field[]).map((f) => (
               <FieldBox key={f} f={f} form={form} set={set} errors={errors} cls={inputCls(f)} />
@@ -136,16 +143,16 @@ export default function CheckoutPage() {
             <textarea
               id="customerNote" rows={3} value={form.customerNote}
               onChange={(e) => set("customerNote", e.target.value)}
-              className="w-full rounded-xl border border-border-hair bg-bg-base/60 px-4 py-3 text-sm text-text-primary placeholder:text-text-dim focus:border-red/60 focus:outline-none"
+              className="commerce-input w-full rounded-xl border border-border-hair bg-bg-base/60 px-4 py-3 text-sm text-text-primary placeholder:text-text-dim focus:border-red/60 focus:outline-none"
             />
           </div>
-          <p className="text-xs leading-relaxed text-text-dim">
+          <p className="checkout-note text-xs leading-relaxed text-text-dim">
             United States only. All products are supplied for laboratory research use only and are not
             for human consumption.
           </p>
         </div>
 
-        <aside className="h-fit rounded-2xl border border-border-hair bg-bg-elevated p-6 lg:sticky lg:top-28">
+        <aside className="order-ticket h-fit rounded-2xl border border-border-hair bg-bg-elevated p-6 lg:sticky lg:top-28">
           <h2 className="font-display text-lg font-black uppercase tracking-wide text-text-primary">Order</h2>
           <ul className="mt-4 max-h-56 space-y-2 overflow-y-auto text-sm">
             {lines.map((l) => (

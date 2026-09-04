@@ -4,7 +4,7 @@ import { StarDivider } from "@/components/ui/Chrome";
 
 export function CTA() {
   return (
-    <section className="relative overflow-hidden py-28">
+    <section className="section-stage relative overflow-hidden py-28">
       <div aria-hidden="true" className="pointer-events-none absolute inset-0">
         <div className="absolute left-1/2 top-1/2 h-[34rem] w-[64rem] -translate-x-1/2 -translate-y-1/2 rounded-full bg-red/[0.07] blur-[130px]" />
         <div className="stars-strip absolute inset-0 opacity-[0.04]" />

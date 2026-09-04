@@ -44,7 +44,7 @@ function Stars() {
 
 export function Testimonials() {
   return (
-    <section className="relative py-28">
+    <section className="section-stage relative py-28">
       <div className="mx-auto max-w-7xl px-5 sm:px-8">
         <Reveal className="text-center">
           <p className="font-mono text-[11px] uppercase tracking-[0.4em] text-blue">
@@ -59,7 +59,7 @@ export function Testimonials() {
         <RevealGroup className="mt-14 grid gap-6 md:grid-cols-3">
           {REVIEWS.map((r) => (
             <motion.div key={r.quote} variants={fadeUp}>
-              <Panel glow="blue" className="h-full">
+              <Panel glow="blue" className="testimonial-card h-full">
                 <Stars />
                 <blockquote className="mt-4 text-sm leading-relaxed text-text-primary">
                   “{r.quote}”

@@ -9,7 +9,7 @@ export default function CartPage() {
   const { lines, setQty, remove, subtotalCents, hydrated, count } = useCart();
 
   return (
-    <section className="mx-auto max-w-5xl px-5 py-20 sm:px-8">
+    <section className="commerce-page mx-auto max-w-5xl px-5 pb-20 pt-32 sm:px-8">
       <p className="font-mono text-[11px] uppercase tracking-[0.4em] text-blue">Your order</p>
       <h1 className="mt-3 font-display text-5xl font-black uppercase leading-[0.9] sm:text-6xl">
         <span className="chrome-text">The</span> <span className="text-red">Cart</span>
@@ -22,7 +22,7 @@ export default function CartPage() {
           ))}
         </div>
       ) : lines.length === 0 ? (
-        <div className="mt-12 rounded-2xl border border-border-hair bg-bg-elevated p-12 text-center">
+        <div className="commerce-empty mt-12 rounded-2xl border border-border-hair bg-bg-elevated p-12 text-center">
           <p className="text-lg font-semibold text-text-primary">Your cart is empty.</p>
           <p className="mt-2 text-sm text-text-secondary">
             Browse the catalog and add what you need — every order ships with reconstitution liquid.
@@ -35,12 +35,12 @@ export default function CartPage() {
           </Link>
         </div>
       ) : (
-        <div className="mt-12 grid gap-10 lg:grid-cols-[1fr_20rem]">
+        <div className="commerce-layout mt-12 grid gap-10 lg:grid-cols-[1fr_20rem]">
           <ul className="space-y-3">
             {lines.map((l) => (
               <li
                 key={l.slug}
-                className="flex items-center gap-4 rounded-2xl border border-border-hair bg-bg-elevated p-4"
+                className="cart-line flex items-center gap-4 rounded-2xl border border-border-hair bg-bg-elevated p-4"
               >
                 <Link href={`/products/${l.slug}`} className="shrink-0">
                   <ProductMockup form={l.form as ProductForm} name={l.name} dosage={l.dosage} className="h-20" />
@@ -54,9 +54,9 @@ export default function CartPage() {
                   <p className="mt-1 font-mono text-sm text-text-secondary">{formatCents(l.priceCents)} each</p>
                 </div>
 
-                <div className="flex items-center overflow-hidden rounded-xl border border-border-hair">
+                <div className="cart-quantity flex items-center overflow-hidden rounded-xl border border-border-hair">
                   <button
-                    type="button" aria-label={`Decrease ${l.name}`}
+                    type="button" aria-label={`Decrease quantity for ${l.name}`}
                     onClick={() => setQty(l.slug, l.quantity - 1)}
                     className="grid h-11 w-10 place-items-center text-text-secondary hover:text-red"
                   >−</button>
@@ -64,7 +64,7 @@ export default function CartPage() {
                     {l.quantity}
                   </span>
                   <button
-                    type="button" aria-label={`Increase ${l.name}`}
+                    type="button" aria-label={`Increase quantity for ${l.name}`}
                     onClick={() => setQty(l.slug, l.quantity + 1)}
                     className="grid h-11 w-10 place-items-center text-text-secondary hover:text-red"
                   >+</button>
@@ -86,7 +86,7 @@ export default function CartPage() {
             ))}
           </ul>
 
-          <aside className="h-fit rounded-2xl border border-border-hair bg-bg-elevated p-6 lg:sticky lg:top-28">
+          <aside className="order-ticket h-fit rounded-2xl border border-border-hair bg-bg-elevated p-6 lg:sticky lg:top-28">
             <h2 className="font-display text-lg font-black uppercase tracking-wide text-text-primary">Summary</h2>
             <dl className="mt-5 space-y-2 text-sm">
               <div className="flex justify-between">

@@ -61,6 +61,8 @@ export default function AdminPage() {
   }
 
   const awaitingCount = orders.filter((o) => o.status === "awaiting_payment").length;
+  const paidCount = orders.filter((o) => o.status === "paid").length;
+  const shippedCount = orders.filter((o) => o.status === "shipped").length;
 
   if (checking) {
     return (
@@ -84,8 +86,8 @@ export default function AdminPage() {
   }
 
   return (
-    <div className="mx-auto max-w-7xl px-5 pb-24 pt-32 sm:px-8">
-      <div className="flex flex-wrap items-center justify-between gap-4">
+    <div className="admin-workspace mx-auto max-w-7xl px-5 pb-24 pt-32 sm:px-8">
+      <div className="admin-workspace__header flex flex-wrap items-center justify-between gap-4">
         <h1 className="font-display text-4xl font-black uppercase leading-none">
           <span className="chrome-text">Control</span> <span className="text-red">panel</span>
         </h1>
@@ -97,7 +99,21 @@ export default function AdminPage() {
         </div>
       </div>
 
-      <div className="mt-8 flex gap-2" role="tablist">
+      <div className="admin-stats mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        {[
+          ["Awaiting payment", awaitingCount, "attention"],
+          ["Paid — label needed", paidCount, "information"],
+          ["Shipped", shippedCount, "complete"],
+          ["Catalog products", products.length, "neutral"],
+        ].map(([label, value, tone]) => (
+          <div key={label as string} className={`admin-stat admin-stat--${tone}`}>
+            <p className="font-mono text-[10px] uppercase tracking-widest text-text-dim">{label}</p>
+            <p className="mt-1 font-display text-3xl font-black tabular-nums text-text-primary">{value}</p>
+          </div>
+        ))}
+      </div>
+
+      <div className="admin-tabs mt-8 flex gap-2" role="tablist">
         {(["orders", "products", "messages"] as Tab[]).map((t) => (
           <button
             key={t}

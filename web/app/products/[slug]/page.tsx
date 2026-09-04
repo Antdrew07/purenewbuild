@@ -64,9 +64,9 @@ export default async function ProductPage({
           <span className="text-text-secondary">{product.name}</span>
         </nav>
 
-        <div className="mt-8 grid gap-12 lg:grid-cols-2">
+        <div className="product-detail-grid mt-8 grid gap-12 lg:grid-cols-2">
           {/* --- vial mockup --- */}
-          <div className="relative overflow-hidden rounded-2xl border border-border-hair bg-white p-8">
+          <div className="product-launch-stage relative overflow-hidden rounded-2xl border border-border-hair bg-white p-8">
                                                 <NeonRule className="absolute inset-x-0 top-0" />
             <NeonRule className="absolute inset-x-0 bottom-0" />
 
@@ -86,16 +86,16 @@ export default async function ProductPage({
           </div>
 
           {/* --- detail --- */}
-          <div>
+          <div className="product-purchase-panel">
             <div className="flex flex-wrap items-center gap-3">
               <StatusBadge status={product.status} />
               <RuoBadge />
             </div>
 
-            <h2 className="mt-5 font-display text-4xl font-black uppercase leading-none text-text-primary sm:text-5xl">
+            <h1 className="mt-5 font-display text-4xl font-black uppercase leading-none text-text-primary sm:text-5xl">
               {product.name}
               {product.dosage && <span className="ml-3 text-blue">{product.dosage}</span>}
-            </h2>
+            </h1>
 
             <p className="mt-6 font-display text-5xl font-black tabular-nums text-text-primary">
               {formatPrice(product.priceCents)}
@@ -128,7 +128,7 @@ export default async function ProductPage({
               .
             </p>
 
-            <dl className="mt-10 grid grid-cols-2 gap-px overflow-hidden rounded-xl border border-border-hair bg-border-hair">
+            <dl className="evidence-grid mt-10 grid grid-cols-2 gap-px overflow-hidden rounded-xl border border-border-hair bg-border-hair">
               {[
                 ["Form", "Lyophilised powder"],
                 ["Purity", "≥ 99% (HPLC)"],
@@ -149,7 +149,7 @@ export default async function ProductPage({
             <h2 className="font-display text-3xl font-black uppercase text-text-primary">
               <span className="chrome-text">Related</span> <span className="text-red">compounds</span>
             </h2>
-            <RevealGroup className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+            <RevealGroup className="related-rail mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
               {related.map((p) => (
                 <ProductCard key={p.slug} product={p} />
               ))}

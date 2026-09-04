@@ -18,10 +18,10 @@ import { AddToCart } from "@/components/cart/AddToCart";
 export function ProductCard({ product }: { product: Product }) {
   return (
     <motion.article variants={fadeUp} className="h-full">
-      <div className="group flex h-full flex-col overflow-hidden rounded-2xl border border-border-hair bg-bg-elevated shadow-sm transition-all duration-200 hover:-translate-y-1 hover:border-red/35 hover:shadow-lg hover:shadow-black/10">
+      <div className="product-card group flex h-full flex-col overflow-hidden rounded-2xl border border-border-hair bg-bg-elevated shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-red/35">
         <Link href={`/products/${product.slug}`} className="flex flex-1 flex-col">
           {/* ── product shot on its own clean ground ─────────────────── */}
-          <div className="relative flex items-center justify-center bg-white px-4 py-4">
+          <div className="product-card__stage relative flex items-center justify-center bg-white px-4 py-4">
             <ProductMockup
               form={product.form}
               name={product.name}
@@ -34,7 +34,7 @@ export function ProductCard({ product }: { product: Product }) {
           </div>
 
           {/* ── detail ─────────────────────────────────────────────────── */}
-          <div className="flex flex-1 flex-col border-t border-border-hair p-5 pb-0">
+          <div className="product-card__body flex flex-1 flex-col border-t border-border-hair p-5 pb-0">
             <p className="font-mono text-[10px] uppercase tracking-widest text-text-dim">
               {product.category}
             </p>
@@ -50,7 +50,7 @@ export function ProductCard({ product }: { product: Product }) {
           </div>
         </Link>
 
-        <div className="space-y-2 p-5 pt-3">
+        <div className="product-card__actions space-y-2 p-5 pt-3">
           <AddToCart product={product} size="sm" />
           <Link
             href={`/products/${product.slug}`}

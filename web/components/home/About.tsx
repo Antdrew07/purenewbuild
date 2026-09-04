@@ -24,7 +24,7 @@ const PILLARS = [
 
 export function About() {
   return (
-    <section className="relative py-28">
+    <section className="section-stage relative py-28">
       <div className="mx-auto max-w-7xl px-5 sm:px-8">
         <div className="grid items-center gap-16 lg:grid-cols-2">
           <div>
@@ -53,7 +53,7 @@ export function About() {
 
           <Parallax strength={40}>
             <Reveal>
-              <div className="relative overflow-hidden rounded-2xl border border-border-hair bg-white p-4 sm:p-8">
+              <div className="brand-stage relative overflow-hidden rounded-2xl border border-border-hair bg-white p-4 sm:p-8">
                                                                 <span aria-hidden="true" className="neon-rule absolute inset-x-0 top-0 h-px" />
                 <span aria-hidden="true" className="neon-rule absolute inset-x-0 bottom-0 h-px" />
 

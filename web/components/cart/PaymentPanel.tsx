@@ -28,9 +28,9 @@ export function PaymentPanel({ order }: { order: PlacedOrder }) {
   }
 
   return (
-    <section className="mx-auto max-w-2xl px-5 py-20 sm:px-8">
+    <section className="commerce-page mx-auto max-w-2xl px-5 pb-20 pt-32 sm:px-8">
       <div className="text-center">
-        <div className="mx-auto grid h-16 w-16 place-items-center rounded-full bg-green-500/10">
+        <div className="success-seal mx-auto grid h-16 w-16 place-items-center rounded-full bg-green-500/10">
           <svg viewBox="0 0 24 24" className="h-8 w-8 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" strokeWidth="2.5">
             <path d="m5 13 4 4L19 7" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
@@ -44,7 +44,7 @@ export function PaymentPanel({ order }: { order: PlacedOrder }) {
       </div>
 
       {/* Payment note — the single thing that must not be got wrong. */}
-      <div className="mt-9 rounded-2xl border-2 border-red bg-red/5 p-6 text-center">
+      <div className="payment-note mt-9 rounded-2xl border-2 border-red bg-red/5 p-6 text-center">
         <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-text-dim">
           Put this in the payment note
         </p>
@@ -63,7 +63,7 @@ export function PaymentPanel({ order }: { order: PlacedOrder }) {
         </p>
       </div>
 
-      <div className="mt-7 rounded-2xl border border-border-hair bg-bg-elevated p-6">
+      <div className="order-ticket mt-7 rounded-2xl border border-border-hair bg-bg-elevated p-6">
         <div className="flex items-baseline justify-between">
           <span className="font-bold text-text-primary">Amount to send</span>
           <span className="font-display text-3xl font-black tabular-nums text-text-primary">
@@ -91,6 +91,7 @@ export function PaymentPanel({ order }: { order: PlacedOrder }) {
           >
             Pay {order.totalFormatted} with Cash App
             <span className="font-mono opacity-90">{order.payment.cashappHandle}</span>
+            <span className="sr-only">(opens in a new tab)</span>
           </a>
           <a
             href={order.payment.venmo}
@@ -100,11 +101,12 @@ export function PaymentPanel({ order }: { order: PlacedOrder }) {
           >
             Pay {order.totalFormatted} with Venmo
             <span className="font-mono opacity-90">{order.payment.venmoHandle}</span>
+            <span className="sr-only">(opens in a new tab)</span>
           </a>
         </div>
       </div>
 
-      <div className="mt-7 rounded-2xl border border-border-hair bg-bg-elevated p-6 text-sm leading-relaxed text-text-secondary">
+      <div className="payment-steps mt-7 rounded-2xl border border-border-hair bg-bg-elevated p-6 text-sm leading-relaxed text-text-secondary">
         <h2 className="font-display text-base font-black uppercase tracking-wide text-text-primary">
           What happens next
         </h2>

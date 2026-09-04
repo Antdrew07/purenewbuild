@@ -2,6 +2,8 @@ import type { Metadata, Viewport } from "next";
 import { Inter, JetBrains_Mono, Saira_Condensed } from "next/font/google";
 import { Nav } from "@/components/site/Nav";
 import { Footer } from "@/components/site/Footer";
+import { ReturnToTop } from "@/components/site/ReturnToTop";
+import { PageTransition } from "@/components/fx/PageTransition";
 import { Providers } from "./providers";
 import "./globals.css";
 
@@ -66,8 +68,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             Skip to content
           </a>
           <Nav />
-          <main id="main">{children}</main>
+          <main id="main"><PageTransition>{children}</PageTransition></main>
           <Footer />
+          <ReturnToTop />
         </Providers>
       </body>
     </html>

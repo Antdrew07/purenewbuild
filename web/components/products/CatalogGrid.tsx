@@ -50,7 +50,7 @@ export function CatalogGrid({
 
   return (
     <div>
-      <div className="brushed glass relative overflow-hidden rounded-2xl p-5">
+      <div className="catalog-controls brushed glass relative overflow-hidden rounded-2xl p-5">
         <div className="relative z-10 flex flex-col gap-4">
           <div className="flex flex-col gap-3 sm:flex-row">
             <label className="relative flex-1">
@@ -68,7 +68,7 @@ export function CatalogGrid({
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Search peptides, dosages…"
-                className="min-h-11 w-full rounded-xl border border-border-hair bg-bg-base/60 py-2.5 pl-10 pr-4 text-sm text-text-primary placeholder:text-text-dim focus:border-red/60 focus:outline-none"
+                className="min-h-11 w-full rounded-xl border border-border-hair bg-bg-base/60 py-2.5 pl-10 pr-4 text-sm text-text-primary shadow-[inset_0_1px_0_rgb(255_255_255_/_0.05)] placeholder:text-text-dim focus:border-red/60 focus:outline-none"
               />
             </label>
 
@@ -126,7 +126,7 @@ export function CatalogGrid({
         </div>
       </div>
 
-      <p aria-live="polite" className="mt-6 font-mono text-xs uppercase tracking-widest text-text-dim">
+      <p aria-live="polite" className="catalog-count mt-6 font-mono text-xs uppercase tracking-widest text-text-dim">
         {filtered.length} {filtered.length === 1 ? "product" : "products"}
       </p>
 
