@@ -36,7 +36,7 @@ export function TurnstileField({
       if (!active || !container.current || !window.turnstile) return;
       widgetId.current = window.turnstile.render(container.current, {
         sitekey: SITE_KEY,
-        theme: "dark",
+        theme: "auto",
         size: "flexible",
         action,
         callback: (token: string) => { setError(""); onToken(token); },
