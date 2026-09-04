@@ -926,15 +926,12 @@ body {
 .member-gate {
   position: relative;
   display: grid;
-  height: 100vh;
-  height: 100svh;
-  overflow-x: hidden;
-  overflow-y: auto;
-  place-items: start;
+  min-height: 100vh;
+  min-height: 100svh;
+  place-items: center;
   padding: clamp(0.75rem, 2vw, 1.5rem);
   background: var(--pp-bg-base);
   isolation: isolate;
-  -webkit-overflow-scrolling: touch;
 }
 
 .member-gate--loading { place-items: center; }
@@ -1002,14 +999,11 @@ body {
   border-right: 1px solid rgb(255 255 255 / 0.10);
   isolation: isolate;
 }
-.member-gate__film {
-  position: absolute;
-  z-index: -3;
-  inset: 0;
-  background: url("/media/american-flag-brand-film-v2-poster.webp") 62% center / cover no-repeat;
-  filter: saturate(1.05) contrast(1.12) brightness(0.74);
-  transform: scale(1.04);
-}
+/* The brand panel reuses the home hero's flag film; its own wash/edge are
+   replaced by the gate's, tuned for a panel instead of a full-width hero. */
+.member-gate__brand .flag-film__video { object-position: 62% center; filter: saturate(1.06) contrast(1.10) brightness(0.86); }
+.member-gate__brand .flag-film__wash,
+.member-gate__brand .flag-film__edge { display: none; }
 .member-gate__wash {
   position: absolute;
   z-index: -2;
@@ -1192,16 +1186,21 @@ body {
     box-shadow: none;
   }
   .member-gate__brand {
-    gap: 0;
-    justify-content: flex-start;
-    padding: calc(0.9rem + env(safe-area-inset-top)) 1.1rem 0.95rem;
+    min-height: 62svh;
+    justify-content: flex-end;
+    padding: calc(1.5rem + env(safe-area-inset-top)) 1.25rem 1.6rem;
     border-right: 0;
     border-bottom: 1px solid rgb(255 255 255 / 0.12);
   }
-  .member-gate__film { transform: none; background-position: 70% 40%; }
-  .member-gate__seal { padding: 3px; box-shadow: 0 0 0 1px rgb(255 255 255 / 0.28), 0 8px 20px -8px rgb(0 0 0 / 0.8); }
-  .member-gate__seal::before, .member-gate__seal::after { display: none; }
-  .member-gate__seal .flag-hero__seal-inner { border-width: 2px; }
+  .member-gate__brand .flag-film__video { object-position: 66% 68%; transform: scale(1.08); }
+  .member-gate__wash {
+    background:
+      linear-gradient(180deg, rgb(2 3 5 / 0.34) 0%, rgb(2 3 5 / 0.06) 30%, rgb(2 3 5 / 0.40) 62%, rgb(2 3 5 / 0.86) 100%),
+      radial-gradient(circle at 50% 42%, rgb(232 18 28 / 0.16), transparent 42%);
+  }
+  .member-gate__seal { padding: 7px; }
+  .member-gate__seal::before { inset: -14px; }
+  .member-gate__seal::after { inset: -7px; }
   .member-gate__panel { padding: 1.15rem 1.1rem calc(1.5rem + env(safe-area-inset-bottom)); }
   .member-gate__panel::before { right: 0; }
   .member-gate__tabs button { min-height: 2.6rem; padding: 0.55rem 0.5rem; font-size: 0.78rem; }

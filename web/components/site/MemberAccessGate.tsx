@@ -3,13 +3,22 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useCallback, useEffect, useState, type FormEvent, type ReactNode } from "react";
+import { useCallback, useState, type FormEvent, type ReactNode } from "react";
+import { motion, useReducedMotion, type Variants } from "framer-motion";
+import { AmericanFlagBackdrop } from "@/components/fx/AmericanFlagBackdrop";
+import { EASE, fadeUp, scaleUp, stagger, trackIn } from "@/lib/motion";
 import { TurnstileField } from "./TurnstileField";
 import { StarDivider } from "@/components/ui/Chrome";
 import { useMember } from "@/lib/member";
 import { membersApiConfigured, registerMember, signInMember, turnstileConfigured, MemberAuthError } from "@/lib/members-client";
 
 type Mode = "register" | "login";
+
+/** The form panel arrives a beat after the brand hero. */
+const panelIn: Variants = {
+  hidden: { opacity: 0, y: 24 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: EASE, delay: 0.25 } },
+};
 
 /** The same four claims the home page makes in its American Standard rail. */
 const PROOF = [
@@ -36,14 +45,7 @@ export function MemberAccessGate({ children }: { children: ReactNode }) {
   const [pending, setPending] = useState(false);
   const [error, setError] = useState("");
 
-  const gateOpen = hydrated && !member;
-
-  useEffect(() => {
-    if (!gateOpen) return;
-    const previous = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => { document.body.style.overflow = previous; };
-  }, [gateOpen]);
+  const reduceMotion = useReducedMotion();
 
   const onTurnstileToken = useCallback((token: string | null) => {
     setTurnstileToken(token);
@@ -99,41 +101,48 @@ export function MemberAccessGate({ children }: { children: ReactNode }) {
       <div aria-hidden="true" className="member-gate__stars stars-strip" />
       <div className="member-gate__frame">
         <div className="member-gate__brand">
-          <div aria-hidden="true" className="member-gate__film" />
+          <AmericanFlagBackdrop />
           <div aria-hidden="true" className="member-gate__wash" />
           <div aria-hidden="true" className="member-gate__edge" />
-          <div className="relative flex items-center gap-4 md:block">
-            <div className="flag-hero__seal member-gate__seal w-fit flex-none">
-              <div className="flag-hero__seal-inner">
-                <Image src="/brand/logo-pure-peptide.jpeg" alt="Pure Peptide" width={240} height={240} priority className="h-11 w-11 rounded-full object-cover md:h-28 md:w-28 xl:h-32 xl:w-32" />
-              </div>
-            </div>
-            <div className="min-w-0 md:mt-9">
-              <p className="font-mono text-[10px] uppercase tracking-[0.24em] text-blue md:tracking-[0.34em]">Veteran owned <span aria-hidden="true" className="text-red">·</span> American made</p>
-              <h1 id="member-gate-title" className="mt-1.5 font-display text-[1.85rem] font-black uppercase leading-[0.86] text-white md:mt-3 md:text-5xl xl:text-6xl">
-                <span className="chrome-text chrome-shine">Member</span> <span className="text-red red-chrome">access</span>
-              </h1>
-            </div>
-          </div>
-          <div className="relative hidden w-fit md:block"><StarDivider /></div>
-          <p className="relative hidden max-w-md text-sm leading-relaxed text-text-secondary md:block xl:text-[15px]">
-            Research-grade peptides held to a standard you can verify. Members get the full catalog, lot documentation on request, and fast dispatch from the USA.
-          </p>
-          <ul className="member-gate__proof relative hidden md:grid" aria-label="Pure Peptide standards">
-            {PROOF.map((item) => (
-              <li key={item.n} className="member-gate__proof-item">
-                <span className="font-mono text-[10px] text-red">{item.n}</span>
-                <div>
-                  <p className="member-gate__proof-label">{item.label}</p>
-                  <p className="member-gate__proof-detail">{item.detail}</p>
+          <motion.div
+            variants={stagger}
+            initial={reduceMotion ? false : "hidden"}
+            animate="visible"
+            className="relative flex flex-col items-center gap-4 text-center md:block md:gap-6 md:text-left"
+          >
+            <motion.div variants={scaleUp} className="w-fit">
+              <div className="flag-hero__seal flag-hero__seal--float member-gate__seal w-fit">
+                <div className="flag-hero__seal-inner">
+                  <Image src="/brand/logo-pure-peptide.jpeg" alt="Pure Peptide" width={240} height={240} priority className="h-[4.75rem] w-[4.75rem] rounded-full object-cover md:h-28 md:w-28 xl:h-32 xl:w-32" />
                 </div>
-              </li>
-            ))}
-          </ul>
-          <p className="relative hidden font-mono text-[10px] uppercase tracking-[0.25em] text-text-dim md:block">Research use only <span aria-hidden="true" className="text-red">·</span> Not for human consumption</p>
+              </div>
+            </motion.div>
+            <div className="min-w-0 md:mt-9">
+              <motion.p variants={fadeUp} className="font-mono text-[10px] uppercase tracking-[0.24em] text-blue md:tracking-[0.34em]">Veteran owned <span aria-hidden="true" className="text-red">·</span> American made</motion.p>
+              <motion.h1 variants={trackIn} id="member-gate-title" className="mt-2 font-display text-[2.75rem] font-black uppercase leading-[0.86] text-white md:mt-3 md:text-5xl xl:text-6xl">
+                <span className="chrome-text chrome-shine">Member</span> <span className="text-red red-chrome">access</span>
+              </motion.h1>
+            </div>
+            <motion.div variants={fadeUp} className="w-fit md:mt-6"><StarDivider /></motion.div>
+            <motion.p variants={fadeUp} className="max-w-md text-sm leading-relaxed text-text-secondary md:mt-6 xl:text-[15px]">
+              Research-grade peptides held to a standard you can verify. Members get the full catalog, lot documentation on request, and fast dispatch from the USA.
+            </motion.p>
+            <motion.ul variants={fadeUp} className="member-gate__proof hidden md:mt-6 md:grid" aria-label="Pure Peptide standards">
+              {PROOF.map((item) => (
+                <li key={item.n} className="member-gate__proof-item">
+                  <span className="font-mono text-[10px] text-red">{item.n}</span>
+                  <div>
+                    <p className="member-gate__proof-label">{item.label}</p>
+                    <p className="member-gate__proof-detail">{item.detail}</p>
+                  </div>
+                </li>
+              ))}
+            </motion.ul>
+            <motion.p variants={fadeUp} className="font-mono text-[10px] uppercase tracking-[0.25em] text-text-dim md:mt-6">Research use only <span aria-hidden="true" className="text-red">·</span> Not for human consumption</motion.p>
+          </motion.div>
         </div>
 
-        <div className="member-gate__panel">
+        <motion.div className="member-gate__panel" variants={panelIn} initial={reduceMotion ? false : "hidden"} animate="visible">
           <p className="font-mono text-[10px] uppercase tracking-[0.28em] text-blue">Restricted research portal</p>
           <h2 className="mt-2 font-display text-2xl font-black uppercase text-text-primary">{title}</h2>
           <p className="mt-2 text-sm leading-relaxed text-text-secondary">
@@ -187,7 +196,7 @@ export function MemberAccessGate({ children }: { children: ReactNode }) {
           <p className="mt-4 text-center text-[11px] leading-relaxed text-text-dim">
             By continuing, you agree to our <Link href="/terms" className="inline-block px-1 py-2.5 text-text-secondary underline underline-offset-2">Terms</Link> and <Link href="/privacy" className="inline-block px-1 py-2.5 text-text-secondary underline underline-offset-2">Privacy Policy</Link>.
           </p>
-        </div>
+        </motion.div>
       </div>
     </main>
   );
