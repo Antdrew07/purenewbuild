@@ -22,7 +22,7 @@ export function LegalPage({
       <div className="relative mx-auto max-w-3xl px-5 pb-24 sm:px-8">
         <Reveal className="text-center">
           <h1 className="font-display text-5xl font-black uppercase leading-none sm:text-6xl">
-            <span className="chrome-text">{title}</span>{" "}
+            <span className="chrome-text chrome-shine">{title}</span>{" "}
             <span className="text-red">{accent}</span>
           </h1>
           <div className="mt-6"><StarDivider /></div>

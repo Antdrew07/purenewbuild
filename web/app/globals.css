@@ -183,6 +183,34 @@ body {
   filter: var(--pp-chrome-shadow);
 }
 
+/* Live chrome: a specular highlight sweeps across the bevel every few
+   seconds while the whole word breathes a soft white glow. Both layers are
+   clipped to the glyphs, so the metal itself appears to catch the light. */
+.chrome-shine {
+  background-image:
+    linear-gradient(105deg,
+      transparent 0%, transparent 42%,
+      rgb(255 255 255 / 0.45) 47%, #ffffff 50%, rgb(255 255 255 / 0.45) 53%,
+      transparent 58%, transparent 100%),
+    var(--pp-chrome-grad);
+  background-size: 300% 100%, 100% 100%;
+  background-repeat: no-repeat;
+  /* The highlight image is 3x the word; at 100% it sits just off the left
+     edge, at 0% just off the right, so the glint crosses left-to-right. */
+  background-position: 100% 0, 0 0;
+  animation:
+    pp-chrome-sweep 5.6s ease-in-out infinite,
+    pp-chrome-pulse 3.8s ease-in-out infinite;
+}
+@keyframes pp-chrome-sweep {
+  0%, 55% { background-position: 100% 0, 0 0; }
+  100%    { background-position: 0% 0, 0 0; }
+}
+@keyframes pp-chrome-pulse {
+  0%, 100% { filter: var(--pp-chrome-shadow) drop-shadow(0 0 5px rgb(255 255 255 / 0.10)); }
+  50%      { filter: var(--pp-chrome-shadow) drop-shadow(0 0 18px rgb(255 255 255 / 0.55)); }
+}
+
 /* The red/blue neon rule that frames every product label. */
 .neon-rule {
   background: linear-gradient(90deg,
@@ -797,16 +825,19 @@ body {
   --pp-text-dim: #74777c;
   --pp-chrome-grad: linear-gradient(177deg, #ffffff 0%, #d6d9db 18%, #8c8b89 38%, #3d3d3f 50%, #8c8b89 62%, #e8eaec 82%, #a5a5a5 100%);
   display: grid;
-  min-height: 100svh;
-  overflow: hidden;
-  place-items: center;
+  height: 100vh;
+  height: 100svh;
+  overflow-x: hidden;
+  overflow-y: auto;
+  place-items: start;
   padding: clamp(1rem, 3vw, 2rem);
   color-scheme: dark;
   background: #030407;
   isolation: isolate;
+  -webkit-overflow-scrolling: touch;
 }
 
-.member-gate--loading { background: #030407; }
+.member-gate--loading { place-items: center; background: #030407; }
 .member-gate__loader {
   width: 2.5rem;
   height: 2.5rem;
@@ -839,6 +870,7 @@ body {
 .member-gate__frame {
   display: grid;
   width: min(100%, 64rem);
+  margin: auto;
   grid-template-columns: minmax(0, 0.88fr) minmax(25rem, 1.12fr);
   overflow: hidden;
   border: 1px solid rgb(255 255 255 / 0.16);
@@ -935,15 +967,37 @@ body {
 
 @keyframes pp-spin { to { transform: rotate(360deg); } }
 
-@media (max-width: 720px) {
-  .member-gate { align-items: start; padding: 1rem 0.75rem; overflow-y: auto; }
-  .member-gate__frame { grid-template-columns: 1fr; margin: auto 0; }
-  .member-gate__brand { min-height: 12rem; padding: 1.75rem 1.4rem; border-right: 0; border-bottom: 1px solid rgb(255 255 255 / 0.12); }
-  .member-gate__panel { padding: 1.3rem; }
+@media (max-width: 767px) {
+  .member-gate { padding: 0; }
+  .member-gate__frame {
+    width: 100%;
+    min-height: 100svh;
+    margin: 0;
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr;
+    border-right: 0;
+    border-left: 0;
+    background: rgb(4 5 8 / 0.84);
+    backdrop-filter: none;
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.14);
+  }
+  .member-gate__brand {
+    justify-content: flex-start;
+    padding: calc(0.9rem + env(safe-area-inset-top)) 1.1rem 0.95rem;
+    border-right: 0;
+    border-bottom: 1px solid rgb(255 255 255 / 0.12);
+  }
+  .member-gate__panel { padding: 1.15rem 1.1rem calc(1.5rem + env(safe-area-inset-bottom)); }
+  .member-gate__panel::before { right: 0; }
+  .member-gate__tabs button { min-height: 2.6rem; padding: 0.55rem 0.5rem; font-size: 0.78rem; }
+  .member-gate__input { min-height: 3rem; font-size: 1rem; }
+  .member-gate__submit { min-height: 3.1rem; }
   .member-gate__stars { opacity: 0.06; }
+  .member-gate__flag { transform: none; }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .member-gate__loader { animation: none; }
   .member-gate__submit { transition: none; }
+  .chrome-shine { animation: none; background-image: var(--pp-chrome-grad); background-size: 100% 100%; }
 }

@@ -14,7 +14,7 @@ export function CTA() {
         <Reveal>
           <StarDivider count={7} />
           <h2 className="mt-8 font-display text-5xl font-black uppercase leading-[0.9] sm:text-7xl">
-            <span className="chrome-text">Every order</span>
+            <span className="chrome-text chrome-shine">Every order</span>
             <br />
             <span className="text-red">includes reconstitution liquid</span>
           </h2>

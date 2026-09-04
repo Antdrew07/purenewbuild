@@ -52,7 +52,7 @@ export function Hero() {
             variants={trackIn}
             className="mt-5 font-display text-6xl font-black uppercase leading-[0.82] sm:text-8xl lg:text-9xl"
           >
-            <span className="chrome-text block">Pure</span>
+            <span className="chrome-text chrome-shine block">Pure</span>
             <span className="flag-hero__red-word block">Peptide</span>
           </motion.h1>
 

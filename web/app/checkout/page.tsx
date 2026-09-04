@@ -115,7 +115,7 @@ export default function CheckoutPage() {
     <section className="commerce-page mx-auto max-w-5xl px-5 pb-20 pt-32 sm:px-8">
       <p className="font-mono text-[11px] uppercase tracking-[0.4em] text-blue">Almost there</p>
       <h1 className="mt-3 font-display text-5xl font-black uppercase leading-[0.9] sm:text-6xl">
-        <span className="chrome-text">Check</span><span className="text-red">out</span>
+        <span className="chrome-text chrome-shine">Check</span><span className="text-red">out</span>
       </h1>
 
       {Object.keys(errors).length > 0 && (

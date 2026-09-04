@@ -37,7 +37,7 @@ export default async function ContactPage({
             We reply within one business day
           </p>
           <h1 className="mt-4 font-display text-6xl font-black uppercase leading-none sm:text-8xl">
-            <span className="chrome-text">Get in</span> <span className="text-red">touch</span>
+            <span className="chrome-text chrome-shine">Get in</span> <span className="text-red">touch</span>
           </h1>
           <div className="mt-8"><StarDivider /></div>
         </Reveal>

@@ -90,11 +90,15 @@ export function MemberAccessGate({ children }: { children: ReactNode }) {
       <div aria-hidden="true" className="member-gate__stars stars-strip" />
       <div className="member-gate__frame">
         <div className="member-gate__brand">
-          <Image src="/brand/logo-pure-peptide.jpeg" alt="Pure Peptide" width={104} height={104} priority className="h-20 w-20 rounded-full ring-1 ring-white/25 sm:h-24 sm:w-24" />
-          <p className="mt-5 font-mono text-[10px] uppercase tracking-[0.32em] text-blue">Veteran owned · American made</p>
-          <h1 id="member-gate-title" className="mt-3 font-display text-4xl font-black uppercase leading-[0.86] text-white sm:text-5xl">
-            <span className="chrome-text">Member</span> <span className="text-red">access</span>
-          </h1>
+          <div className="flex items-center gap-4 md:block">
+            <Image src="/brand/logo-pure-peptide.jpeg" alt="Pure Peptide" width={104} height={104} priority className="h-14 w-14 flex-none rounded-full ring-1 ring-white/25 md:h-24 md:w-24" />
+            <div className="min-w-0 md:mt-5">
+              <p className="font-mono text-[9px] uppercase tracking-[0.26em] text-blue md:text-[10px] md:tracking-[0.32em]">Veteran owned · American made</p>
+              <h1 id="member-gate-title" className="mt-1.5 font-display text-[1.85rem] font-black uppercase leading-[0.86] text-white md:mt-3 md:text-5xl">
+                <span className="chrome-text chrome-shine">Member</span> <span className="text-red">access</span>
+              </h1>
+            </div>
+          </div>
         </div>
 
         <div className="member-gate__panel">
