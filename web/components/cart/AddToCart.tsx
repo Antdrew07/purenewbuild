@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { useCart } from "@/lib/cart";
 import type { Product } from "@/lib/types";
@@ -10,6 +10,9 @@ import type { Product } from "@/lib/types";
  *
  * Products with no price cannot be ordered online — the API rejects them — so
  * the button says so here rather than letting checkout fail later.
+ *
+ * On add, the button runs a liquid fill, the label flips to "Added", and a
+ * `pp:cart-add` event tells any VialFill on the page to fill the vial too.
  */
 export function AddToCart({
   product,
@@ -23,6 +26,10 @@ export function AddToCart({
   const { add } = useCart();
   const [qty, setQty] = useState(1);
   const [notice, setNotice] = useState("");
+  const [filling, setFilling] = useState(false);
+  const timer = useRef(0);
+
+  useEffect(() => () => window.clearTimeout(timer.current), []);
 
   const orderable = product.status === "active" && product.priceCents !== null;
 
@@ -44,16 +51,36 @@ export function AddToCart({
     const message = quantity === 1 ? `${product.name} added to cart` : `${quantity} × ${product.name} added to cart`;
     setNotice(message);
     toast.success(message);
+    window.dispatchEvent(new CustomEvent("pp:cart-add", { detail: { slug: product.slug } }));
+    setFilling(false);
+    requestAnimationFrame(() => setFilling(true));
+    window.clearTimeout(timer.current);
+    timer.current = window.setTimeout(() => setFilling(false), 1300);
   }
+
+  const label = (
+    <span className="relative z-[1] inline-flex items-center gap-1.5">
+      {filling ? (
+        <>
+          <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth="3" aria-hidden="true">
+            <path d="M5 12.5l4.5 4.5L19 7.5" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+          Added
+        </>
+      ) : (
+        "Add to cart"
+      )}
+    </span>
+  );
 
   if (size === "sm") {
     return (
       <button
         type="button"
         onClick={() => addItem(1)}
-        className={`${base} w-full px-4 text-xs ${className}`}
+        className={`${base} ${filling ? "is-filling" : ""} w-full px-4 text-xs ${className}`}
       >
-        Add to cart
+        {label}
       </button>
     );
   }
@@ -94,9 +121,9 @@ export function AddToCart({
       <button
         type="button"
         onClick={() => addItem(qty)}
-        className={`${base} flex-1 px-7 text-sm`}
+        className={`${base} ${filling ? "is-filling" : ""} flex-1 px-7 text-sm`}
       >
-        Add to cart
+        {label}
       </button>
     </div>
   );

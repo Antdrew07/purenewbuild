@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import { motion, useReducedMotion, useScroll, useTransform } from "framer-motion";
 import { useRef } from "react";
 import { ButtonLink } from "@/components/ui/Button";
@@ -8,6 +7,8 @@ import { StarDivider } from "@/components/ui/Chrome";
 import { ParticleField } from "@/components/fx/ParticleField";
 import { AmericanFlagBackdrop } from "@/components/fx/AmericanFlagBackdrop";
 import { GlowOrbs } from "@/components/fx/GlowOrbs";
+import { HeroStage } from "@/components/fx/HeroStage";
+import { Spotlight } from "@/components/fx/Spotlight";
 import { EASE, fadeUp, stagger, trackIn } from "@/lib/motion";
 
 export function Hero() {
@@ -38,6 +39,7 @@ export function Hero() {
 
       {/* Layer 3 - slow drifting colour, the ambient life under the copy */}
       <GlowOrbs />
+      <Spotlight />
 
       {/* The reading path is content first, then the existing circular identity mark. */}
       <motion.div
@@ -90,18 +92,7 @@ export function Hero() {
         </div>
 
         <motion.div variants={fadeUp} className="flex justify-center lg:justify-end">
-          <div className="flag-hero__seal flag-hero__seal--float">
-            <div className="flag-hero__seal-inner">
-              <Image
-                src="/brand/logo-pure-peptide.jpeg"
-                alt="Pure Peptide"
-                width={310}
-                height={310}
-                priority
-                className="h-48 w-48 rounded-full object-cover sm:h-64 sm:w-64 lg:h-72 lg:w-72"
-              />
-            </div>
-          </div>
+          <HeroStage />
         </motion.div>
       </motion.div>
 

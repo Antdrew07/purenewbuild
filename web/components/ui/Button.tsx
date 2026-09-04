@@ -1,5 +1,8 @@
+"use client";
+
 import Link from "next/link";
 import type { ComponentProps, ReactNode } from "react";
+import { Magnetic } from "@/components/fx/Magnetic";
 
 const BASE =
   "brand-button relative inline-flex min-h-11 items-center justify-center gap-2 rounded-xl px-6 py-3 text-sm font-semibold uppercase tracking-wider transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50";
@@ -15,28 +18,33 @@ const VARIANTS = {
 
 type Variant = keyof typeof VARIANTS;
 
+/** Every brand button is magnetic by default; pass magnetic={false} inside tight layouts. */
 export function Button({
   variant = "primary",
   className = "",
+  magnetic = true,
   children,
   ...rest
-}: ComponentProps<"button"> & { variant?: Variant; children: ReactNode }) {
-  return (
+}: ComponentProps<"button"> & { variant?: Variant; magnetic?: boolean; children: ReactNode }) {
+  const el = (
     <button className={`${BASE} ${VARIANTS[variant]} ${className}`} {...rest}>
       {children}
     </button>
   );
+  return magnetic ? <Magnetic>{el}</Magnetic> : el;
 }
 
 export function ButtonLink({
   variant = "primary",
   className = "",
+  magnetic = true,
   children,
   ...rest
-}: ComponentProps<typeof Link> & { variant?: Variant; children: ReactNode }) {
-  return (
+}: ComponentProps<typeof Link> & { variant?: Variant; magnetic?: boolean; children: ReactNode }) {
+  const el = (
     <Link className={`${BASE} ${VARIANTS[variant]} ${className}`} {...rest}>
       {children}
     </Link>
   );
+  return magnetic ? <Magnetic>{el}</Magnetic> : el;
 }

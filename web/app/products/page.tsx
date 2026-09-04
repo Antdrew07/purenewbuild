@@ -3,6 +3,7 @@ import { CatalogGrid } from "@/components/products/CatalogGrid";
 import { Reveal } from "@/components/fx/Reveal";
 import { StarDivider } from "@/components/ui/Chrome";
 import { RuoBadge } from "@/components/ui/Badge";
+import { ProofTicker } from "@/components/site/ProofTicker";
 import { getCategories, getProducts } from "@/lib/api";
 
 export const metadata: Metadata = {
@@ -37,7 +38,9 @@ export default async function ProductsPage() {
           </div>
         </Reveal>
 
-        <div className="mt-14">
+        <ProofTicker className="mt-10" />
+
+        <div className="mt-10">
           <CatalogGrid products={products} categories={categories} />
         </div>
       </div>

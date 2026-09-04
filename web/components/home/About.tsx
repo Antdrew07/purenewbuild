@@ -1,4 +1,6 @@
 import { Reveal, RevealGroup } from "@/components/fx/Reveal";
+import { FlagRipple } from "@/components/fx/FlagRipple";
+import { NeonRule } from "@/components/ui/Chrome";
 import { Parallax } from "@/components/fx/Parallax";
 import { Panel } from "@/components/ui/Panel";
 import { VialMockup } from "@/components/ui/VialMockup";
@@ -24,8 +26,9 @@ const PILLARS = [
 
 export function About() {
   return (
-    <section className="section-stage relative py-28">
-      <div className="mx-auto max-w-7xl px-5 sm:px-8">
+    <section className="section-stage relative overflow-hidden py-28">
+      <FlagRipple />
+      <div className="relative mx-auto max-w-7xl px-5 sm:px-8">
         <div className="grid items-center gap-16 lg:grid-cols-2">
           <div>
             <Reveal>
@@ -37,6 +40,7 @@ export function About() {
                 <br />
                 <span className="text-red">researchers</span>
               </h2>
+              <NeonRule className="mt-6 !w-40" />
               <p className="mt-6 max-w-xl leading-relaxed text-text-secondary">
                 Pure Peptide is a veteran-owned American supplier of research-grade
                 peptides and laboratory materials. We started because sourcing

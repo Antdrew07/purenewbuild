@@ -21,6 +21,7 @@ export function Nav() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [hovered, setHovered] = useState<string | null>(null);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 12);
@@ -36,6 +37,9 @@ export function Nav() {
     return () => { document.body.style.overflow = ""; };
   }, [open]);
 
+  const activeHref = LINKS.find((l) => (l.href === "/" ? pathname === "/" : pathname.startsWith(l.href)))?.href ?? null;
+  const underlineHref = hovered ?? activeHref;
+
   return (
     <header
       className={`site-nav fixed inset-x-0 top-0 z-50 transition-all duration-300 ${
@@ -43,7 +47,9 @@ export function Nav() {
       }`}
     >
       <div className="neon-rule absolute inset-x-0 top-0 h-px opacity-70" />
-      <nav className="mx-auto flex h-20 max-w-7xl items-center justify-between px-5 sm:px-8">
+      <nav
+        className={`mx-auto flex max-w-7xl items-center justify-between px-5 transition-[height] duration-300 sm:px-8 ${scrolled ? "h-16" : "h-20"}`}
+      >
         <Link href="/" className="flex items-center gap-3" aria-label="Pure Peptide — home">
           <Image
             src="/brand/logo-pure-peptide.jpeg"
@@ -51,7 +57,7 @@ export function Nav() {
             width={48}
             height={48}
             priority
-            className="h-11 w-11 rounded-full ring-1 ring-border-hair"
+            className={`rounded-full ring-1 ring-border-hair transition-all duration-300 ${scrolled ? "h-9 w-9" : "h-11 w-11"}`}
           />
           <span className="hidden font-display text-xl font-black uppercase tracking-wide sm:block">
             <span className="chrome-text">Pure</span>{" "}
@@ -59,24 +65,27 @@ export function Nav() {
           </span>
         </Link>
 
-        <div className="hidden items-center gap-1 md:flex">
+        <div className="hidden items-center gap-1 md:flex" onPointerLeave={() => setHovered(null)}>
           {LINKS.map((l) => {
-            const active = l.href === "/" ? pathname === "/" : pathname.startsWith(l.href);
+            const active = l.href === activeHref;
             return (
               <Link
                 key={l.href}
                 href={l.href}
                 aria-current={active ? "page" : undefined}
-                  className={`relative rounded-lg px-4 py-2 text-sm font-medium uppercase tracking-wider transition-colors ${
+                onPointerEnter={() => setHovered(l.href)}
+                onFocus={() => setHovered(l.href)}
+                onBlur={() => setHovered(null)}
+                className={`relative rounded-lg px-4 py-2 text-sm font-medium uppercase tracking-wider transition-colors ${
                   active ? "text-red" : "text-text-secondary hover:text-text-primary"
                 }`}
               >
                 {l.label}
-                {active && (
+                {underlineHref === l.href && (
                   <motion.span
                     layoutId="nav-underline"
-                    className="absolute inset-x-3 -bottom-0.5 h-px bg-red shadow-[0_0_8px_var(--pp-red)]"
-                    transition={{ duration: 0.3, ease: EASE }}
+                    className={`absolute inset-x-3 -bottom-0.5 h-px ${active && !hovered ? "bg-red shadow-[0_0_8px_var(--pp-red)]" : "bg-blue shadow-[0_0_8px_var(--pp-blue)]"}`}
+                    transition={{ type: "spring", stiffness: 420, damping: 34 }}
                   />
                 )}
               </Link>
@@ -116,14 +125,20 @@ export function Nav() {
             className="border-t border-border-hair bg-bg-base/97 shadow-2xl shadow-black/50 backdrop-blur-xl md:hidden"
           >
             <div className="space-y-1 px-5 py-6">
-              {LINKS.map((l) => (
-                <Link
+              {LINKS.map((l, i) => (
+                <motion.div
                   key={l.href}
-                  href={l.href}
-                  className="block rounded-lg px-4 py-3 font-display text-2xl font-bold uppercase tracking-wide text-text-primary transition-colors hover:bg-bg-glass hover:text-red"
+                  initial={{ opacity: 0, x: -14 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.3, ease: EASE, delay: 0.05 + i * 0.05 }}
                 >
-                  {l.label}
-                </Link>
+                  <Link
+                    href={l.href}
+                    className="block rounded-lg px-4 py-3 font-display text-2xl font-bold uppercase tracking-wide text-text-primary transition-colors hover:bg-bg-glass hover:text-red"
+                  >
+                    {l.label}
+                  </Link>
+                </motion.div>
               ))}
             </div>
           </motion.div>

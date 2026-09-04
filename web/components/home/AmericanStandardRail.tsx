@@ -1,4 +1,6 @@
 import { Reveal } from "@/components/fx/Reveal";
+import { CountUp } from "@/components/fx/CountUp";
+import { getCategories, getProducts } from "@/lib/api";
 
 const STANDARDS = [
   { value: "01", label: "Veteran owned", detail: "American operated" },
@@ -7,8 +9,17 @@ const STANDARDS = [
   { value: "04", label: "U.S. dispatch", detail: "Fast domestic shipping" },
 ];
 
-/** A compact proof rail that uses claims already made elsewhere on the site. */
-export function AmericanStandardRail() {
+/** A compact proof rail that uses claims already made elsewhere on the site, plus live catalog numbers. */
+export async function AmericanStandardRail() {
+  const [products, categories] = await Promise.all([getProducts(), getCategories()]);
+
+  const STATS = [
+    { value: products.length, label: "Products in catalog" },
+    { value: categories.length, label: "Research categories" },
+    { value: 99, prefix: "≥", suffix: "%", label: "Purity by HPLC" },
+    { value: 48, suffix: "h", label: "Dispatch window" },
+  ];
+
   return (
     <section aria-label="Pure Peptide standards" className="american-standard">
       <Reveal>
@@ -29,6 +40,17 @@ export function AmericanStandardRail() {
                 </Reveal>
               ))}
             </div>
+          </div>
+
+          <div className="american-standard__stats">
+            {STATS.map((s, i) => (
+              <Reveal key={s.label} delay={0.2 + i * 0.07} className="american-standard__stat">
+                <span className="american-standard__stat-value chrome-text">
+                  <CountUp to={s.value} prefix={s.prefix} suffix={s.suffix} />
+                </span>
+                <span className="american-standard__stat-label">{s.label}</span>
+              </Reveal>
+            ))}
           </div>
         </div>
       </Reveal>

@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { useCallback, useState, type FormEvent, type ReactNode } from "react";
 import { motion, useReducedMotion, type Variants } from "framer-motion";
 import { AmericanFlagBackdrop } from "@/components/fx/AmericanFlagBackdrop";
+import { Spotlight } from "@/components/fx/Spotlight";
 import { EASE, fadeUp, scaleUp, stagger, trackIn } from "@/lib/motion";
 import { TurnstileField } from "./TurnstileField";
 import { StarDivider } from "@/components/ui/Chrome";
@@ -104,6 +105,7 @@ export function MemberAccessGate({ children }: { children: ReactNode }) {
           <AmericanFlagBackdrop />
           <div aria-hidden="true" className="member-gate__wash" />
           <div aria-hidden="true" className="member-gate__edge" />
+          <Spotlight />
           <motion.div
             variants={stagger}
             initial={reduceMotion ? false : "hidden"}

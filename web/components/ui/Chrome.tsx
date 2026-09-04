@@ -1,4 +1,8 @@
+"use client";
+
 import type { ElementType, ReactNode } from "react";
+import { motion } from "framer-motion";
+import { EASE } from "@/lib/motion";
 
 /** Beveled chrome lettering — the logo/vial-label treatment, as live text. */
 export function ChromeText({
@@ -13,9 +17,23 @@ export function ChromeText({
   return <Tag className={`chrome-text ${className}`}>{children}</Tag>;
 }
 
-/** The red/blue neon hairline that frames every product label. */
-export function NeonRule({ className = "" }: { className?: string }) {
-  return <div aria-hidden="true" className={`neon-rule h-px w-full ${className}`} />;
+/**
+ * The red/blue neon hairline that frames every product label. It lights up
+ * from the centre outward the first time it scrolls into view; pass
+ * sweep={false} for rules that must be present at first paint.
+ */
+export function NeonRule({ className = "", sweep = true }: { className?: string; sweep?: boolean }) {
+  return (
+    <motion.div
+      aria-hidden="true"
+      className={`neon-rule h-px w-full ${className}`}
+      initial={sweep ? { scaleX: 0, opacity: 0 } : false}
+      whileInView={{ scaleX: 1, opacity: 1 }}
+      viewport={{ once: true, margin: "-40px" }}
+      transition={{ duration: 0.9, ease: EASE }}
+      style={{ transformOrigin: "50% 50%" }}
+    />
+  );
 }
 
 /** Star divider lifted from the label artwork's five-star strip. */

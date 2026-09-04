@@ -8,6 +8,8 @@ import { fadeUp } from "@/lib/motion";
 import { StatusBadge } from "./Badge";
 import { ProductMockup } from "./ProductMockup";
 import { AddToCart } from "@/components/cart/AddToCart";
+import { TiltCard } from "@/components/fx/TiltCard";
+import { VialFill } from "@/components/fx/VialFill";
 
 /**
  * The card links to the product, but Add to cart is a real button that must not
@@ -18,6 +20,7 @@ import { AddToCart } from "@/components/cart/AddToCart";
 export function ProductCard({ product }: { product: Product }) {
   return (
     <motion.article variants={fadeUp} className="h-full">
+      <TiltCard>
       <div className="product-card group flex h-full flex-col overflow-hidden rounded-2xl border border-border-hair bg-bg-elevated shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-red/35">
         <Link href={`/products/${product.slug}`} className="flex flex-1 flex-col">
           {/* ── product shot on its own clean ground ─────────────────── */}
@@ -31,6 +34,7 @@ export function ProductCard({ product }: { product: Product }) {
             <div className="absolute left-4 top-4">
               <StatusBadge status={product.status} />
             </div>
+            {product.form === "vial" && <VialFill slug={product.slug} mockH="13rem" pad="1rem" />}
           </div>
 
           {/* ── detail ─────────────────────────────────────────────────── */}
@@ -60,6 +64,7 @@ export function ProductCard({ product }: { product: Product }) {
           </Link>
         </div>
       </div>
+      </TiltCard>
     </motion.article>
   );
 }

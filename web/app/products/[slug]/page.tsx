@@ -11,6 +11,8 @@ import { AddToCart } from "@/components/cart/AddToCart";
 import { Panel } from "@/components/ui/Panel";
 import { ProductCard } from "@/components/ui/ProductCard";
 import { RevealGroup } from "@/components/fx/Reveal";
+import { VialFill } from "@/components/fx/VialFill";
+import { StickyBuyBar } from "@/components/products/StickyBuyBar";
 
 export const revalidate = 300;
 
@@ -79,6 +81,7 @@ export default async function ProductPage({
                 priority
               />
             </div>
+            {product.form === "vial" && <VialFill slug={product.slug} mockH="26rem" pad="2.5rem" />}
 
             <p className="relative z-10 text-center font-mono text-[10px] uppercase tracking-[0.3em] text-chrome-400">
               Representative image · labelling varies by lot
@@ -110,7 +113,9 @@ export default async function ProductPage({
               </Panel>
             )}
 
-            <AddToCart product={product} className="mt-8" />
+            <div data-buy-anchor>
+              <AddToCart product={product} className="mt-8" />
+            </div>
 
             <div className="mt-4 flex flex-wrap gap-4">
               <ButtonLink href={`/contact?product=${encodeURIComponent(product.slug)}`} variant="outline">
@@ -157,6 +162,7 @@ export default async function ProductPage({
           </section>
         )}
       </div>
+      <StickyBuyBar product={product} />
     </div>
   );
 }

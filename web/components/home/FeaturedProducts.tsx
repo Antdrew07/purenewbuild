@@ -1,4 +1,6 @@
 import { RevealGroup, Reveal } from "@/components/fx/Reveal";
+import { FlagRipple } from "@/components/fx/FlagRipple";
+import { NeonRule } from "@/components/ui/Chrome";
 import { ProductCard } from "@/components/ui/ProductCard";
 import { ButtonLink } from "@/components/ui/Button";
 import { getFeaturedProducts } from "@/lib/api";
@@ -7,7 +9,8 @@ export async function FeaturedProducts() {
   const products = await getFeaturedProducts();
 
   return (
-    <section className="section-stage relative py-28">
+    <section className="section-stage relative overflow-hidden py-28">
+      <FlagRipple />
       {/* Section wash */}
       <div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden">
         <div className="absolute left-1/2 top-0 h-[28rem] w-[70rem] -translate-x-1/2 rounded-full bg-navy/[0.06] blur-[120px]" />
@@ -22,6 +25,7 @@ export async function FeaturedProducts() {
             <span className="chrome-text">Top tier</span>{" "}
             <span className="text-red">peptides</span>
           </h2>
+          <NeonRule className="mx-auto mt-6 !w-40" />
           <p className="mx-auto mt-5 max-w-xl text-text-secondary">
             The compounds our researchers reorder most. Every one third-party
             tested, sealed, and documented.

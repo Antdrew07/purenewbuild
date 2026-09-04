@@ -888,6 +888,294 @@ body {
   .return-top { right: 0.8rem; bottom: 0.8rem; }
 }
 
+/* ===========================================================================
+   Dynamic layer: hero product stage, tilt cards, liquid fill, cart pulse,
+   spotlight, flag ripple, proof ticker, route wipe, sticky buy bar,
+   testimonial deck, count-up stats.
+   =========================================================================== */
+
+/* Hero product stage */
+.hero-stage {
+  position: relative;
+  width: min(100%, 27rem);
+  margin-inline: auto;
+  padding: 2.75rem 0 1rem;
+  perspective: 1400px;
+}
+.hero-stage__seal { position: absolute; left: 0; top: 0; z-index: 3; }
+.hero-stage__tile {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-left: 24%;
+  padding: 1.5rem 1.25rem 1rem;
+  border: 1px solid rgb(255 255 255 / 0.55);
+  border-radius: 1.25rem;
+  background: linear-gradient(180deg, #ffffff 0%, #eef1f5 100%);
+  transform-style: preserve-3d;
+  overflow: hidden;
+}
+.hero-stage__tile::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(90deg, rgb(7 144 255 / 0.16), transparent 20%, transparent 80%, rgb(232 18 28 / 0.16)),
+    radial-gradient(ellipse at 50% 108%, rgb(7 144 255 / 0.16), transparent 48%);
+}
+.hero-stage__vial { position: relative; z-index: 1; height: 15rem; transform: translateZ(28px); }
+.hero-stage__sheen {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  opacity: 0.75;
+  background: linear-gradient(105deg, transparent 38%, rgb(0 0 0 / 0.05) 45%, rgb(255 255 255 / 0.9) 50%, rgb(0 0 0 / 0.05) 55%, transparent 62%);
+  background-size: 240% 100%;
+  background-repeat: no-repeat;
+  mix-blend-mode: overlay;
+}
+.hero-stage__caption {
+  position: relative;
+  z-index: 1;
+  margin-top: 0.7rem;
+  font-family: var(--font-mono);
+  font-size: 0.56rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  text-align: center;
+  white-space: nowrap;
+  color: #8c8b89;
+}
+@media (min-width: 640px) { .hero-stage__vial { height: 18rem; } }
+@media (min-width: 1024px) { .hero-stage { width: min(100%, 30rem); margin-inline: 0 auto; } .hero-stage__vial { height: 21rem; } }
+
+/* Tilt cards */
+.tilt-card {
+  height: 100%;
+  transform: perspective(1000px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+  transition: transform 160ms ease-out;
+  will-change: transform;
+}
+.tilt-card:not(:hover) { transition: transform 520ms cubic-bezier(0.22, 1, 0.36, 1); }
+.tilt-card .product-card__stage::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  opacity: 0;
+  background: radial-gradient(circle at var(--gx, 50%) var(--gy, 40%), rgb(255 255 255 / 0.8), rgb(255 255 255 / 0.25) 22%, transparent 48%);
+  mix-blend-mode: soft-light;
+  transition: opacity 260ms ease;
+}
+.tilt-card:hover .product-card__stage::before { opacity: 1; }
+@media (hover: none), (prefers-reduced-motion: reduce) {
+  .tilt-card { transform: none !important; }
+  .tilt-card .product-card__stage::before { display: none; }
+}
+
+/* Liquid fill on Add to cart (vial form only) */
+.vial-fill {
+  position: absolute;
+  left: 50%;
+  top: calc(var(--stage-pad) + var(--mock-h) * 0.27);
+  width: calc(var(--mock-h) * 0.667 * 0.37);
+  height: calc(var(--mock-h) * 0.64);
+  z-index: 2;
+  transform: translateX(-50%);
+  border-radius: 18% / 6%;
+  overflow: hidden;
+  pointer-events: none;
+}
+.vial-fill__liquid {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 0;
+  background: linear-gradient(180deg, rgb(7 144 255 / 0.62), rgb(232 18 28 / 0.62));
+  mix-blend-mode: multiply;
+}
+.vial-fill__burst {
+  position: absolute;
+  inset: -30%;
+  border-radius: 50%;
+  opacity: 0;
+  box-shadow: 0 0 40px 12px rgb(232 18 28 / 0.45), inset 0 0 30px rgb(7 144 255 / 0.35);
+}
+.vial-fill.is-on .vial-fill__liquid { animation: pp-fill 1.5s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
+.vial-fill.is-on .vial-fill__burst { animation: pp-burst 0.9s ease-out forwards; }
+@keyframes pp-fill { 0% { height: 0; opacity: 1; } 55% { height: 74%; opacity: 0.95; } 100% { height: 74%; opacity: 0; } }
+@keyframes pp-burst { 0% { opacity: 0; transform: scale(0.6); } 30% { opacity: 1; } 100% { opacity: 0; transform: scale(1.25); } }
+
+/* Purchase button fill */
+.purchase-button { position: relative; overflow: hidden; }
+.purchase-button::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0;
+  background: linear-gradient(180deg, rgb(7 144 255 / 0.15), rgb(7 144 255 / 0.7));
+  transform: translateY(100%);
+}
+.purchase-button.is-filling::before { animation: pp-btn-fill 950ms cubic-bezier(0.22, 1, 0.36, 1) forwards; }
+@keyframes pp-btn-fill { 0% { transform: translateY(100%); opacity: 1; } 65% { transform: translateY(0); opacity: 1; } 100% { transform: translateY(0); opacity: 0; } }
+
+/* Cart icon pulse */
+.cart-link--pulse { animation: pp-cart-pulse 0.8s cubic-bezier(0.22, 1, 0.36, 1); }
+@keyframes pp-cart-pulse {
+  0%   { transform: scale(1);    box-shadow: 0 0 0 0 rgb(232 18 28 / 0.6); }
+  35%  { transform: scale(1.16); box-shadow: 0 0 0 11px rgb(232 18 28 / 0); }
+  100% { transform: scale(1);    box-shadow: 0 0 0 0 rgb(232 18 28 / 0); }
+}
+.cart-badge--pop { animation: pp-pop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1); }
+@keyframes pp-pop { from { transform: scale(0.4); } to { transform: scale(1); } }
+
+/* Cursor spotlight on dark surfaces */
+.spotlight {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 500ms ease;
+  background: radial-gradient(440px circle at var(--sx, 50%) var(--sy, 50%), rgb(255 255 255 / 0.12), rgb(255 255 255 / 0.035) 38%, transparent 64%);
+  mix-blend-mode: screen;
+}
+.member-gate__brand .spotlight { z-index: 0; }
+
+/* Flag ripple behind section headings */
+.flag-ripple {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  opacity: 0.11;
+  -webkit-mask-image: radial-gradient(ellipse 70% 62% at 50% 38%, #000 18%, transparent 74%);
+  mask-image: radial-gradient(ellipse 70% 62% at 50% 38%, #000 18%, transparent 74%);
+}
+:root:not([data-theme="light"]) .flag-ripple { opacity: 0.18; }
+.flag-ripple__img {
+  position: absolute;
+  inset: -8%;
+  background: url("/media/american-flag-brand-film-v2-poster.webp") center / cover no-repeat;
+  filter: saturate(1.15) contrast(1.05);
+  will-change: transform;
+  animation: pp-ripple 18s ease-in-out infinite alternate;
+}
+@keyframes pp-ripple {
+  from { transform: translate3d(-2%, -1.5%, 0) scale(1.02); }
+  to   { transform: translate3d(2%, 1.5%, 0) scale(1.09); }
+}
+
+/* Proof ticker */
+.proof-ticker {
+  overflow: hidden;
+  border-top: 1px solid var(--pp-border);
+  border-bottom: 1px solid var(--pp-border);
+  background: color-mix(in srgb, var(--pp-text-primary) 3%, transparent);
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 7%, #000 93%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 7%, #000 93%, transparent);
+}
+.proof-ticker__track { display: flex; width: max-content; padding: 0.85rem 0; animation: pp-ticker 42s linear infinite; }
+.proof-ticker:hover .proof-ticker__track { animation-play-state: paused; }
+.proof-ticker__item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding-right: 2.75rem;
+  font-family: var(--font-display);
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.proof-ticker__star { font-size: 0.7rem; color: var(--pp-red); }
+.proof-ticker__item:nth-child(even) .proof-ticker__star { color: var(--pp-blue); }
+@keyframes pp-ticker { to { transform: translateX(-50%); } }
+
+/* Route wipe */
+.route-wipe {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  pointer-events: none;
+  background: linear-gradient(100deg, #e8121c 0%, #ff2a34 28%, #f2f4f6 52%, #0790ff 100%);
+}
+
+/* Sticky buy bar (phones) */
+.sticky-buy {
+  position: fixed;
+  right: 0.75rem;
+  bottom: calc(0.75rem + env(safe-area-inset-bottom));
+  left: 0.75rem;
+  z-index: 45;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.65rem 0.7rem 0.65rem 1rem;
+  border: 1px solid var(--pp-border);
+  border-radius: 1rem;
+  background: color-mix(in srgb, var(--pp-bg-elevated) 94%, transparent);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow: 0 18px 40px -18px rgb(0 0 0 / 0.65), inset 0 1px 0 rgb(255 255 255 / 0.12);
+}
+
+/* Testimonial deck lead card */
+.testimonial-lead .testimonial-card {
+  border-left-color: var(--pp-red);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.10), 0 22px 50px -38px rgb(0 0 0 / 0.9), 0 0 40px -22px rgb(232 18 28 / 0.6);
+}
+
+/* Count-up stats under the American Standard rail */
+.american-standard__stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin-top: 0.75rem;
+  overflow: hidden;
+  border: 1px solid rgb(255 255 255 / 0.12);
+  background: rgb(9 11 15 / 0.92);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.10), 0 24px 45px -35px rgb(0 0 0 / 0.95);
+}
+.american-standard__stat { padding: 1.1rem 1.35rem; border-right: 1px solid var(--pp-border); }
+.american-standard__stat:last-child { border-right: 0; }
+.american-standard__stat-value {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 2.3rem;
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: -0.01em;
+}
+.american-standard__stat-label {
+  display: block;
+  margin-top: 0.35rem;
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--pp-text-dim);
+}
+:root[data-theme="light"] .american-standard__stats {
+  border-color: var(--pp-border);
+  background: rgb(255 255 255 / 0.9);
+  box-shadow: inset 0 1px 0 #ffffff, 0 24px 45px -35px rgb(10 11 13 / 0.35);
+}
+@media (max-width: 767px) {
+  .american-standard__stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .american-standard__stat:nth-child(2) { border-right: 0; }
+  .american-standard__stat:nth-child(-n+2) { border-bottom: 1px solid var(--pp-border); }
+  .hero-stage { padding-top: 2.25rem; }
+}
+
 /* Phones: iOS zooms the page when a focused control is under 16px, and a
    fingertip needs ~44px. Applies to every form on the site. */
 @media (max-width: 767px) {
@@ -901,6 +1189,9 @@ body {
   html { scroll-behavior: auto; }
   .brand-stage::after, .brand-button::before { animation: none; transition: none; }
   .brand-button, .brand-button::after, .red-chrome, .glow-orb, .flag-hero__seal--float { animation: none; }
+  .flag-ripple__img, .cart-link--pulse, .cart-badge--pop, .vial-fill__liquid, .vial-fill__burst, .purchase-button::before { animation: none; }
+  .proof-ticker__track { animation: none; flex-wrap: wrap; width: auto; }
+  .spotlight, .hero-stage__sheen { display: none; }
 }
 
 :root[data-theme="light"] .american-standard,
