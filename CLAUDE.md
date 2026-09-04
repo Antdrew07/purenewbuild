@@ -4,8 +4,14 @@ Next.js 15 storefront rebuild for Pure Peptide LLC. **This is one of three
 Pure Peptide codebases on this machine — read "Not this project" below before
 changing anything.**
 
-- GitHub: `Antdrew07/purepeptide-us` (private)
-- Railway: project `purepeptide-us` — service `web` → https://web-production-df972.up.railway.app
+- GitHub: `Antdrew07/purenewbuild` (public). The older private
+  `Antdrew07/purepeptide-us` is a separate history; do not push there.
+- Railway: project `purenewbuild` — services `web`
+  (https://web-production-b3ad7.up.railway.app), `api`
+  (https://api-production-298d.up.railway.app) and `Postgres`. Pushes to
+  `main` deploy both app services. Per-service build/start commands live in
+  the Railway dashboard: there is deliberately NO `railway.json` in the repo
+  (a root config file applies to every service and broke the api build).
 - Local dev: **http://127.0.0.1:3200**
 
 ## Run it
@@ -28,15 +34,18 @@ Requires **Node >= 20** (Tailwind v4's oxide binary). See `.nvmrc`.
 |---|---|
 | web | Next.js 15 App Router · React 19 · Tailwind v4 · Framer Motion |
 | api | Express 4 · Drizzle · **Postgres** · Zod · JWT |
-| data | catalog JSON — 96 products, 9 categories (see warning below) |
+| data | catalog JSON — 96 products, 10 categories (see warning below) |
 
 **Zero-credential boot.** With no env vars set the whole site renders from the
 seed catalog. `NEXT_PUBLIC_API_URL` unset ⇒ `lib/api.ts` falls back to seed
-data and the contact form / admin degrade gracefully. Railway currently runs
-the `web` workspace only — no database attached yet.
+data and the contact form / admin degrade gracefully. On Railway the api runs
+live against Postgres (schema via `npm run db:push`, data via `npm run db:seed`;
+re-seeding upserts by slug and updates name, price, status, form, category).
 
-There is **no checkout** — the site is browse-and-enquire. Do not add payment
-handles here; see "Not this project".
+The site is gated: `MemberAccessGate` wraps every page and renders a loader
+until hydration, so SSR HTML never contains page content — verify pages with a
+real browser (Playwright), not `curl`. Cart, checkout (manual payment) and an
+order admin exist here.
 
 ## The catalog is duplicated THREE times — read this first
 
