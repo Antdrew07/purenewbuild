@@ -1,6 +1,6 @@
 import { and, asc, eq, ilike, inArray, or, sql as raw } from "drizzle-orm";
 import { db, schema } from "../db/index.js";
-import { CATALOG, toRecord, type ProductRecord } from "./catalog.js";
+import { CATALOG, toRecord, type ProductForm, type ProductRecord } from "./catalog.js";
 
 export interface ProductQuery {
   category?: string;
@@ -131,6 +131,7 @@ const liveRepo: Repo = {
         category: catById.get(p.categoryId ?? -1) ?? "",
         status: p.status,
         featured: p.featured,
+        form: (p.form as ProductForm) ?? "vial",
         note: p.note,
         description: p.description,
         imageUrl: p.imageUrl,
@@ -148,8 +149,8 @@ const liveRepo: Repo = {
       : [];
     return {
       id: p.id, slug: p.slug, name: p.name, dosage: p.dosage, priceCents: p.priceCents,
-      category: cat[0]?.slug ?? "", status: p.status, featured: p.featured, note: p.note,
-      description: p.description, imageUrl: p.imageUrl, coaUrl: p.coaUrl,
+      category: cat[0]?.slug ?? "", status: p.status, featured: p.featured, form: (p.form as ProductForm) ?? "vial",
+      note: p.note, description: p.description, imageUrl: p.imageUrl, coaUrl: p.coaUrl,
     };
   },
 };

@@ -29,6 +29,8 @@ export const products = pgTable("products", {
   categoryId: integer("category_id").references(() => categories.id),
   status: productStatus("status").notNull().default("active"),
   featured: boolean("featured").notNull().default(false),
+  /** Presentation form drives the product mockup: vial | dropper | spray | pen. */
+  form: text("form").notNull().default("vial"),
   note: text("note"),
   description: text("description"),
   imageUrl: text("image_url"),

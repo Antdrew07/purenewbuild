@@ -28,19 +28,22 @@ async function get<T>(path: string, revalidate = 300): Promise<T | null> {
   }
 }
 
+/** Older API builds omit `form`; every product renders as a vial unless told otherwise. */
+const withForm = (p: Product): Product => ({ ...p, form: p.form ?? "vial" });
+
 export async function getProducts(): Promise<Product[]> {
-  return (await get<Product[]>("/api/products?limit=100")) ?? DEMO_PRODUCTS;
+  return (await get<Product[]>("/api/products?limit=100"))?.map(withForm) ?? DEMO_PRODUCTS;
 }
 
 export async function getFeaturedProducts(): Promise<Product[]> {
   const live = await get<Product[]>("/api/products?featured=true&limit=8");
-  return live ?? DEMO_PRODUCTS.filter((p) => p.featured);
+  return live?.map(withForm) ?? DEMO_PRODUCTS.filter((p) => p.featured);
 }
 
 export async function getProduct(slug: string): Promise<Product | null> {
   if (API_URL) {
     const live = await get<Product>(`/api/products/${slug}`);
-    if (live) return live;
+    if (live) return withForm(live);
   }
   return DEMO_PRODUCTS.find((p) => p.slug === slug) ?? null;
 }

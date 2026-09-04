@@ -1,6 +1,7 @@
 import catalog from "../db/catalog.json" with { type: "json" };
 
 export type CatalogStatus = "active" | "out_of_stock" | "coming_soon" | "unavailable";
+export type ProductForm = "vial" | "dropper" | "spray" | "pen";
 
 export interface CatalogProduct {
   name: string;
@@ -10,6 +11,7 @@ export interface CatalogProduct {
   status: CatalogStatus;
   featured?: boolean;
   note?: string;
+  form?: ProductForm;
 }
 
 export const CATALOG = catalog as unknown as {
@@ -49,6 +51,7 @@ export interface ProductRecord {
   category: string;
   status: CatalogStatus;
   featured: boolean;
+  form: ProductForm;
   note: string | null;
   description: string | null;
   imageUrl: string | null;
@@ -66,6 +69,7 @@ export function toRecord(p: CatalogProduct, index: number): ProductRecord {
     category: p.category,
     status: p.status,
     featured: Boolean(p.featured),
+    form: p.form ?? "vial",
     note: p.note ?? null,
     description: describe(p),
     imageUrl: null,

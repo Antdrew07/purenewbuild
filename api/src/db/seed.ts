@@ -37,6 +37,7 @@ for (const p of CATALOG.products) {
       categoryId: catIds.get(p.category) ?? null,
       status: p.status,
       featured: Boolean(p.featured),
+      form: p.form ?? "vial",
       note: p.note ?? null,
       description: describe(p),
     })
@@ -47,6 +48,7 @@ for (const p of CATALOG.products) {
         priceCents: p.price === null ? null : Math.round(p.price * 100),
         status: p.status,
         featured: Boolean(p.featured),
+        form: p.form ?? "vial",
         updatedAt: new Date(),
       },
     });
