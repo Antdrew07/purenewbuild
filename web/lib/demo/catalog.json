@@ -56,6 +56,11 @@
       "blurb": "Melanocortin and gonadotropin research compounds."
     },
     {
+      "slug": "sprays",
+      "name": "Sprays",
+      "blurb": "Research peptides supplied as ready-to-use 30 ml spray formulations, grouped here for quick comparison."
+    },
+    {
       "slug": "blends",
       "name": "Blends & Stacks",
       "blurb": "Multi-compound research blends supplied in a single vial."
@@ -671,7 +676,7 @@
       "name": "Selank Spray",
       "dosage": "30ml",
       "price": 40,
-      "category": "cognitive",
+      "category": "sprays",
       "status": "active",
       "form": "spray"
     },
@@ -679,7 +684,7 @@
       "name": "Semax Spray",
       "dosage": "30ml",
       "price": 40,
-      "category": "cognitive",
+      "category": "sprays",
       "status": "active",
       "form": "spray"
     },
@@ -687,7 +692,7 @@
       "name": "Semax / Selank Spray",
       "dosage": "30ml",
       "price": 45,
-      "category": "cognitive",
+      "category": "sprays",
       "status": "active",
       "form": "spray"
     },
@@ -695,7 +700,7 @@
       "name": "KPV Spray",
       "dosage": "10mg / 30ml",
       "price": 40,
-      "category": "recovery",
+      "category": "sprays",
       "status": "active",
       "form": "spray"
     },
@@ -703,7 +708,7 @@
       "name": "KPV Spray",
       "dosage": "30mg / 30ml",
       "price": 55,
-      "category": "recovery",
+      "category": "sprays",
       "status": "active",
       "form": "spray"
     },
@@ -711,7 +716,7 @@
       "name": "BPC-157 Spray",
       "dosage": "20mg / 30ml",
       "price": 55,
-      "category": "recovery",
+      "category": "sprays",
       "status": "active",
       "form": "spray"
     },
@@ -719,7 +724,7 @@
       "name": "TB-500 Spray",
       "dosage": "20mg / 30ml",
       "price": 55,
-      "category": "recovery",
+      "category": "sprays",
       "status": "active",
       "form": "spray"
     },
@@ -727,7 +732,7 @@
       "name": "NAD+ Spray",
       "dosage": "500mg / 30ml",
       "price": 50,
-      "category": "longevity",
+      "category": "sprays",
       "status": "active",
       "form": "spray"
     },
@@ -735,7 +740,7 @@
       "name": "NAD+ Spray",
       "dosage": "1000mg / 30ml",
       "price": 65,
-      "category": "longevity",
+      "category": "sprays",
       "status": "active",
       "form": "spray"
     },
@@ -743,7 +748,7 @@
       "name": "Oxytocin Spray",
       "dosage": "10mg / 30ml",
       "price": 50,
-      "category": "sexual",
+      "category": "sprays",
       "status": "active",
       "form": "spray"
     },
@@ -751,7 +756,7 @@
       "name": "PT-141 Spray",
       "dosage": "10mg / 30ml",
       "price": 40,
-      "category": "sexual",
+      "category": "sprays",
       "status": "active",
       "form": "spray"
     },
@@ -759,7 +764,7 @@
       "name": "PT-141 / Oxytocin Spray",
       "dosage": "30ml",
       "price": 55,
-      "category": "sexual",
+      "category": "sprays",
       "status": "active",
       "form": "spray"
     }

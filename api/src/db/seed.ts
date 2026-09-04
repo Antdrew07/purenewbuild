@@ -49,6 +49,8 @@ for (const p of CATALOG.products) {
         status: p.status,
         featured: Boolean(p.featured),
         form: p.form ?? "vial",
+        categoryId: catIds.get(p.category) ?? null,
+        note: p.note ?? null,
         updatedAt: new Date(),
       },
     });
