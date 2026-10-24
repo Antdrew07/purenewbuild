@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useCallback, useState, type FormEvent, type ReactNode } from "react";
+import { useCallback, useEffect, useState, type FormEvent, type ReactNode } from "react";
 import { motion, useReducedMotion, type Variants } from "framer-motion";
 import { AmericanFlagBackdrop } from "@/components/fx/AmericanFlagBackdrop";
 import { Spotlight } from "@/components/fx/Spotlight";
@@ -11,9 +11,28 @@ import { EASE, fadeUp, scaleUp, stagger, trackIn } from "@/lib/motion";
 import { TurnstileField } from "./TurnstileField";
 import { StarDivider } from "@/components/ui/Chrome";
 import { useMember } from "@/lib/member";
+import { getToken as getAdminToken } from "@/lib/admin-client";
 import { membersApiConfigured, registerMember, signInMember, turnstileConfigured, MemberAuthError } from "@/lib/members-client";
 
 type Mode = "register" | "login";
+
+/**
+ * A signed-in admin satisfies the gate too, so operations staff never need a
+ * separate member account to reach the site. Presence + unexpired JWT only;
+ * the API remains the real authorization check.
+ */
+function adminSessionActive(): boolean {
+  const token = getAdminToken();
+  if (!token) return false;
+  try {
+    const payload = JSON.parse(
+      atob(token.split(".")[1]?.replace(/-/g, "+").replace(/_/g, "/") ?? ""),
+    ) as { exp?: number };
+    return !payload.exp || payload.exp * 1000 > Date.now();
+  } catch {
+    return false;
+  }
+}
 
 /** The form panel arrives a beat after the brand hero. */
 const panelIn: Variants = {
@@ -47,6 +66,10 @@ export function MemberAccessGate({ children }: { children: ReactNode }) {
   const [error, setError] = useState("");
 
   const reduceMotion = useReducedMotion();
+
+  // Re-checked on every navigation so signing into /admin unlocks the whole site.
+  const [adminActive, setAdminActive] = useState(false);
+  useEffect(() => { setAdminActive(adminSessionActive()); }, [pathname]);
 
   const onTurnstileToken = useCallback((token: string | null) => {
     setTurnstileToken(token);
@@ -91,7 +114,8 @@ export function MemberAccessGate({ children }: { children: ReactNode }) {
   if (!hydrated) {
     return <div className="member-gate member-gate--loading" aria-busy="true"><span className="member-gate__loader" /></div>;
   }
-  if (member || ["/terms", "/privacy", "/shipping"].includes(pathname)) return <>{children}</>;
+  const onAdminRoute = pathname === "/admin" || pathname.startsWith("/admin/");
+  if (member || adminActive || onAdminRoute || ["/terms", "/privacy", "/shipping"].includes(pathname)) return <>{children}</>;
 
   const unavailable = !membersApiConfigured || !turnstileConfigured;
   const title = mode === "register" ? "Join the research portal" : "Member sign in";
