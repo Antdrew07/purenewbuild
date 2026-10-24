@@ -31,7 +31,7 @@ export function PageTransition({ children }: { children: ReactNode }) {
             className="route-wipe"
             initial={{ scaleX: 0, originX: 0 }}
             animate={{ scaleX: [0, 1, 1, 0], originX: [0, 0, 1, 1] }}
-            transition={{ duration: 0.72, times: [0, 0.42, 0.55, 1], ease: EASE }}
+            transition={{ duration: 0.38, times: [0, 0.42, 0.55, 1], ease: EASE }}
             onAnimationComplete={() => setWipe(0)}
           />
         )}
@@ -40,7 +40,7 @@ export function PageTransition({ children }: { children: ReactNode }) {
         key={pathname}
         initial={reduceMotion ? false : { opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: reduceMotion ? 0 : 0.5, ease: EASE, delay: reduceMotion || wipe === 0 ? 0 : 0.28 }}
+        transition={{ duration: reduceMotion ? 0 : 0.28, ease: EASE, delay: reduceMotion || wipe === 0 ? 0 : 0.1 }}
       >
         {children}
       </motion.div>

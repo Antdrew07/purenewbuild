@@ -5,12 +5,12 @@ export const EASE = [0.22, 1, 0.36, 1] as const;
 
 export const fadeUp: Variants = {
   hidden: { opacity: 0, y: 28 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.55, ease: EASE } },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: EASE } },
 };
 
 export const fadeIn: Variants = {
   hidden: { opacity: 0 },
-  visible: { opacity: 1, transition: { duration: 0.6, ease: EASE } },
+  visible: { opacity: 1, transition: { duration: 0.42, ease: EASE } },
 };
 
 export const scaleUp: Variants = {
@@ -20,7 +20,7 @@ export const scaleUp: Variants = {
 
 export const stagger: Variants = {
   hidden: {},
-  visible: { transition: { staggerChildren: 0.09, delayChildren: 0.1 } },
+  visible: { transition: { staggerChildren: 0.06, delayChildren: 0.05 } },
 };
 
 /** Wide letter-spacing collapse — used for display headings. */
@@ -30,6 +30,6 @@ export const trackIn: Variants = {
     opacity: 1,
     letterSpacing: "0.02em",
     filter: "blur(0px)",
-    transition: { duration: 0.9, ease: EASE },
+    transition: { duration: 0.55, ease: EASE },
   },
 };
