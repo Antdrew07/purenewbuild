@@ -14,7 +14,7 @@ import { VialMockup, vialLabelName } from "./VialMockup";
  *
  *   vial     /vial/vial-master-v3.png     lyophilised powder
  *   dropper  /mockup/dropper-master-v2.png   Methylene Blue
- *   spray    /mockup/spray-master.png     the 30ml sprays
+ *   spray    /mockup/nasal-spray-master.png  the 30ml nasal sprays
  *   pen      /mockup/pen-master.png       Ready-Use Pen kit (no label surface)
  */
 
@@ -40,13 +40,13 @@ const PANELS: Record<
     maxSize: 34,
   },
   spray: {
-    src: "/mockup/spray-master.png",
-    alt: "spray bottle",
-    cx: 510,
-    top: 1132,
-    bottom: 1212,
-    maxW: 320,
-    maxSize: 38,
+    src: "/mockup/nasal-spray-master.png",
+    alt: "nasal spray bottle",
+    cx: 483,
+    top: 1204,
+    bottom: 1260,
+    maxW: 268,
+    maxSize: 32,
   },
 };
 
