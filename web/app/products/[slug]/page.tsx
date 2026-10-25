@@ -81,7 +81,7 @@ export default async function ProductPage({
                   src={img}
                   alt={product.name}
                   width={1024}
-                  height={1536}
+                  height={1024}
                   priority
                   className="h-[26rem] w-auto object-contain"
                 />

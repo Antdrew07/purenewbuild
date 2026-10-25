@@ -33,9 +33,9 @@ export function ProductCard({ product }: { product: Product }) {
                 src={img}
                 alt={product.name}
                 width={1024}
-                height={1536}
+                height={1024}
                 sizes="(max-width: 640px) 45vw, 340px"
-                className="relative h-52 w-auto object-contain transition-transform duration-300 group-hover:scale-[1.04]"
+                className="relative h-56 w-auto object-contain transition-transform duration-300 group-hover:scale-[1.04]"
               />
             ) : (
               <ProductMockup
