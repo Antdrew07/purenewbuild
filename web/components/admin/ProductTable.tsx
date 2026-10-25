@@ -10,7 +10,7 @@ import { StatusBadge } from "@/components/ui/Badge";
 
 const CATEGORIES = [
   "metabolic", "recovery", "growth", "cognitive",
-  "longevity", "wellness", "sexual", "blends", "accessories",
+  "longevity", "wellness", "skincare", "sexual", "blends", "sprays", "accessories",
 ];
 
 const STATUSES: Product["status"][] = ["active", "out_of_stock", "coming_soon", "unavailable"];

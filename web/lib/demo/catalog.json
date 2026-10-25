@@ -51,6 +51,11 @@
       "blurb": "Vitamin, antioxidant, and general wellness research blends."
     },
     {
+      "slug": "skincare",
+      "name": "Skincare & Topicals",
+      "blurb": "Copper-peptide and cosmetic research topicals for skin, hair, and nails."
+    },
+    {
       "slug": "sexual",
       "name": "Hormone & Sexual Health",
       "blurb": "Melanocortin and gonadotropin research compounds."
@@ -605,7 +610,7 @@
       "name": "HHB Hair, Skin & Nail Blend",
       "dosage": "10ml",
       "price": 63,
-      "category": "wellness",
+      "category": "skincare",
       "status": "active"
     },
     {
@@ -836,7 +841,7 @@
       "name": "SNAP-8",
       "dosage": "10mg",
       "price": 35,
-      "category": "wellness",
+      "category": "skincare",
       "status": "active"
     },
     {
@@ -887,7 +892,7 @@
       "name": "GHK-Cu / SNAP-8 Face Cream",
       "dosage": "",
       "price": 25,
-      "category": "wellness",
+      "category": "skincare",
       "status": "active",
       "form": "jar"
     },
@@ -895,7 +900,7 @@
       "name": "GHK-Cu / SNAP-8 / Methylene Blue Balm",
       "dosage": "",
       "price": 25,
-      "category": "wellness",
+      "category": "skincare",
       "status": "active",
       "form": "jar"
     },
@@ -903,7 +908,7 @@
       "name": "GHK-Cu Face Serum",
       "dosage": "30ml",
       "price": 45,
-      "category": "wellness",
+      "category": "skincare",
       "status": "active",
       "form": "dropper"
     }
