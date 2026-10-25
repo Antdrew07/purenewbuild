@@ -852,6 +852,20 @@
       "price": 60,
       "category": "metabolic",
       "status": "active"
+    },
+    {
+      "name": "KPV",
+      "dosage": "50mg",
+      "price": 85,
+      "category": "recovery",
+      "status": "active"
+    },
+    {
+      "name": "RT3",
+      "dosage": "50mg",
+      "price": 145,
+      "category": "metabolic",
+      "status": "active"
     }
   ]
 }
