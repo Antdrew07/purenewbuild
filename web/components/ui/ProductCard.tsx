@@ -1,7 +1,9 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { motion } from "framer-motion";
+import { productImage } from "@/lib/product-images";
 import type { Product } from "@/lib/types";
 import { formatPrice } from "@/lib/format";
 import { fadeUp } from "@/lib/motion";
@@ -18,6 +20,7 @@ import { VialFill } from "@/components/fx/VialFill";
  * both actions on one tap.
  */
 export function ProductCard({ product }: { product: Product }) {
+  const img = productImage(product);
   return (
     <motion.article variants={fadeUp} className="h-full">
       <TiltCard>
@@ -25,16 +28,27 @@ export function ProductCard({ product }: { product: Product }) {
         <Link href={`/products/${product.slug}`} className="flex flex-1 flex-col">
           {/* ── product shot on its own clean ground ─────────────────── */}
           <div className="product-card__stage relative flex items-center justify-center bg-white px-4 py-4">
-            <ProductMockup
-              form={product.form}
-              name={product.name}
-              dosage={product.dosage}
-              className="relative h-52 transition-transform duration-300 group-hover:scale-[1.04]"
-            />
+            {img ? (
+              <Image
+                src={img}
+                alt={product.name}
+                width={1024}
+                height={1536}
+                sizes="(max-width: 640px) 45vw, 340px"
+                className="relative h-52 w-auto object-contain transition-transform duration-300 group-hover:scale-[1.04]"
+              />
+            ) : (
+              <ProductMockup
+                form={product.form}
+                name={product.name}
+                dosage={product.dosage}
+                className="relative h-52 transition-transform duration-300 group-hover:scale-[1.04]"
+              />
+            )}
             <div className="absolute left-4 top-4">
               <StatusBadge status={product.status} />
             </div>
-            {product.form === "vial" && <VialFill slug={product.slug} mockH="13rem" pad="1rem" />}
+            {!img && product.form === "vial" && <VialFill slug={product.slug} mockH="13rem" pad="1rem" />}
           </div>
 
           {/* ── detail ─────────────────────────────────────────────────── */}

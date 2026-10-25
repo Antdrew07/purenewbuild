@@ -6,7 +6,9 @@ import { formatPrice } from "@/lib/format";
 import { RuoBadge, StatusBadge } from "@/components/ui/Badge";
 import { ButtonLink } from "@/components/ui/Button";
 import { NeonRule } from "@/components/ui/Chrome";
+import Image from "next/image";
 import { ProductMockup } from "@/components/ui/ProductMockup";
+import { productImage } from "@/lib/product-images";
 import { AddToCart } from "@/components/cart/AddToCart";
 import { Panel } from "@/components/ui/Panel";
 import { ProductCard } from "@/components/ui/ProductCard";
@@ -45,6 +47,7 @@ export default async function ProductPage({
   const { slug } = await params;
   const product = await getProduct(slug);
   if (!product) notFound();
+  const img = productImage(product);
 
   const all = await getProducts();
   const related = all
@@ -73,15 +76,26 @@ export default async function ProductPage({
             <NeonRule className="absolute inset-x-0 bottom-0" />
 
             <div className="relative z-10 flex min-h-[26rem] items-center justify-center py-2">
-              <ProductMockup
-                form={product.form}
-                name={product.name}
-                dosage={product.dosage}
-                className="h-[26rem]"
-                priority
-              />
+              {img ? (
+                <Image
+                  src={img}
+                  alt={product.name}
+                  width={1024}
+                  height={1536}
+                  priority
+                  className="h-[26rem] w-auto object-contain"
+                />
+              ) : (
+                <ProductMockup
+                  form={product.form}
+                  name={product.name}
+                  dosage={product.dosage}
+                  className="h-[26rem]"
+                  priority
+                />
+              )}
             </div>
-            {product.form === "vial" && <VialFill slug={product.slug} mockH="26rem" pad="2.5rem" />}
+            {!img && product.form === "vial" && <VialFill slug={product.slug} mockH="26rem" pad="2.5rem" />}
 
             <p className="relative z-10 text-center font-mono text-[10px] uppercase tracking-[0.3em] text-chrome-400">
               Representative image · labelling varies by lot

@@ -211,6 +211,15 @@ body {
   50%      { filter: var(--pp-chrome-shadow) drop-shadow(0 0 18px rgb(255 255 255 / 0.55)); }
 }
 
+/* The home hero sits on the dark flag film in BOTH themes, so its chrome must
+   stay bright silver even in light mode (where the default chrome gradient
+   flips dark for use on white surfaces). Same approach as .member-gate__brand. */
+.flag-hero {
+  --pp-chrome-grad: linear-gradient(177deg, #ffffff 0%, #d6d9db 18%, #8c8b89 38%, #3d3d3f 50%, #8c8b89 62%, #e8eaec 82%, #a5a5a5 100%);
+  --pp-chrome-stroke: 0.6px rgb(255 255 255 / 0.22);
+  --pp-chrome-shadow: drop-shadow(0 1px 0 rgb(255 255 255 / 0.35)) drop-shadow(0 4px 14px rgb(0 0 0 / 0.85));
+}
+
 /* Red chrome: the brand red as beveled metal, with the same travelling glint
    as .chrome-shine (offset so paired words catch the light one after the
    other) and a neon breath underneath. */
