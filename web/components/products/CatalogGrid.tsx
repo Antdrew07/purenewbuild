@@ -1,10 +1,10 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { AnimatePresence, LayoutGroup, motion } from "framer-motion";
+import { LayoutGroup, motion } from "framer-motion";
 import type { Category, Product } from "@/lib/types";
 import { ProductCard } from "@/components/ui/ProductCard";
-import { EASE, stagger } from "@/lib/motion";
+import { fadeUp, stagger } from "@/lib/motion";
 
 type Sort = "name" | "price_asc" | "price_desc";
 
@@ -157,27 +157,21 @@ export function CatalogGrid({
             </button>
           </div>
         ) : (
+          // Re-key on each discrete filter change so the entrance replays cleanly;
+          // no AnimatePresence/popLayout, which stranded cards invisible when the
+          // list shrank from "all" to a small category.
           <motion.div
-            layout
+            key={`${category}|${sort}|${inStockOnly}`}
             variants={stagger}
             initial="hidden"
             animate="visible"
             className="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
           >
-            <AnimatePresence mode="popLayout" initial={false}>
-              {filtered.map((p) => (
-                <motion.div
-                  key={p.slug}
-                  layout
-                  initial={{ opacity: 0, scale: 0.96 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.96 }}
-                  transition={{ layout: { duration: 0.45, ease: EASE }, duration: 0.28, ease: EASE }}
-                >
-                  <ProductCard product={p} />
-                </motion.div>
-              ))}
-            </AnimatePresence>
+            {filtered.map((p) => (
+              <motion.div key={p.slug} variants={fadeUp}>
+                <ProductCard product={p} />
+              </motion.div>
+            ))}
           </motion.div>
         )}
       </div>

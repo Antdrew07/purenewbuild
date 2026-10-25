@@ -5,6 +5,7 @@ import { Parallax } from "@/components/fx/Parallax";
 import { Panel } from "@/components/ui/Panel";
 import { StarDivider } from "@/components/ui/Chrome";
 import { ButtonLink } from "@/components/ui/Button";
+import { getProducts } from "@/lib/api";
 
 export const metadata: Metadata = {
   title: "About Us",
@@ -32,13 +33,19 @@ const VALUES = [
 ];
 
 const STATS = [
-  { value: "70+", label: "Compounds in catalog" },
   { value: "100%", label: "Lots third-party tested" },
   { value: "48h", label: "Typical dispatch time" },
   { value: "USA", label: "Veteran owned & operated" },
 ];
 
-export default function AboutPage() {
+export default async function AboutPage() {
+  // Count distinct compounds from the live catalog so this never goes stale.
+  const products = await getProducts();
+  const compoundCount = new Set(products.map((p) => p.name)).size;
+  const stats = [
+    { value: `${Math.floor(compoundCount / 10) * 10}+`, label: "Compounds in catalog" },
+    ...STATS,
+  ];
   return (
     <div className="relative pt-32">
       <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-0 h-[34rem] overflow-hidden">
@@ -62,7 +69,7 @@ export default function AboutPage() {
         </Reveal>
 
         <RevealGroup className="mt-20 grid grid-cols-2 gap-4 lg:grid-cols-4">
-          {STATS.map((s) => (
+          {stats.map((s) => (
             <Reveal key={s.label}>
               <div className="relative overflow-hidden rounded-2xl border border-border-hair bg-bg-glass p-6 backdrop-blur">
                 <div aria-hidden="true" className="absolute -right-8 -top-8 h-32 w-32 rounded-full bg-red/15 blur-2xl" />
