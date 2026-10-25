@@ -866,6 +866,46 @@
       "price": 145,
       "category": "metabolic",
       "status": "active"
+    },
+    {
+      "name": "GHK-Cu Pills",
+      "dosage": "60 count",
+      "price": 55,
+      "category": "recovery",
+      "status": "active",
+      "form": "pills"
+    },
+    {
+      "name": "Tesofensin",
+      "dosage": "30ct / 500mcg",
+      "price": 75,
+      "category": "metabolic",
+      "status": "active",
+      "form": "pills"
+    },
+    {
+      "name": "GHK-Cu / SNAP-8 Face Cream",
+      "dosage": "",
+      "price": 25,
+      "category": "wellness",
+      "status": "active",
+      "form": "jar"
+    },
+    {
+      "name": "GHK-Cu / SNAP-8 / Methylene Blue Balm",
+      "dosage": "",
+      "price": 25,
+      "category": "wellness",
+      "status": "active",
+      "form": "jar"
+    },
+    {
+      "name": "GHK-Cu Face Serum",
+      "dosage": "30ml",
+      "price": 45,
+      "category": "wellness",
+      "status": "active",
+      "form": "dropper"
     }
   ]
 }

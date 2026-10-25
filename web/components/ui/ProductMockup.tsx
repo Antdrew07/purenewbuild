@@ -15,6 +15,8 @@ import { VialMockup, vialLabelName } from "./VialMockup";
  *   vial     /vial/vial-master-v3.png     lyophilised powder
  *   dropper  /mockup/dropper-master-v2.png   Methylene Blue
  *   spray    /mockup/nasal-spray-master.png  the 30ml nasal sprays
+ *   pills    /mockup/pills-master.png     oral capsule bottles
+ *   jar      /mockup/jar-master.png       face cream & balm jars
  *   pen      /mockup/pen-master.png       Ready-Use Pen kit (no label surface)
  */
 
@@ -27,7 +29,7 @@ const IMG_H = 1536;
  * panel never lands in the same place twice.
  */
 const PANELS: Record<
-  "dropper" | "spray",
+  "dropper" | "spray" | "pills" | "jar",
   { src: string; alt: string; cx: number; top: number; bottom: number; maxW: number; maxSize: number }
 > = {
   dropper: {
@@ -48,6 +50,24 @@ const PANELS: Record<
     maxW: 268,
     maxSize: 32,
   },
+  pills: {
+    src: "/mockup/pills-master.png",
+    alt: "pill bottle",
+    cx: 456,
+    top: 988,
+    bottom: 1104,
+    maxW: 410,
+    maxSize: 40,
+  },
+  jar: {
+    src: "/mockup/jar-master.png",
+    alt: "cosmetic jar",
+    cx: 512,
+    top: 918,
+    bottom: 965,
+    maxW: 240,
+    maxSize: 26,
+  },
 };
 
 interface MockupProps {
@@ -62,6 +82,8 @@ interface MockupProps {
 export function ProductMockup({ form, ...rest }: MockupProps) {
   if (form === "dropper") return <LabelledBottle panel={PANELS.dropper} {...rest} />;
   if (form === "spray") return <LabelledBottle panel={PANELS.spray} {...rest} />;
+  if (form === "pills") return <LabelledBottle panel={PANELS.pills} {...rest} />;
+  if (form === "jar") return <LabelledBottle panel={PANELS.jar} {...rest} />;
   if (form === "pen") return <PenMockup {...rest} />;
   return <VialMockup {...rest} />;
 }

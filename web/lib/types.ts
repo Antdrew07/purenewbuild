@@ -1,7 +1,7 @@
 export type ProductStatus = "active" | "out_of_stock" | "coming_soon" | "unavailable";
 
 /** Which physical mockup a product is rendered as. */
-export type ProductForm = "vial" | "dropper" | "spray" | "pen";
+export type ProductForm = "vial" | "dropper" | "spray" | "pen" | "pills" | "jar";
 
 export interface Product {
   id: number;

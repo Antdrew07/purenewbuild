@@ -1,7 +1,7 @@
 import catalog from "../db/catalog.json" with { type: "json" };
 
 export type CatalogStatus = "active" | "out_of_stock" | "coming_soon" | "unavailable";
-export type ProductForm = "vial" | "dropper" | "spray" | "pen";
+export type ProductForm = "vial" | "dropper" | "spray" | "pen" | "pills" | "jar";
 
 export interface CatalogProduct {
   name: string;
@@ -31,10 +31,19 @@ export function slugify(name: string, dosage: string): string {
     .replace(/^-|-$/g, "");
 }
 
+const CONTAINER: Record<ProductForm, string> = {
+  vial: "a sealed, lyophilised vial",
+  dropper: "a sealed dropper bottle",
+  spray: "a ready-to-use nasal spray",
+  pills: "a sealed bottle of capsules",
+  jar: "a sealed cosmetic jar",
+  pen: "a ready-to-use pen kit",
+};
+
 export function describe(p: CatalogProduct): string {
   const dose = p.dosage ? ` ${p.dosage}` : "";
   return (
-    `${p.name}${dose} is a research-grade compound supplied in a sealed, lyophilised vial. ` +
+    `${p.name}${dose} is a research-grade compound supplied in ${CONTAINER[p.form ?? "vial"]}. ` +
     `Every lot is third-party tested for identity and purity, with a Certificate of Analysis available on request. ` +
     (p.note ? `Composition: ${p.note}. ` : "") +
     `For laboratory research use only — not for human consumption, and not for diagnostic or therapeutic use.`
