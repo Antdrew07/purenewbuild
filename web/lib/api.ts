@@ -32,7 +32,7 @@ async function get<T>(path: string, revalidate = 300): Promise<T | null> {
 const withForm = (p: Product): Product => ({ ...p, form: p.form ?? "vial" });
 
 export async function getProducts(): Promise<Product[]> {
-  return (await get<Product[]>("/api/products?limit=100"))?.map(withForm) ?? DEMO_PRODUCTS;
+  return (await get<Product[]>("/api/products?limit=500"))?.map(withForm) ?? DEMO_PRODUCTS;
 }
 
 export async function getFeaturedProducts(): Promise<Product[]> {

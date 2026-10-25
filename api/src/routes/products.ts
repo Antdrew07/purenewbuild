@@ -15,7 +15,7 @@ const ListQuery = z.object({
   minPrice: z.coerce.number().min(0).optional(),
   maxPrice: z.coerce.number().min(0).optional(),
   sort: z.enum(["name", "price_asc", "price_desc"]).default("name"),
-  limit: z.coerce.number().int().min(1).max(100).default(48),
+  limit: z.coerce.number().int().min(1).max(500).default(48),
   offset: z.coerce.number().int().min(0).default(0),
 });
 
