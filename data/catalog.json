@@ -82,7 +82,7 @@
     {
       "name": "Adamax",
       "dosage": "10mg",
-      "price": 55,
+      "price": 60,
       "category": "cognitive",
       "status": "active"
     },
@@ -103,7 +103,7 @@
     {
       "name": "ARA 290",
       "dosage": "10mg",
-      "price": 45,
+      "price": 50,
       "category": "recovery",
       "status": "active"
     },
@@ -132,7 +132,7 @@
     {
       "name": "Cagrilintide",
       "dosage": "10mg",
-      "price": null,
+      "price": 55,
       "category": "metabolic",
       "status": "active"
     },
@@ -147,7 +147,7 @@
     {
       "name": "CoQ10",
       "dosage": "5ml",
-      "price": 50,
+      "price": 55,
       "category": "wellness",
       "status": "active"
     },
@@ -189,7 +189,7 @@
     {
       "name": "Fat Blaster Lipo-C",
       "dosage": "10ml",
-      "price": 55,
+      "price": 60,
       "category": "metabolic",
       "status": "active"
     },
@@ -253,21 +253,21 @@
     {
       "name": "KLOW",
       "dosage": "80mg",
-      "price": 85,
+      "price": 88,
       "category": "blends",
       "status": "active"
     },
     {
       "name": "Korean B-12",
       "dosage": "10ml",
-      "price": 60,
+      "price": 63,
       "category": "wellness",
       "status": "active"
     },
     {
       "name": "Korean Multivitamin",
       "dosage": "10ml",
-      "price": 60,
+      "price": 63,
       "category": "wellness",
       "status": "active"
     },
@@ -281,14 +281,14 @@
     {
       "name": "KPV",
       "dosage": "10mg",
-      "price": 45,
+      "price": 50,
       "category": "recovery",
       "status": "active"
     },
     {
       "name": "KPV",
       "dosage": "30mg",
-      "price": 60,
+      "price": 75,
       "category": "recovery",
       "status": "active"
     },
@@ -309,7 +309,7 @@
     {
       "name": "Kisspeptin-10",
       "dosage": "10mg",
-      "price": 45,
+      "price": 55,
       "category": "sexual",
       "status": "active"
     },
@@ -323,14 +323,14 @@
     {
       "name": "Lipo Lab",
       "dosage": "",
-      "price": 50,
+      "price": 55,
       "category": "metabolic",
       "status": "active"
     },
     {
       "name": "Lipo-C MIC B-12",
       "dosage": "10ml",
-      "price": 60,
+      "price": 63,
       "category": "metabolic",
       "status": "active",
       "note": "with B5 & B6"
@@ -352,7 +352,7 @@
     {
       "name": "Melanotan II",
       "dosage": "10mg",
-      "price": 45,
+      "price": 35,
       "category": "sexual",
       "status": "active"
     },
@@ -367,7 +367,7 @@
     {
       "name": "MITO-PRIME",
       "dosage": "5-amino/MOTS-c/NAD",
-      "price": 45,
+      "price": 55,
       "category": "longevity",
       "status": "active"
     },
@@ -389,7 +389,7 @@
     {
       "name": "PE 22-28",
       "dosage": "10mg",
-      "price": 45,
+      "price": 55,
       "category": "cognitive",
       "status": "active"
     },
@@ -403,14 +403,14 @@
     {
       "name": "RT3",
       "dosage": "10mg",
-      "price": 60,
+      "price": 65,
       "category": "metabolic",
       "status": "active"
     },
     {
       "name": "RT3",
       "dosage": "15mg",
-      "price": 70,
+      "price": 75,
       "category": "metabolic",
       "status": "active",
       "featured": true
@@ -425,7 +425,7 @@
     {
       "name": "RT3",
       "dosage": "30mg",
-      "price": 100,
+      "price": 105,
       "category": "metabolic",
       "status": "active"
     },
@@ -453,21 +453,21 @@
     {
       "name": "SS-31",
       "dosage": "10mg",
-      "price": 45,
+      "price": 50,
       "category": "longevity",
       "status": "active"
     },
     {
       "name": "Super Human",
       "dosage": "10ml",
-      "price": 60,
+      "price": 63,
       "category": "blends",
       "status": "active"
     },
     {
       "name": "Tesamorelin",
       "dosage": "10mg",
-      "price": 45,
+      "price": 55,
       "category": "growth",
       "status": "active"
     },
@@ -496,7 +496,7 @@
     {
       "name": "TR3",
       "dosage": "15mg",
-      "price": 60,
+      "price": 65,
       "category": "metabolic",
       "status": "active",
       "featured": true
@@ -518,7 +518,7 @@
     {
       "name": "TR3",
       "dosage": "60mg",
-      "price": 110,
+      "price": 115,
       "category": "metabolic",
       "status": "active"
     },
@@ -547,7 +547,7 @@
     {
       "name": "ARA 290",
       "dosage": "40mg",
-      "price": 100,
+      "price": 95,
       "category": "recovery",
       "status": "active"
     },
@@ -582,7 +582,7 @@
     {
       "name": "Deadpool Blend",
       "dosage": "40mg",
-      "price": 90,
+      "price": 95,
       "category": "blends",
       "status": "active",
       "note": "Cartalax 20mg · BPC-157 10mg · TB-500 10mg"
@@ -597,14 +597,14 @@
     {
       "name": "Follistatin 344",
       "dosage": "1mg",
-      "price": 95,
+      "price": 100,
       "category": "growth",
       "status": "active"
     },
     {
       "name": "HHB Hair, Skin & Nail Blend",
       "dosage": "10ml",
-      "price": 60,
+      "price": 63,
       "category": "wellness",
       "status": "active"
     },
@@ -618,7 +618,7 @@
     {
       "name": "SS-31",
       "dosage": "50mg",
-      "price": 70,
+      "price": 75,
       "category": "longevity",
       "status": "active"
     },
@@ -632,7 +632,7 @@
     {
       "name": "Tri-Heal Blend",
       "dosage": "45mg",
-      "price": 85,
+      "price": 80,
       "category": "blends",
       "status": "active",
       "note": "KPV 10mg · BPC-157 10mg · TB-500 25mg"
@@ -640,7 +640,7 @@
     {
       "name": "Vasugen",
       "dosage": "10mg",
-      "price": 45,
+      "price": 55,
       "category": "recovery",
       "status": "active"
     },
