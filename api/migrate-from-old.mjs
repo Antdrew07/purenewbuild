@@ -89,6 +89,14 @@ async function main() {
     log("legacy holding tables ready");
   }
 
+  // Optional exact-mirror mode: wipe previously migrated rows in the NEW db so
+  // the result matches the source exactly (never touches the old DB).
+  if (!DRY && process.env.MIGRATION_RESET === "1") {
+    await pg.unsafe(`TRUNCATE order_items, orders, member_users, contact_messages,
+      legacy_loyalty_balances, legacy_loyalty_transactions, legacy_promo_codes RESTART IDENTITY`);
+    log("reset: cleared previously migrated rows in NEW db");
+  }
+
   // ---- prefetch lookups ----
   const oldUsers = await q("SELECT id, email, passwordHash, name, createdAt, pointsBalance, pointsLifetime FROM users");
   const userEmailById = new Map(oldUsers.map((u) => [u.id, u.email]));
