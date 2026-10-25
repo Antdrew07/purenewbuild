@@ -767,6 +767,91 @@
       "category": "sprays",
       "status": "active",
       "form": "spray"
+    },
+    {
+      "name": "ACE-031",
+      "dosage": "10mg",
+      "price": 45,
+      "category": "growth",
+      "status": "active"
+    },
+    {
+      "name": "B-12",
+      "dosage": "10ml",
+      "price": 63,
+      "category": "wellness",
+      "status": "active"
+    },
+    {
+      "name": "B-12 Complex",
+      "dosage": "10ml",
+      "price": 55,
+      "category": "wellness",
+      "status": "active"
+    },
+    {
+      "name": "Cartalax",
+      "dosage": "20mg",
+      "price": 60,
+      "category": "recovery",
+      "status": "active"
+    },
+    {
+      "name": "HMG",
+      "dosage": "75iu",
+      "price": 65,
+      "category": "sexual",
+      "status": "active"
+    },
+    {
+      "name": "MOTS-C",
+      "dosage": "10mg",
+      "price": 35,
+      "category": "longevity",
+      "status": "active"
+    },
+    {
+      "name": "MOTS-C",
+      "dosage": "40mg",
+      "price": 60,
+      "category": "longevity",
+      "status": "active"
+    },
+    {
+      "name": "PNC-27",
+      "dosage": "10mg",
+      "price": 100,
+      "category": "longevity",
+      "status": "active"
+    },
+    {
+      "name": "RT3 / Cagrilintide Blend",
+      "dosage": "30mg/5mg",
+      "price": 115,
+      "category": "blends",
+      "status": "active",
+      "note": "RT3 30mg · Cagrilintide 5mg"
+    },
+    {
+      "name": "SNAP-8",
+      "dosage": "10mg",
+      "price": 35,
+      "category": "wellness",
+      "status": "active"
+    },
+    {
+      "name": "Sermorelin",
+      "dosage": "10mg",
+      "price": 45,
+      "category": "growth",
+      "status": "active"
+    },
+    {
+      "name": "Super Shred",
+      "dosage": "10ml",
+      "price": 60,
+      "category": "metabolic",
+      "status": "active"
     }
   ]
 }
