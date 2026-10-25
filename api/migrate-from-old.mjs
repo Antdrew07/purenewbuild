@@ -86,6 +86,14 @@ async function main() {
       discount_percent numeric, commission_percent numeric,
       is_active boolean, starts_at timestamp, ends_at timestamp, created_at timestamp
     )`);
+    await pg.unsafe(`ALTER TABLE legacy_loyalty_balances ADD COLUMN IF NOT EXISTS affiliate_code text`);
+    await pg.unsafe(`CREATE TABLE IF NOT EXISTS legacy_affiliate_credit_transactions (
+      legacy_id integer PRIMARY KEY,
+      legacy_user_id integer, email text,
+      legacy_order_id integer, order_number text,
+      type text, amount numeric, balance_after numeric,
+      description text, created_at timestamp
+    )`);
     log("legacy holding tables ready");
   }
 
@@ -93,18 +101,18 @@ async function main() {
   // the result matches the source exactly (never touches the old DB).
   if (!DRY && process.env.MIGRATION_RESET === "1") {
     await pg.unsafe(`TRUNCATE order_items, orders, member_users, contact_messages,
-      legacy_loyalty_balances, legacy_loyalty_transactions, legacy_promo_codes RESTART IDENTITY`);
+      legacy_loyalty_balances, legacy_loyalty_transactions, legacy_promo_codes, legacy_affiliate_credit_transactions RESTART IDENTITY`);
     log("reset: cleared previously migrated rows in NEW db");
   }
 
   // ---- prefetch lookups ----
-  const oldUsers = await q("SELECT id, email, passwordHash, name, createdAt, pointsBalance, pointsLifetime FROM users");
+  const oldUsers = await q("SELECT id, email, passwordHash, name, createdAt, pointsBalance, pointsLifetime, affiliateCode FROM users");
   const userEmailById = new Map(oldUsers.map((u) => [u.id, u.email]));
 
   const newProducts = await pg.unsafe(`SELECT id, slug, name FROM products`);
   const productByName = new Map(newProducts.map((p) => [String(p.name).toLowerCase(), p]));
 
-  const counts = { members: 0, loyaltyBal: 0, orders: 0, orderItems: 0, loyaltyTx: 0, promo: 0, contact: 0 };
+  const counts = { members: 0, loyaltyBal: 0, orders: 0, orderItems: 0, loyaltyTx: 0, affiliateCredit: 0, promo: 0, contact: 0 };
 
   // ---- 1. customers -> member_users (+ loyalty balance stash) ----
   for (const u of oldUsers) {
@@ -119,10 +127,10 @@ async function main() {
         [u.email, ph, ageVerified, u.createdAt || new Date()]
       );
       await pg.unsafe(
-        `INSERT INTO legacy_loyalty_balances (legacy_user_id,email,name,points_balance,points_lifetime,created_at)
-         VALUES ($1,$2,$3,$4,$5,$6)
-         ON CONFLICT (legacy_user_id) DO UPDATE SET points_balance=EXCLUDED.points_balance, points_lifetime=EXCLUDED.points_lifetime`,
-        [u.id, u.email, u.name || null, u.pointsBalance || 0, u.pointsLifetime || 0, u.createdAt || null]
+        `INSERT INTO legacy_loyalty_balances (legacy_user_id,email,name,points_balance,points_lifetime,created_at,affiliate_code)
+         VALUES ($1,$2,$3,$4,$5,$6,$7)
+         ON CONFLICT (legacy_user_id) DO UPDATE SET points_balance=EXCLUDED.points_balance, points_lifetime=EXCLUDED.points_lifetime, affiliate_code=EXCLUDED.affiliate_code`,
+        [u.id, u.email, u.name || null, u.pointsBalance || 0, u.pointsLifetime || 0, u.createdAt || null, u.affiliateCode || null]
       );
     }
     counts.members++;
@@ -143,6 +151,10 @@ async function main() {
     if (o.trackingCarrier) noteBits.push(`carrier ${o.trackingCarrier}`);
     if (o.shippingMethod && o.shippingMethod !== "standard") noteBits.push(`ship ${o.shippingMethod}`);
     if (o.status && !["pending_payment", "shipped", "cancelled"].includes(o.status)) noteBits.push(`orig status ${o.status}`);
+    const rawPm = String(o.paymentMethod || "venmo").toLowerCase();
+    const pm = rawPm === "cashapp" ? "cashapp" : "venmo";
+    if (rawPm !== "venmo" && rawPm !== "cashapp") noteBits.push(`paid via ${rawPm}`);
+    if (o.paypalOrderId) noteBits.push(`paypal ${o.paypalOrderId}`);
     const adminNote = noteBits.join(" · ");
     const paid = status === "paid" || status === "shipped";
     const params = [
@@ -160,7 +172,7 @@ async function main() {
       centsOf(o.shippingCost),
       centsOf(o.total),
       status,
-      "venmo",
+      pm,
       o.notes || null,
       adminNote,
       o.shippoTransactionId || null,
@@ -237,6 +249,21 @@ async function main() {
   }
   log(`loyalty transactions (stashed): ${counts.loyaltyTx}`);
 
+  // ---- 4b. affiliate store-credit ledger (stash) ----
+  const oldCredits = await q("SELECT * FROM affiliate_credit_transactions").catch(() => []);
+  for (const t of oldCredits) {
+    if (!DRY) {
+      await pg.unsafe(
+        `INSERT INTO legacy_affiliate_credit_transactions (legacy_id,legacy_user_id,email,legacy_order_id,order_number,type,amount,balance_after,description,created_at)
+         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
+         ON CONFLICT (legacy_id) DO NOTHING`,
+        [t.id, t.userId, userEmailById.get(t.userId) || null, t.orderId || null, t.orderId ? orderNumberByOldId.get(t.orderId) || null : null, t.type, t.amount, t.balanceAfter, t.description, t.createdAt || null]
+      );
+    }
+    counts.affiliateCredit++;
+  }
+  log(`affiliate credit transactions (stashed): ${counts.affiliateCredit}`);
+
   // ---- 5. promo / affiliate codes (stash) ----
   const oldPromos = await q("SELECT * FROM promo_codes").catch(() => []);
   for (const p of oldPromos) {
@@ -278,6 +305,7 @@ async function main() {
     log(`  legacy_loyalty_balances:   ${await rb("legacy_loyalty_balances")}`);
     log(`  legacy_loyalty_transactions: ${await rb("legacy_loyalty_transactions")}`);
     log(`  legacy_promo_codes:        ${await rb("legacy_promo_codes")}`);
+    log(`  legacy_affiliate_credit_tx: ${await rb("legacy_affiliate_credit_transactions")}`);
   }
 
   await src.end();
