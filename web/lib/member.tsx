@@ -1,9 +1,10 @@
 "use client";
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
+import { setToken as setAdminToken } from "./admin-client";
 
-export type Member = { id: number; email: string };
-type MemberSession = { token: string; member: Member };
+export type Member = { id: number; email: string; isAdmin?: boolean };
+type MemberSession = { token: string; member: Member; adminToken?: string };
 
 type MemberContextValue = {
   member: Member | null;
@@ -36,7 +37,11 @@ export function MemberProvider({ children }: { children: ReactNode }) {
     try {
       const raw = window.localStorage.getItem(STORAGE_KEY);
       const parsed = raw ? JSON.parse(raw) : null;
-      if (validSession(parsed)) setSession(parsed);
+      if (validSession(parsed)) {
+        setSession(parsed);
+        // An admin who signed in at the gate keeps dashboard access in new tabs too.
+        if (parsed.adminToken) setAdminToken(parsed.adminToken);
+      }
       else window.localStorage.removeItem(STORAGE_KEY);
     } catch {
       window.localStorage.removeItem(STORAGE_KEY);
@@ -47,11 +52,13 @@ export function MemberProvider({ children }: { children: ReactNode }) {
 
   const signIn = useCallback((next: MemberSession) => {
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+    setAdminToken(next.adminToken ?? null);
     setSession(next);
   }, []);
 
   const signOut = useCallback(() => {
     window.localStorage.removeItem(STORAGE_KEY);
+    setAdminToken(null);
     setSession(null);
   }, []);
 

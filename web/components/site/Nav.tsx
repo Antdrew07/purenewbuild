@@ -8,6 +8,7 @@ import { useEffect, useState } from "react";
 import { CartLink } from "@/components/cart/CartLink";
 import { ThemeToggle } from "./ThemeToggle";
 import { MemberControl } from "./MemberControl";
+import { useMember } from "@/lib/member";
 import { EASE } from "@/lib/motion";
 
 const LINKS = [
@@ -19,6 +20,8 @@ const LINKS = [
 
 export function Nav() {
   const pathname = usePathname();
+  const { member } = useMember();
+  const links = member?.isAdmin ? [...LINKS, { href: "/admin", label: "Admin" }] : LINKS;
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [hovered, setHovered] = useState<string | null>(null);
@@ -37,7 +40,7 @@ export function Nav() {
     return () => { document.body.style.overflow = ""; };
   }, [open]);
 
-  const activeHref = LINKS.find((l) => (l.href === "/" ? pathname === "/" : pathname.startsWith(l.href)))?.href ?? null;
+  const activeHref = links.find((l) => (l.href === "/" ? pathname === "/" : pathname.startsWith(l.href)))?.href ?? null;
   const underlineHref = hovered ?? activeHref;
 
   return (
@@ -66,7 +69,7 @@ export function Nav() {
         </Link>
 
         <div className="hidden items-center gap-1 md:flex" onPointerLeave={() => setHovered(null)}>
-          {LINKS.map((l) => {
+          {links.map((l) => {
             const active = l.href === activeHref;
             return (
               <Link
@@ -125,7 +128,7 @@ export function Nav() {
             className="border-t border-border-hair bg-bg-base/97 shadow-2xl shadow-black/50 backdrop-blur-xl md:hidden"
           >
             <div className="space-y-1 px-5 py-6">
-              {LINKS.map((l, i) => (
+              {links.map((l, i) => (
                 <motion.div
                   key={l.href}
                   initial={{ opacity: 0, x: -14 }}

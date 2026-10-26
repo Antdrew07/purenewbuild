@@ -4,7 +4,7 @@ import rateLimit from "express-rate-limit";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
 import { db, schema } from "../db/index.js";
-import { signMemberToken } from "../middleware/auth.js";
+import { signAdminToken, signMemberToken } from "../middleware/auth.js";
 import { asyncHandler, HttpError } from "../middleware/error.js";
 import { validateBody } from "../middleware/validate.js";
 import { verifyTurnstile } from "../lib/turnstile.js";
@@ -108,6 +108,13 @@ membersRouter.post(
     const adminValid = await bcrypt.compare(body.password, admin?.passwordHash ?? DUMMY_HASH);
     if (!admin || !adminValid) throw new HttpError(401, "Invalid email or password");
 
-    res.json({ data: sessionFor(admin) });
+    // One sign-in opens both doors: the storefront session plus a dashboard token.
+    res.json({
+      data: {
+        ...sessionFor(admin),
+        member: { id: admin.id, email: admin.email, isAdmin: true },
+        adminToken: signAdminToken({ sub: String(admin.id), email: admin.email }),
+      },
+    });
   }),
 );

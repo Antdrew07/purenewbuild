@@ -14,7 +14,21 @@ export const adminApiConfigured = Boolean(API_URL);
 
 export function getToken(): string | null {
   if (typeof window === "undefined") return null;
-  return window.sessionStorage.getItem(TOKEN_KEY);
+  const own = window.sessionStorage.getItem(TOKEN_KEY);
+  if (own) return own;
+  // An admin who signed in at the member gate carries a dashboard token in
+  // that (persistent) session, so a fresh tab opens the dashboard directly.
+  try {
+    const raw = window.localStorage.getItem("pp_member_session_v1");
+    const fromGate = raw ? (JSON.parse(raw) as { adminToken?: string }).adminToken : undefined;
+    if (fromGate) {
+      window.sessionStorage.setItem(TOKEN_KEY, fromGate);
+      return fromGate;
+    }
+  } catch {
+    /* unreadable session — fall through to signed-out */
+  }
+  return null;
 }
 
 export function setToken(token: string | null) {
