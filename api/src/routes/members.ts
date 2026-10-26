@@ -91,13 +91,23 @@ membersRouter.post(
       action: "member_login",
     });
 
+    // Compare a dummy hash when missing so account existence is not exposed by timing.
+    const DUMMY_HASH = "$2a$10$invalidinvalidinvalidinvalidinvalidinvalidinvalidinvalidin";
+
     const rows = await db.select().from(schema.memberUsers).where(eq(schema.memberUsers.email, body.email)).limit(1);
     const user = rows[0];
-    // Compare a dummy hash when missing so account existence is not exposed by timing.
-    const hash = user?.passwordHash ?? "$2a$10$invalidinvalidinvalidinvalidinvalidinvalidinvalidinvalidin";
-    const valid = await bcrypt.compare(body.password, hash);
-    if (!user || !valid) throw new HttpError(401, "Invalid email or password");
+    const valid = await bcrypt.compare(body.password, user?.passwordHash ?? DUMMY_HASH);
+    if (user && valid) {
+      res.json({ data: sessionFor(user) });
+      return;
+    }
 
-    res.json({ data: sessionFor(user) });
+    // Admin credentials open the member gate too, so the owner signs in once, not twice.
+    const admins = await db.select().from(schema.adminUsers).where(eq(schema.adminUsers.email, body.email)).limit(1);
+    const admin = admins[0];
+    const adminValid = await bcrypt.compare(body.password, admin?.passwordHash ?? DUMMY_HASH);
+    if (!admin || !adminValid) throw new HttpError(401, "Invalid email or password");
+
+    res.json({ data: sessionFor(admin) });
   }),
 );

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { PasswordField } from "@/components/ui/PasswordField";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/Button";
 import { adminApi, adminApiConfigured, setToken } from "@/lib/admin-client";
@@ -61,9 +62,8 @@ export function LoginForm({ onSignedIn }: { onSignedIn: (email: string) => void 
               <label htmlFor="admin-password" className="mb-1.5 block font-mono text-[10px] uppercase tracking-widest text-text-dim">
                 Password
               </label>
-              <input
+              <PasswordField
                 id="admin-password"
-                type="password"
                 required
                 autoComplete="current-password"
                 value={password}
