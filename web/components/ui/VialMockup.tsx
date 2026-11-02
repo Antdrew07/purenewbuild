@@ -27,8 +27,6 @@ const LABEL_ALIASES: [RegExp, string][] = [
   [/\bReta\b/gi, "RT3"],
   [/\bTirzepatide\b/gi, "TR3"],
   [/\bTirz\b/gi, "TR3"],
-  // Blends carry their tagline as a second label line ("\n" splits lines in the box).
-  [/^Inferno X$/i, "Inferno X\nAdvanced Fat Burner Blend"],
 ];
 
 export function vialLabelName(name: string): string {
@@ -63,15 +61,6 @@ interface TextLayout {
  * fits, otherwise name and dosage stacked.
  */
 function layoutTitle(name: string, dosage?: string | null): TextLayout {
-  // A name with explicit line breaks is laid out line by line: first line
-  // large, the rest smaller, dosage last.
-  if (name.includes("\n")) {
-    const [first, ...rest] = name.split("\n").map((l) => l.trim().toUpperCase()).filter(Boolean);
-    const lines = [{ text: first, size: Math.max(fitSize(first, 32), 15) }];
-    for (const r of rest) lines.push({ text: r, size: Math.max(fitSize(r, 20), 13) });
-    if (dosage) lines.push({ text: dosage.toUpperCase(), size: Math.max(fitSize(dosage.toUpperCase(), 20), 13) });
-    return { lines };
-  }
   const one = [name, dosage].filter(Boolean).join(" ").toUpperCase();
   const oneSize = fitSize(one, 46);
   if (oneSize >= 27 || !dosage) {
@@ -119,7 +108,7 @@ export function VialMockup({ name, dosage, className = "", style, priority }: Vi
         viewBox={`0 0 ${IMG_W} ${IMG_H}`}
         className="pointer-events-none absolute inset-0 h-full w-full"
         role="img"
-        aria-label={`${printed.replace(/\n/g, " ")}${dosage ? ` ${dosage}` : ""} research vial`}
+        aria-label={`${printed}${dosage ? ` ${dosage}` : ""} research vial`}
       >
         {/* Product title in the label's white box */}
         {lines.map((l) => {
