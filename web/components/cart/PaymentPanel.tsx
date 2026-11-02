@@ -81,12 +81,27 @@ export function PaymentPanel({ order }: { order: PlacedOrder }) {
             </li>
           ))}
         </ul>
-        {order.discountCents ? (
-          <p className="mt-2 flex justify-between border-t border-border-hair pt-2 text-sm">
-            <span className="text-emerald-600">Promo {order.promoCode}</span>
-            <span className="tabular-nums text-emerald-600">−{formatCents(order.discountCents)}</span>
+        <div className="mt-2 space-y-1 border-t border-border-hair pt-2 text-sm">
+          {order.discountCents ? (
+            <p className="flex justify-between">
+              <span className="text-emerald-600">Promo {order.promoCode}</span>
+              <span className="tabular-nums text-emerald-600">−{formatCents(order.discountCents)}</span>
+            </p>
+          ) : null}
+          {order.pointsDiscountCents ? (
+            <p className="flex justify-between">
+              <span className="text-violet-600">Loyalty points</span>
+              <span className="tabular-nums text-violet-600">−{formatCents(order.pointsDiscountCents)}</span>
+            </p>
+          ) : null}
+          <p className="flex justify-between">
+            <span className="text-text-secondary">Shipping{order.shippingMethod === "next_day" ? " (next-day)" : ""}</span>
+            <span className="tabular-nums text-text-primary">{order.shippingCents > 0 ? formatCents(order.shippingCents) : "Free"}</span>
           </p>
-        ) : null}
+          {order.pointsEarned ? (
+            <p className="text-[11px] font-semibold text-emerald-700">+{order.pointsEarned} loyalty points earned on this order</p>
+          ) : null}
+        </div>
 
         <div className="mt-6 space-y-3">
           <a

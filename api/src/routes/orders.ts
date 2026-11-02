@@ -9,6 +9,7 @@ import { requireMember } from "../middleware/auth.js";
 import { priceCart, reserveOrderNumber, paymentLinks, money } from "../lib/orders.js";
 import { sendOrderPlaced, sendOwnerNewOrder } from "../lib/email.js";
 import { discountCentsFor, findActivePromo } from "../lib/promo.js";
+import { getLoyaltyBalance, movePoints, pointsEarnedFor } from "../lib/loyalty.js";
 
 export const ordersRouter = Router();
 
@@ -33,6 +34,8 @@ const PlaceBody = z.object({
   country: z.string().trim().length(2).default("US"),
   customerNote: z.string().trim().max(2000).optional(),
   promoCode: z.string().trim().max(64).optional(),
+  shippingMethod: z.enum(["standard", "next_day"]).default("standard"),
+  redeemPoints: z.number().int().min(0).max(10_000_000).optional(),
   // Only slug + quantity is accepted. Prices are always looked up server-side.
   items: z
     .array(z.object({ slug: z.string().trim().min(1).max(200), quantity: z.number().int().min(1).max(99) }))
@@ -53,7 +56,7 @@ ordersRouter.post(
     if (req.member?.email !== b.email) {
       throw new HttpError(403, "Use the email address associated with your member account");
     }
-    const priced = await priceCart(b.items);
+    const priced = await priceCart(b.items, b.shippingMethod);
 
     // Promo codes are validated here, never trusted from the client; the
     // discount comes off the subtotal exactly as the previous store did.
@@ -65,7 +68,18 @@ ordersRouter.post(
       promo = { code: found.code, discountPercent: found.discountPercent };
     }
     const discountCents = promo ? discountCentsFor(priced.subtotalCents, promo.discountPercent) : 0;
-    const totalCents = priced.subtotalCents - discountCents + priced.shippingCents;
+    const afterPromoCents = priced.subtotalCents - discountCents + priced.shippingCents;
+
+    // Loyalty points: 1 point = 1¢, capped at the balance and at the amount due.
+    let pointsRedeemed = 0;
+    if (b.redeemPoints && b.redeemPoints > 0) {
+      if (!db) throw new HttpError(503, "Loyalty points require a configured database");
+      const { balance } = await getLoyaltyBalance(db, b.email);
+      pointsRedeemed = Math.max(0, Math.min(b.redeemPoints, balance, afterPromoCents));
+    }
+    const pointsDiscountCents = pointsRedeemed;
+    const totalCents = Math.max(0, afterPromoCents - pointsDiscountCents);
+    const pointsEarned = pointsEarnedFor(totalCents);
 
     const orderNumber = await reserveOrderNumber();
 
@@ -89,6 +103,10 @@ ordersRouter.post(
           totalCents,
           promoCode: promo?.code ?? null,
           discountCents,
+          shippingMethod: b.shippingMethod,
+          pointsRedeemed,
+          pointsDiscountCents,
+          pointsEarned,
           customerNote: b.customerNote ?? null,
         })
         .returning({ id: schema.orders.id });
@@ -106,6 +124,14 @@ ordersRouter.post(
           lineTotalCents: i.lineTotalCents,
         })),
       );
+
+      // Points move at placement, as before: redeemed ones leave now, earned ones land now.
+      if (pointsRedeemed > 0) {
+        await movePoints(db, { email: b.email, orderNumber, type: "redeem", points: -pointsRedeemed, description: `Redeemed on order ${orderNumber}` });
+      }
+      if (pointsEarned > 0) {
+        await movePoints(db, { email: b.email, orderNumber, type: "earn", points: pointsEarned, description: `Earned on order ${orderNumber}` });
+      }
     }
 
     const emailData = {
@@ -115,6 +141,9 @@ ordersRouter.post(
       totalCents,
       discountCents,
       promoCode: promo?.code ?? null,
+      shippingCents: priced.shippingCents,
+      shippingMethod: b.shippingMethod,
+      pointsDiscountCents,
       items: priced.items,
     };
     // Never let a mail failure fail the order — the customer already owes us money.
@@ -129,8 +158,12 @@ ordersRouter.post(
         status: "awaiting_payment",
         subtotalCents: priced.subtotalCents,
         shippingCents: priced.shippingCents,
+        shippingMethod: b.shippingMethod,
         promoCode: promo?.code ?? null,
         discountCents,
+        pointsRedeemed,
+        pointsDiscountCents,
+        pointsEarned,
         totalCents,
         totalFormatted: money(totalCents),
         items: priced.items,
@@ -176,6 +209,11 @@ ordersRouter.get(
         status: o.status,
         promoCode: o.promoCode,
         discountCents: o.discountCents,
+        shippingMethod: o.shippingMethod,
+        shippingCents: o.shippingCents,
+        pointsRedeemed: o.pointsRedeemed,
+        pointsDiscountCents: o.pointsDiscountCents,
+        pointsEarned: o.pointsEarned,
         totalCents: o.totalCents,
         totalFormatted: money(o.totalCents),
         trackingNumber: o.trackingNumber,
@@ -219,6 +257,10 @@ ordersRouter.get(
         status: order.status,
         promoCode: order.promoCode,
         discountCents: order.discountCents,
+        shippingMethod: order.shippingMethod,
+        shippingCents: order.shippingCents,
+        pointsRedeemed: order.pointsRedeemed,
+        pointsDiscountCents: order.pointsDiscountCents,
         totalCents: order.totalCents,
         totalFormatted: money(order.totalCents),
         trackingNumber: order.trackingNumber,

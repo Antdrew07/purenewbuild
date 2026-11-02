@@ -22,6 +22,15 @@ export default function ShippingPage() {
       </section>
 
       <section>
+        <h2>Rates</h2>
+        <ul>
+          <li>Standard shipping (2–5 business days) — $15, free on orders of $200 or more</li>
+          <li>Next-day shipping — $65 flat, order by 2pm ET</li>
+        </ul>
+        <p>The free-shipping threshold is based on the order subtotal before discounts.</p>
+      </section>
+
+      <section>
         <h2>Packaging</h2>
         <p>
           Lyophilised material is shipped in sealed vials, cushioned, and

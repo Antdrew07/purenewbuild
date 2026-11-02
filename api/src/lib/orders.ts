@@ -21,8 +21,17 @@ export function generateOrderNumber(): string {
   return `PP-${out}`;
 }
 
-/** Free shipping is the standing offer; the column exists so it can change. */
-export const SHIPPING_CENTS = 0;
+export type ShippingMethod = "standard" | "next_day";
+
+/** Standard is $15, free from $200 (before discounts); next-day is a flat $65. Same rules as the previous store. */
+export const FREE_SHIPPING_FROM_CENTS = 20_000;
+export const STANDARD_SHIPPING_CENTS = 1_500;
+export const NEXT_DAY_SHIPPING_CENTS = 6_500;
+
+export function shippingCentsFor(subtotalCents: number, method: ShippingMethod = "standard"): number {
+  if (method === "next_day") return NEXT_DAY_SHIPPING_CENTS;
+  return subtotalCents >= FREE_SHIPPING_FROM_CENTS ? 0 : STANDARD_SHIPPING_CENTS;
+}
 
 export interface CartLine {
   slug: string;
@@ -46,7 +55,7 @@ export interface PricedLine {
  * how storefronts get bought for a penny, so the unit price is always looked up
  * here and the totals are derived from the lookup.
  */
-export async function priceCart(lines: CartLine[]): Promise<{
+export async function priceCart(lines: CartLine[], shippingMethod: ShippingMethod = "standard"): Promise<{
   items: PricedLine[];
   subtotalCents: number;
   shippingCents: number;
@@ -113,7 +122,7 @@ export async function priceCart(lines: CartLine[]): Promise<{
   }
 
   const subtotalCents = items.reduce((a, i) => a + i.lineTotalCents, 0);
-  const shippingCents = SHIPPING_CENTS;
+  const shippingCents = shippingCentsFor(subtotalCents, shippingMethod);
   return { items, subtotalCents, shippingCents, totalCents: subtotalCents + shippingCents };
 }
 

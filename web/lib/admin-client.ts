@@ -116,6 +116,9 @@ export interface AdminOrder {
   status: "awaiting_payment" | "paid" | "shipped" | "cancelled";
   promoCode?: string | null;
   discountCents?: number;
+  shippingMethod?: string;
+  shippingCents?: number;
+  pointsDiscountCents?: number;
   totalCents: number;
   totalFormatted: string;
   trackingNumber: string | null;

@@ -60,6 +60,9 @@ export interface OrderEmailData {
   totalCents: number;
   discountCents?: number;
   promoCode?: string | null;
+  shippingCents?: number;
+  shippingMethod?: string;
+  pointsDiscountCents?: number;
   items: { name: string; dosage: string; quantity: number; lineTotalCents: number }[];
 }
 
@@ -90,6 +93,14 @@ export async function sendOrderPlaced(o: OrderEmailData): Promise<boolean> {
       o.discountCents && o.discountCents > 0
         ? `<tr><td style="padding:6px 0;color:#047857;">Promo ${o.promoCode ?? ""}</td><td style="padding:6px 0;text-align:right;color:#047857;font-weight:600;">−${money(o.discountCents)}</td></tr>`
         : ""
+    }${
+      o.pointsDiscountCents && o.pointsDiscountCents > 0
+        ? `<tr><td style="padding:6px 0;color:#6d28d9;">Loyalty points</td><td style="padding:6px 0;text-align:right;color:#6d28d9;font-weight:600;">−${money(o.pointsDiscountCents)}</td></tr>`
+        : ""
+    }${
+      o.shippingCents !== undefined
+        ? `<tr><td style="padding:6px 0;color:#374151;">Shipping${o.shippingMethod === "next_day" ? " (next-day)" : ""}</td><td style="padding:6px 0;text-align:right;color:#111827;font-weight:600;">${o.shippingCents > 0 ? money(o.shippingCents) : "Free"}</td></tr>`
+        : ""
     }</table>
     <table style="width:100%;border-collapse:collapse;font-size:16px;border-top:1px solid #e5e7eb;">
       <tr><td style="padding:10px 0;font-weight:700;color:#111827;">Total to send</td>
@@ -118,6 +129,8 @@ export async function sendOrderPlaced(o: OrderEmailData): Promise<boolean> {
     `Cash App: ${pay.cashapp}\nVenmo: ${pay.venmo}\n\n` +
     o.items.map((i) => `  ${i.name}${i.dosage ? ` ${i.dosage}` : ""} x${i.quantity}  ${money(i.lineTotalCents)}`).join("\n") +
     (o.discountCents && o.discountCents > 0 ? `\n  Promo ${o.promoCode ?? ""}  -${money(o.discountCents)}` : "") +
+    (o.pointsDiscountCents && o.pointsDiscountCents > 0 ? `\n  Loyalty points  -${money(o.pointsDiscountCents)}` : "") +
+    (o.shippingCents !== undefined ? `\n  Shipping${o.shippingMethod === "next_day" ? " (next-day)" : ""}  ${o.shippingCents > 0 ? money(o.shippingCents) : "Free"}` : "") +
     `\n\nOnce we verify the transfer we will approve the order and email your tracking number.\n` +
     `Research use only — not for human consumption.`;
 
