@@ -174,3 +174,22 @@ export async function sendOwnerNewOrder(o: OrderEmailData): Promise<boolean> {
     text: `New order ${o.orderNumber} — ${money(o.totalCents)}\n${o.name} <${o.email}>\n\n${lines}\n`,
   });
 }
+
+/** Single-use reset link. Sent only when the address has an account; the API
+ *  answers the same either way so addresses cannot be enumerated. */
+export async function sendPasswordReset(o: { email: string; resetUrl: string }): Promise<boolean> {
+  const html = shell(`
+    <p style="margin:0 0 6px;color:#111827;font-size:18px;font-weight:700;">Reset your password</p>
+    <p style="margin:0 0 20px;color:#4b5563;line-height:1.6;">
+      Someone asked to reset the password for this Pure Peptide account. The link below works once and expires in one hour.
+    </p>
+    <a href="${o.resetUrl}" style="display:inline-block;background:#000;color:#fff;text-decoration:none;padding:14px 22px;border-radius:10px;font-weight:700;">Choose a new password</a>
+    <p style="margin:22px 0 0;color:#6b7280;font-size:13px;line-height:1.6;">
+      If you did not request this, you can ignore this email — your password will not change.
+    </p>
+  `);
+  const text =
+    `Reset your Pure Peptide password (the link works once and expires in one hour):\n${o.resetUrl}\n\n` +
+    `If you did not request this, ignore this email — your password will not change.`;
+  return send({ to: [o.email], subject: "Reset your Pure Peptide password", html, text });
+}

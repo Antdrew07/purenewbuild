@@ -13,9 +13,9 @@ import { TurnstileField } from "./TurnstileField";
 import { StarDivider } from "@/components/ui/Chrome";
 import { useMember } from "@/lib/member";
 import { getToken as getAdminToken } from "@/lib/admin-client";
-import { membersApiConfigured, registerMember, signInMember, turnstileConfigured, MemberAuthError } from "@/lib/members-client";
+import { membersApiConfigured, registerMember, signInMember, forgotPassword, resetPassword, turnstileConfigured, MemberAuthError } from "@/lib/members-client";
 
-type Mode = "register" | "login";
+type Mode = "register" | "login" | "forgot" | "reset";
 
 /**
  * A signed-in admin satisfies the gate too, so operations staff never need a
@@ -65,6 +65,18 @@ export function MemberAccessGate({ children }: { children: ReactNode }) {
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState("");
+  const [notice, setNotice] = useState("");
+  const [resetToken, setResetToken] = useState<string | null>(null);
+
+  // A reset link lands on the storefront as ?reset=TOKEN. Pick it up once and
+  // scrub it from the address bar so it cannot be re-used or shared by accident.
+  useEffect(() => {
+    const token = new URLSearchParams(window.location.search).get("reset");
+    if (!token) return;
+    setResetToken(token);
+    setMode("reset");
+    window.history.replaceState(null, "", window.location.pathname);
+  }, []);
 
   const reduceMotion = useReducedMotion();
 
@@ -80,6 +92,7 @@ export function MemberAccessGate({ children }: { children: ReactNode }) {
   function changeMode(next: Mode) {
     setMode(next);
     setError("");
+    setNotice("");
     setTurnstileToken(null);
   }
 
@@ -94,17 +107,28 @@ export function MemberAccessGate({ children }: { children: ReactNode }) {
       setError("Passwords do not match.");
       return;
     }
-    if (!turnstileToken) {
+    if (mode === "reset" && password !== confirmation) {
+      setError("Passwords do not match.");
+      return;
+    }
+    if (mode !== "reset" && !turnstileToken) {
       setError(turnstileConfigured ? "Complete bot verification before continuing." : "Bot verification is being configured. Please return shortly.");
       return;
     }
 
     setPending(true);
     try {
-      const session = mode === "register"
-        ? await registerMember({ email, password, turnstileToken })
-        : await signInMember({ email, password, turnstileToken });
-      signIn(session);
+      if (mode === "forgot") {
+        await forgotPassword({ email, turnstileToken: turnstileToken ?? "" });
+        setNotice("If an account exists for that email, a reset link is on its way. It expires in one hour.");
+      } else if (mode === "reset") {
+        signIn(await resetPassword({ token: resetToken ?? "", password }));
+      } else {
+        const session = mode === "register"
+          ? await registerMember({ email, password, turnstileToken: turnstileToken ?? "" })
+          : await signInMember({ email, password, turnstileToken: turnstileToken ?? "" });
+        signIn(session);
+      }
     } catch (cause) {
       setError(cause instanceof MemberAuthError ? cause.message : "Could not complete member access.");
     } finally {
@@ -119,7 +143,11 @@ export function MemberAccessGate({ children }: { children: ReactNode }) {
   if (member || adminActive || onAdminRoute || ["/terms", "/privacy", "/shipping"].includes(pathname)) return <>{children}</>;
 
   const unavailable = !membersApiConfigured || !turnstileConfigured;
-  const title = mode === "register" ? "Join the research portal" : "Member sign in";
+  const title =
+    mode === "register" ? "Join the research portal"
+    : mode === "forgot" ? "Reset your password"
+    : mode === "reset" ? "Choose a new password"
+    : "Member sign in";
 
   return (
     <main className="member-gate" aria-labelledby="member-gate-title">
@@ -191,33 +219,50 @@ export function MemberAccessGate({ children }: { children: ReactNode }) {
           )}
 
           <form onSubmit={submit} className="mt-4 space-y-3.5" noValidate>
-            <label className="block">
-              <span className="member-gate__label">Email address</span>
-              <input type="email" autoComplete="email" value={email} onChange={(event) => setEmail(event.target.value)} required className="member-gate__input" />
-            </label>
-            <label className="block">
-              <span className="member-gate__label">Password</span>
-              <PasswordField autoComplete={mode === "register" ? "new-password" : "current-password"} value={password} onChange={(event) => setPassword(event.target.value)} minLength={12} required className="member-gate__input" />
-              {mode === "register" && <span className="mt-1 block text-xs text-text-dim">Use 12 or more characters.</span>}
-            </label>
+            {mode !== "reset" && (
+              <label className="block">
+                <span className="member-gate__label">Email address</span>
+                <input type="email" autoComplete="email" value={email} onChange={(event) => setEmail(event.target.value)} required className="member-gate__input" />
+              </label>
+            )}
+            {mode !== "forgot" && (
+              <label className="block">
+                <span className="member-gate__label">{mode === "reset" ? "New password" : "Password"}</span>
+                <PasswordField autoComplete={mode === "login" ? "current-password" : "new-password"} value={password} onChange={(event) => setPassword(event.target.value)} minLength={12} required className="member-gate__input" />
+                {mode !== "login" && <span className="mt-1 block text-xs text-text-dim">Use 12 or more characters.</span>}
+              </label>
+            )}
+            {mode === "login" && (
+              <button type="button" onClick={() => changeMode("forgot")} className="block py-2 text-xs text-text-secondary underline underline-offset-2 transition-colors hover:text-red">
+                Forgot your password?
+              </button>
+            )}
+            {(mode === "register" || mode === "reset") && (
+              <label className="block">
+                <span className="member-gate__label">Confirm password</span>
+                <PasswordField autoComplete="new-password" value={confirmation} onChange={(event) => setConfirmation(event.target.value)} minLength={12} required className="member-gate__input" />
+              </label>
+            )}
             {mode === "register" && (
-              <>
-                <label className="block">
-                  <span className="member-gate__label">Confirm password</span>
-                  <PasswordField autoComplete="new-password" value={confirmation} onChange={(event) => setConfirmation(event.target.value)} minLength={12} required className="member-gate__input" />
-                </label>
-                <label className="member-gate__check">
-                  <input type="checkbox" checked={ageConfirmed} onChange={(event) => setAgeConfirmed(event.target.checked)} />
-                  <span>I am at least 18 years old and understand that all products are for laboratory research use only and are not for human or animal consumption.</span>
-                </label>
-              </>
+              <label className="member-gate__check">
+                <input type="checkbox" checked={ageConfirmed} onChange={(event) => setAgeConfirmed(event.target.checked)} />
+                <span>I am at least 18 years old and understand that all products are for laboratory research use only and are not for human or animal consumption.</span>
+              </label>
             )}
 
-            <TurnstileField action={mode === "register" ? "member_register" : "member_login"} onToken={onTurnstileToken} disabled={pending || unavailable} />
+            {mode !== "reset" && (
+              <TurnstileField action={mode === "register" ? "member_register" : mode === "forgot" ? "member_forgot" : "member_login"} onToken={onTurnstileToken} disabled={pending || unavailable} />
+            )}
+            {notice && <p role="status" className="member-gate__status">{notice}</p>}
             {error && <p role="alert" className="member-gate__error">{error}</p>}
             <button type="submit" disabled={pending || unavailable} className="member-gate__submit brand-button">
-              {pending ? "Verifying…" : mode === "register" ? "Create account and enter" : "Sign in and enter"}
+              {pending ? "Verifying…" : mode === "register" ? "Create account and enter" : mode === "forgot" ? "Email me a reset link" : mode === "reset" ? "Set new password and enter" : "Sign in and enter"}
             </button>
+            {(mode === "forgot" || mode === "reset") && (
+              <button type="button" onClick={() => changeMode("login")} className="block w-full py-2.5 text-center text-xs text-text-secondary underline underline-offset-2 transition-colors hover:text-red">
+                Back to sign in
+              </button>
+            )}
           </form>
 
           <p className="mt-4 text-center text-[11px] leading-relaxed text-text-dim">

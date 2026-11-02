@@ -20,7 +20,7 @@ export function TurnstileField({
   onToken,
   disabled = false,
 }: {
-  action: "member_register" | "member_login";
+  action: "member_register" | "member_login" | "member_forgot";
   onToken: (token: string | null) => void;
   disabled?: boolean;
 }) {

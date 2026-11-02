@@ -68,6 +68,9 @@ export const memberUsers = pgTable("member_users", {
   email: text("email").notNull(),
   passwordHash: text("password_hash").notNull(),
   ageVerifiedAt: timestamp("age_verified_at").notNull(),
+  /** Password reset: single-use token + expiry; null when nothing is pending. */
+  resetToken: text("reset_token"),
+  resetTokenExpiry: timestamp("reset_token_expiry"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 }, (t) => ({
