@@ -80,7 +80,14 @@ async function main() {
       type text, points integer, balance_after integer,
       description text, created_at timestamp
     )`);
-    await pg.unsafe(`ALTER TABLE orders ADD COLUMN IF NOT EXISTS promo_code text, ADD COLUMN IF NOT EXISTS discount_cents integer NOT NULL DEFAULT 0`);
+    await pg.unsafe(`ALTER TABLE orders ADD COLUMN IF NOT EXISTS promo_code text, ADD COLUMN IF NOT EXISTS discount_cents integer NOT NULL DEFAULT 0,
+    ADD COLUMN IF NOT EXISTS shipping_method text NOT NULL DEFAULT 'standard'`);
+  await pg.unsafe(`ALTER TABLE member_users ADD COLUMN IF NOT EXISTS points_balance integer NOT NULL DEFAULT 0,
+    ADD COLUMN IF NOT EXISTS points_lifetime integer NOT NULL DEFAULT 0, ADD COLUMN IF NOT EXISTS points_seeded_at timestamp`);
+  await pg.unsafe(`CREATE TABLE IF NOT EXISTS loyalty_transactions (
+    id serial PRIMARY KEY, legacy_id integer, email text NOT NULL, order_number text, type text NOT NULL,
+    points integer NOT NULL, balance_after integer NOT NULL, description text NOT NULL DEFAULT '', created_at timestamp NOT NULL DEFAULT now())`);
+  await pg.unsafe(`CREATE UNIQUE INDEX IF NOT EXISTS loyalty_tx_legacy_idx ON loyalty_transactions (legacy_id) WHERE legacy_id IS NOT NULL`);
   await pg.unsafe(`CREATE TABLE IF NOT EXISTS legacy_promo_codes (
       legacy_id integer PRIMARY KEY,
       code text, affiliate_name text,
@@ -122,10 +129,11 @@ async function main() {
     const ph = u.passwordHash || "legacy-no-password-reset-required";
     if (!DRY) {
       await pg.unsafe(
-        `INSERT INTO member_users (email, password_hash, age_verified_at, created_at, updated_at)
-         VALUES ($1,$2,$3,$4,$4)
-         ON CONFLICT (email) DO UPDATE SET password_hash=EXCLUDED.password_hash, age_verified_at=EXCLUDED.age_verified_at`,
-        [u.email, ph, ageVerified, u.createdAt || new Date()]
+        `INSERT INTO member_users (email, password_hash, age_verified_at, created_at, updated_at, points_balance, points_lifetime, points_seeded_at)
+         VALUES ($1,$2,$3,$4,$4,$5,$6,now())
+         ON CONFLICT (email) DO UPDATE SET password_hash=EXCLUDED.password_hash, age_verified_at=EXCLUDED.age_verified_at,
+           points_balance=EXCLUDED.points_balance, points_lifetime=EXCLUDED.points_lifetime, points_seeded_at=now()`,
+        [u.email, ph, ageVerified, u.createdAt || new Date(), Number(u.pointsBalance ?? 0), Number(u.pointsLifetime ?? 0)]
       );
       await pg.unsafe(
         `INSERT INTO legacy_loyalty_balances (legacy_user_id,email,name,points_balance,points_lifetime,created_at,affiliate_code)
@@ -189,13 +197,14 @@ async function main() {
       o.updatedAt || o.createdAt || new Date(),
       promoCode,
       discountCents,
+      o.shippingMethod === "next_day" ? "next_day" : "standard",
     ];
     if (!DRY) {
       const rows = await pg.unsafe(
         `INSERT INTO orders (order_number,email,name,phone,address1,address2,city,state,postal_code,country,
            subtotal_cents,shipping_cents,total_cents,status,payment_method,customer_note,admin_note,
-           shippo_transaction_id,tracking_number,tracking_url,label_url,approved_at,approved_by,shipped_at,created_at,updated_at,promo_code,discount_cents)
-         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14::order_status,$15::payment_method,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26,$27,$28)
+           shippo_transaction_id,tracking_number,tracking_url,label_url,approved_at,approved_by,shipped_at,created_at,updated_at,promo_code,discount_cents,shipping_method)
+         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14::order_status,$15::payment_method,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26,$27,$28,$29)
          ON CONFLICT (order_number) DO UPDATE SET
            email=EXCLUDED.email,name=EXCLUDED.name,address1=EXCLUDED.address1,city=EXCLUDED.city,state=EXCLUDED.state,
            postal_code=EXCLUDED.postal_code,country=EXCLUDED.country,subtotal_cents=EXCLUDED.subtotal_cents,
@@ -204,7 +213,7 @@ async function main() {
            shippo_transaction_id=EXCLUDED.shippo_transaction_id,tracking_number=EXCLUDED.tracking_number,
            label_url=EXCLUDED.label_url,approved_at=EXCLUDED.approved_at,approved_by=EXCLUDED.approved_by,
            shipped_at=EXCLUDED.shipped_at,created_at=EXCLUDED.created_at,updated_at=EXCLUDED.updated_at,
-           promo_code=EXCLUDED.promo_code,discount_cents=EXCLUDED.discount_cents
+           promo_code=EXCLUDED.promo_code,discount_cents=EXCLUDED.discount_cents,shipping_method=EXCLUDED.shipping_method
          RETURNING id`,
         params
       );
@@ -250,6 +259,16 @@ async function main() {
          ON CONFLICT (legacy_id) DO NOTHING`,
         [t.id, t.userId, userEmailById.get(t.userId) || null, t.orderId || null, t.orderId ? orderNumberByOldId.get(t.orderId) || null : null, t.type, t.points, t.balanceAfter, t.description, t.createdAt || null]
       );
+      // Live ledger too, so the Account page shows history straight away.
+      const txEmail = userEmailById.get(t.userId);
+      if (txEmail) {
+        await pg.unsafe(
+          `INSERT INTO loyalty_transactions (legacy_id,email,order_number,type,points,balance_after,description,created_at)
+           VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
+           ON CONFLICT (legacy_id) WHERE legacy_id IS NOT NULL DO NOTHING`,
+          [t.id, String(txEmail).toLowerCase(), t.orderId ? orderNumberByOldId.get(t.orderId) || null : null, t.type || "adjustment", Number(t.points ?? 0), Number(t.balanceAfter ?? 0), t.description || "", t.createdAt || new Date()]
+        );
+      }
     }
     counts.loyaltyTx++;
   }
