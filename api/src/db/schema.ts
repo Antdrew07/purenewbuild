@@ -50,6 +50,8 @@ export const contactMessages = pgTable("contact_messages", {
   subject: text("subject").notNull(),
   message: text("message").notNull(),
   handled: boolean("handled").notNull().default(false),
+  adminReply: text("admin_reply"),
+  repliedAt: timestamp("replied_at"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 

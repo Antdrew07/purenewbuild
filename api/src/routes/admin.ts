@@ -6,6 +6,9 @@ import { slugify } from "../lib/catalog.js";
 import { requireAdmin } from "../middleware/auth.js";
 import { asyncHandler, HttpError } from "../middleware/error.js";
 import { validateBody } from "../middleware/validate.js";
+import { sendContactReply } from "../lib/email.js";
+import { normalizeCode } from "../lib/promo.js";
+import { sql } from "drizzle-orm";
 
 export const adminRouter = Router();
 
@@ -129,5 +132,159 @@ adminRouter.get(
     const d = requireDb();
     const rows = await d.select().from(schema.contactMessages).orderBy(desc(schema.contactMessages.createdAt)).limit(200);
     res.json({ data: rows });
+  }),
+);
+
+/** POST /api/admin/messages/:id/read */
+adminRouter.post(
+  "/messages/:id/read",
+  asyncHandler(async (req, res) => {
+    const d = requireDb();
+    const id = Number(req.params.id);
+    const [row] = await d.update(schema.contactMessages).set({ handled: true })
+      .where(eq(schema.contactMessages.id, id)).returning();
+    if (!row) throw new HttpError(404, "Message not found");
+    res.json({ data: row });
+  }),
+);
+
+const ReplyBody = z.object({ replyText: z.string().trim().min(1).max(10_000) });
+
+/** POST /api/admin/messages/:id/reply — emails the customer and records the reply. */
+adminRouter.post(
+  "/messages/:id/reply",
+  validateBody(ReplyBody),
+  asyncHandler(async (req, res) => {
+    const d = requireDb();
+    const id = Number(req.params.id);
+    const { replyText } = req.body as z.infer<typeof ReplyBody>;
+    const [msg] = await d.select().from(schema.contactMessages).where(eq(schema.contactMessages.id, id)).limit(1);
+    if (!msg) throw new HttpError(404, "Message not found");
+    const emailed = await sendContactReply({
+      to: msg.email,
+      customerName: msg.name,
+      originalSubject: msg.subject,
+      originalMessage: msg.message,
+      replyText,
+    });
+    const [row] = await d.update(schema.contactMessages)
+      .set({ adminReply: replyText, repliedAt: new Date(), handled: true })
+      .where(eq(schema.contactMessages.id, id)).returning();
+    res.json({ data: row, meta: { emailed } });
+  }),
+);
+
+/* ─────────────────────────── promo codes / affiliates ─────────────────────────── */
+
+/** GET /api/admin/promos — every code with its order stats and ledger total. */
+adminRouter.get(
+  "/promos",
+  asyncHandler(async (_req, res) => {
+    const d = requireDb();
+    const codes = await d.select().from(schema.promoCodes).orderBy(desc(schema.promoCodes.createdAt));
+    const orders = await d
+      .select({
+        id: schema.orders.id,
+        orderNumber: schema.orders.orderNumber,
+        name: schema.orders.name,
+        promoCode: schema.orders.promoCode,
+        status: schema.orders.status,
+        totalCents: schema.orders.totalCents,
+        discountCents: schema.orders.discountCents,
+        createdAt: schema.orders.createdAt,
+      })
+      .from(schema.orders)
+      .where(sql`${schema.orders.promoCode} IS NOT NULL`)
+      .orderBy(desc(schema.orders.createdAt));
+    const credited = await d
+      .select({ email: schema.affiliateCreditTransactions.email, cents: sql<number>`coalesce(sum(${schema.affiliateCreditTransactions.amountCents}), 0)` })
+      .from(schema.affiliateCreditTransactions)
+      .where(eq(schema.affiliateCreditTransactions.type, "earn"))
+      .groupBy(schema.affiliateCreditTransactions.email);
+    const creditedByEmail = new Map(credited.map((c) => [c.email.toLowerCase(), Number(c.cents)]));
+
+    const data = codes.map((c) => {
+      const mine = orders.filter((o) => o.promoCode === c.code);
+      const live = mine.filter((o) => o.status !== "cancelled");
+      const revenueCents = live.reduce((s, o) => s + o.totalCents, 0);
+      const discountCents = live.reduce((s, o) => s + o.discountCents, 0);
+      return {
+        id: c.id,
+        code: c.code,
+        affiliateName: c.affiliateName,
+        affiliateEmail: c.affiliateEmail,
+        discountPercent: c.discountPercent,
+        commissionPercent: c.commissionPercent,
+        isActive: c.isActive,
+        createdAt: c.createdAt,
+        totalOrders: live.length,
+        revenueCents,
+        discountCents,
+        // Same formula as before: revenue × commission%, over every non-cancelled order.
+        commissionOwedCents: Math.round((revenueCents * c.commissionPercent) / 100),
+        // What the live ledger has actually credited (earned on approval).
+        commissionCreditedCents: c.affiliateEmail ? creditedByEmail.get(c.affiliateEmail.toLowerCase()) ?? 0 : 0,
+        orders: mine.slice(0, 50),
+      };
+    });
+    res.json({ data });
+  }),
+);
+
+const PromoBody = z.object({
+  code: z.string().trim().min(2).max(64),
+  affiliateName: z.string().trim().min(1).max(120),
+  affiliateEmail: z.string().trim().email().max(200).nullable().optional(),
+  discountPercent: z.number().min(0).max(100).default(10),
+  commissionPercent: z.number().min(0).max(100).default(20),
+});
+
+/** POST /api/admin/promos — create, or update an existing code in place. */
+adminRouter.post(
+  "/promos",
+  validateBody(PromoBody),
+  asyncHandler(async (req, res) => {
+    const d = requireDb();
+    const b = req.body as z.infer<typeof PromoBody>;
+    const code = normalizeCode(b.code);
+    if (!code) throw new HttpError(400, "Code is required");
+    const [row] = await d
+      .insert(schema.promoCodes)
+      .values({
+        code,
+        affiliateName: b.affiliateName,
+        affiliateEmail: b.affiliateEmail ? b.affiliateEmail.toLowerCase() : null,
+        discountPercent: b.discountPercent,
+        commissionPercent: b.commissionPercent,
+        isActive: true,
+      })
+      .onConflictDoUpdate({
+        target: schema.promoCodes.code,
+        set: {
+          affiliateName: b.affiliateName,
+          affiliateEmail: b.affiliateEmail ? b.affiliateEmail.toLowerCase() : null,
+          discountPercent: b.discountPercent,
+          commissionPercent: b.commissionPercent,
+          isActive: true,
+        },
+      })
+      .returning();
+    res.status(201).json({ data: row });
+  }),
+);
+
+const PromoToggle = z.object({ isActive: z.boolean() });
+
+/** PATCH /api/admin/promos/:id — enable or disable a code. */
+adminRouter.patch(
+  "/promos/:id",
+  validateBody(PromoToggle),
+  asyncHandler(async (req, res) => {
+    const d = requireDb();
+    const id = Number(req.params.id);
+    const { isActive } = req.body as z.infer<typeof PromoToggle>;
+    const [row] = await d.update(schema.promoCodes).set({ isActive }).where(eq(schema.promoCodes.id, id)).returning();
+    if (!row) throw new HttpError(404, "Promo code not found");
+    res.json({ data: row });
   }),
 );
