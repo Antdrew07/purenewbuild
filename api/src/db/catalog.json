@@ -542,6 +542,13 @@
       "status": "active"
     },
     {
+      "name": "Wolverine Blend",
+      "dosage": "40mg",
+      "price": 40,
+      "category": "blends",
+      "status": "active"
+    },
+    {
       "name": "Ready-Use Pen",
       "dosage": "3 cartridges / 10 needles",
       "price": 65,
@@ -853,6 +860,15 @@
       "category": "blends",
       "status": "active",
       "note": "5-peptide blend, 100mg total: 50mg GHK-Cu, 10mg BPC-157, 10mg TB-500, 10mg KPV, 20mg Cartalax"
+    },
+    {
+      "name": "Blackout X",
+      "dosage": "4ml",
+      "price": 50,
+      "category": "blends",
+      "status": "active",
+      "form": "vial",
+      "note": "Sleep & recovery blend, 4 mL vial: 5mg melatonin, 100mg L-arginine, 100mg L-theanine, 100mg GABA, 50mg histidine"
     },
     {
       "name": "SNAP-8",
