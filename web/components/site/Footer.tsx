@@ -113,6 +113,7 @@ export function Footer() {
             <Link href="/shipping" className="inline-block py-3.5 -my-3.5 transition-colors hover:text-text-secondary">Shipping</Link>
             <Link href="/faq" className="inline-block py-3.5 -my-3.5 transition-colors hover:text-text-secondary">FAQ</Link>
             <Link href="/lab-results" className="inline-block py-3.5 -my-3.5 transition-colors hover:text-text-secondary">Lab Results</Link>
+            <Link href="/track" className="inline-block py-3.5 -my-3.5 transition-colors hover:text-text-secondary">Track order</Link>
           </div>
         </div>
       </div>
