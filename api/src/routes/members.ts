@@ -10,7 +10,7 @@ import { signAdminToken, signMemberToken } from "../middleware/auth.js";
 import { asyncHandler, HttpError } from "../middleware/error.js";
 import { validateBody } from "../middleware/validate.js";
 import { verifyTurnstile } from "../lib/turnstile.js";
-import { sendPasswordReset } from "../lib/email.js";
+import { sendPasswordReset, sendWelcome } from "../lib/email.js";
 import { env } from "../env.js";
 
 export const membersRouter = Router();
@@ -77,6 +77,9 @@ membersRouter.post(
       passwordHash,
       ageVerifiedAt: new Date(),
     }).returning({ id: schema.memberUsers.id, email: schema.memberUsers.email });
+
+    // Fire-and-forget: a mail hiccup must never block the sign-up.
+    void sendWelcome({ email: user.email, siteUrl: env.SITE_URL || env.CORS_ORIGIN[0] || "" }).catch(() => false);
 
     res.status(201).json({ data: sessionFor(user) });
   }),

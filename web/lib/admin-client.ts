@@ -142,6 +142,43 @@ export interface AdminOrderDetail extends AdminOrder {
   items: { id: number; name: string; dosage: string; quantity: number; unitPriceCents: number; lineTotalCents: number }[];
 }
 
+export interface AdminMessage {
+  id: number;
+  name: string;
+  email: string;
+  subject: string;
+  message: string;
+  handled: boolean;
+  adminReply: string | null;
+  repliedAt: string | null;
+  createdAt: string;
+}
+
+export interface PromoInput {
+  code: string;
+  affiliateName: string;
+  affiliateEmail?: string | null;
+  discountPercent: number;
+  commissionPercent: number;
+}
+
+export interface AffiliateStat {
+  id: number;
+  code: string;
+  affiliateName: string;
+  affiliateEmail: string | null;
+  discountPercent: number;
+  commissionPercent: number;
+  isActive: boolean;
+  createdAt: string;
+  totalOrders: number;
+  revenueCents: number;
+  discountCents: number;
+  commissionOwedCents: number;
+  commissionCreditedCents: number;
+  orders: { id: number; orderNumber: string; name: string; status: string; totalCents: number; discountCents: number; createdAt: string }[];
+}
+
 export interface ApproveResult {
   data: { orderNumber: string; status: string; tracking: { number?: string; url?: string; labelUrl?: string } | null };
   meta: { approved: boolean; labelPurchased: boolean; labelError: string | null; emailed: boolean };
@@ -160,10 +197,18 @@ export const adminApi = {
     request<Product>(`/api/admin/products/${id}`, { method: "PATCH", body: JSON.stringify(input) }),
   deleteProduct: (id: number) =>
     request<void>(`/api/admin/products/${id}`, { method: "DELETE" }),
-  listMessages: () =>
-    request<{ id: number; name: string; email: string; subject: string; message: string; createdAt: string }[]>(
-      "/api/admin/messages",
-    ),
+  listMessages: () => request<AdminMessage[]>("/api/admin/messages"),
+  markMessageRead: (id: number) => request<AdminMessage>(`/api/admin/messages/${id}/read`, { method: "POST" }),
+  replyMessage: (id: number, replyText: string) =>
+    requestFull<{ data: AdminMessage; meta: { emailed: boolean } }>(`/api/admin/messages/${id}/reply`, {
+      method: "POST",
+      body: JSON.stringify({ replyText }),
+    }),
+
+  listPromos: () => request<AffiliateStat[]>("/api/admin/promos"),
+  savePromo: (input: PromoInput) => request<AffiliateStat>("/api/admin/promos", { method: "POST", body: JSON.stringify(input) }),
+  togglePromo: (id: number, isActive: boolean) =>
+    request<AffiliateStat>(`/api/admin/promos/${id}`, { method: "PATCH", body: JSON.stringify({ isActive }) }),
 
   listOrders: (status?: string) =>
     request<AdminOrder[]>(`/api/admin/orders${status ? `?status=${encodeURIComponent(status)}` : ""}`),

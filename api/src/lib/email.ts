@@ -38,6 +38,9 @@ async function send({ to, subject, html, text, replyTo }: SendArgs): Promise<boo
   }
 }
 
+const esc = (s: string) =>
+  s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+
 const shell = (inner: string) => `
 <div style="background:#f4f5f7;padding:32px 0;font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;">
   <div style="max-width:560px;margin:0 auto;background:#ffffff;border-radius:14px;overflow:hidden;border:1px solid #e5e7eb;">
@@ -212,4 +215,58 @@ export async function sendPasswordReset(o: { email: string; resetUrl: string }):
     `Reset your Pure Peptide password (the link works once and expires in one hour):\n${o.resetUrl}\n\n` +
     `If you did not request this, ignore this email — your password will not change.`;
   return send({ to: [o.email], subject: "Reset your Pure Peptide password", html, text });
+}
+
+/** Sent once when a member account is created. */
+export async function sendWelcome(o: { email: string; siteUrl: string }): Promise<boolean> {
+  const html = shell(`
+    <p style="margin:0 0 6px;color:#111827;font-size:20px;font-weight:800;">Welcome to Pure Peptide</p>
+    <p style="margin:0 0 18px;color:#E8121C;font-size:11px;font-weight:700;letter-spacing:3px;text-transform:uppercase;">Premium research materials</p>
+    <p style="margin:0 0 16px;color:#4b5563;line-height:1.7;">
+      Your account is ready. You now have full access to the catalog — pricing, product details and ordering —
+      and you earn 2 loyalty points for every $100 spent.
+    </p>
+    <a href="${o.siteUrl}/products" style="display:inline-block;background:#E8121C;color:#ffffff;text-decoration:none;padding:13px 22px;border-radius:10px;font-weight:700;">Browse the catalog</a>
+    <p style="margin:22px 0 0;color:#6b7280;font-size:13px;line-height:1.6;">
+      Orders are paid by Cash App or Venmo; the instructions arrive the moment you place one.
+    </p>
+  `);
+  const text =
+    `Welcome to Pure Peptide.\n\nYour account is ready: ${o.siteUrl}/products\n` +
+    `You earn 2 loyalty points for every $100 spent.\n\nResearch use only — not for human consumption.`;
+  return send({ to: [o.email], subject: "Welcome to Pure Peptide — your account is ready", html, text });
+}
+
+/** An admin's reply to a contact-form message, quoting the original underneath. */
+export async function sendContactReply(o: {
+  to: string;
+  customerName: string;
+  originalSubject: string;
+  originalMessage: string;
+  replyText: string;
+}): Promise<boolean> {
+  const html = shell(`
+    <p style="margin:0 0 6px;color:#111827;font-size:18px;font-weight:700;">Reply from Pure Peptide</p>
+    <p style="margin:0 0 18px;color:#4b5563;line-height:1.7;">Hi ${esc(o.customerName)},<br/><br/>Thank you for reaching out. Here is our response to your message:</p>
+    <div style="background:#f9fafb;border-left:4px solid #E8121C;border-radius:0 10px 10px 0;padding:14px 18px;margin-bottom:22px;">
+      <p style="margin:0;color:#111827;font-size:14px;line-height:1.7;white-space:pre-wrap;">${esc(o.replyText)}</p>
+    </div>
+    <div style="background:#f3f4f6;border-radius:10px;padding:14px 18px;margin-bottom:22px;">
+      <p style="margin:0 0 6px;color:#9ca3af;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;">Your original message</p>
+      ${o.originalSubject ? `<p style="margin:0 0 4px;color:#4b5563;font-size:13px;font-weight:600;">${esc(o.originalSubject)}</p>` : ""}
+      <p style="margin:0;color:#6b7280;font-size:13px;line-height:1.6;white-space:pre-wrap;">${esc(o.originalMessage)}</p>
+    </div>
+    <p style="margin:0;color:#4b5563;font-size:14px;line-height:1.7;">If you have any further questions, just reply to this email.</p>
+  `);
+  const text =
+    `Hi ${o.customerName},\n\nThank you for reaching out. Here is our response:\n\n${o.replyText}\n\n` +
+    `--- Your original message ---\n${o.originalSubject ? o.originalSubject + "\n" : ""}${o.originalMessage}\n\n` +
+    `Research use only — not for human consumption.`;
+  return send({
+    to: [o.to],
+    subject: `Re: ${o.originalSubject || "Your message to Pure Peptide"}`,
+    html,
+    text,
+    replyTo: env.OWNER_EMAIL || undefined,
+  });
 }

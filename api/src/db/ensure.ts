@@ -25,6 +25,10 @@ export async function ensureSchema(): Promise<void> {
     ADD COLUMN IF NOT EXISTS points_discount_cents integer NOT NULL DEFAULT 0,
     ADD COLUMN IF NOT EXISTS points_earned integer NOT NULL DEFAULT 0`);
 
+  await db.execute(sql`ALTER TABLE contact_messages
+    ADD COLUMN IF NOT EXISTS admin_reply text,
+    ADD COLUMN IF NOT EXISTS replied_at timestamp`);
+
   await db.execute(sql`CREATE TABLE IF NOT EXISTS loyalty_transactions (
     id serial PRIMARY KEY,
     legacy_id integer,

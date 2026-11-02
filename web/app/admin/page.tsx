@@ -3,15 +3,16 @@
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 import type { Product } from "@/lib/types";
-import { adminApi, getToken, setToken, type AdminOrder } from "@/lib/admin-client";
+import { adminApi, getToken, setToken, type AdminOrder, type AdminMessage, type AffiliateStat } from "@/lib/admin-client";
+import { AffiliatesPanel } from "@/components/admin/AffiliatesPanel";
+import { MessagesPanel } from "@/components/admin/MessagesPanel";
 import { LoginForm } from "@/components/admin/LoginForm";
 import { ProductTable } from "@/components/admin/ProductTable";
 import { OrderTable } from "@/components/admin/OrderTable";
 import { Button } from "@/components/ui/Button";
-import { Panel } from "@/components/ui/Panel";
 
-type Message = Awaited<ReturnType<typeof adminApi.listMessages>>[number];
-type Tab = "orders" | "products" | "messages";
+type Message = AdminMessage;
+type Tab = "orders" | "products" | "messages" | "affiliates";
 
 export default function AdminPage() {
   const [authed, setAuthed] = useState(false);
@@ -21,21 +22,24 @@ export default function AdminPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [messages, setMessages] = useState<Message[]>([]);
   const [orders, setOrders] = useState<AdminOrder[]>([]);
+  const [promos, setPromos] = useState<AffiliateStat[]>([]);
   const [loading, setLoading] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const [p, m, o] = await Promise.all([
+      const [p, m, o, a] = await Promise.all([
         adminApi.listProducts(),
         adminApi.listMessages(),
         // Orders need a database; on a demo deployment this 503s rather than
         // taking the whole panel down with it.
         adminApi.listOrders().catch(() => [] as AdminOrder[]),
+        adminApi.listPromos().catch(() => [] as AffiliateStat[]),
       ]);
       setProducts(p);
       setMessages(m);
       setOrders(o);
+      setPromos(a);
     } catch (err) {
       // A 401 clears the token in the client, so drop back to the login screen.
       if (!getToken()) setAuthed(false);
@@ -58,11 +62,13 @@ export default function AdminPage() {
     setProducts([]);
     setMessages([]);
     setOrders([]);
+    setPromos([]);
   }
 
   const awaitingCount = orders.filter((o) => o.status === "awaiting_payment").length;
   const paidCount = orders.filter((o) => o.status === "paid").length;
   const shippedCount = orders.filter((o) => o.status === "shipped").length;
+  const unreadCount = messages.filter((m) => !m.handled).length;
 
   if (checking) {
     return (
@@ -114,7 +120,7 @@ export default function AdminPage() {
       </div>
 
       <div className="admin-tabs mt-8 flex gap-2" role="tablist">
-        {(["orders", "products", "messages"] as Tab[]).map((t) => (
+        {(["orders", "products", "messages", "affiliates"] as Tab[]).map((t) => (
           <button
             key={t}
             role="tab"
@@ -127,8 +133,8 @@ export default function AdminPage() {
             }`}
           >
             {t}
-            {t === "messages" && messages.length > 0 && (
-              <span className="ml-2 font-mono text-[10px]">{messages.length}</span>
+            {t === "messages" && unreadCount > 0 && (
+              <span className="ml-2 rounded-full bg-blue px-1.5 font-mono text-[10px] text-white">{unreadCount}</span>
             )}
             {t === "orders" && awaitingCount > 0 && (
               <span className="ml-2 rounded-full bg-amber-500 px-1.5 font-mono text-[10px] text-white">
@@ -144,30 +150,10 @@ export default function AdminPage() {
           <OrderTable orders={orders} onChanged={() => void load()} />
         ) : tab === "products" ? (
           <ProductTable products={products} onChanged={() => void load()} />
-        ) : messages.length === 0 ? (
-          <Panel className="text-center">
-            <p className="text-text-secondary">No contact messages yet.</p>
-          </Panel>
+        ) : tab === "affiliates" ? (
+          <AffiliatesPanel promos={promos} onChanged={() => void load()} />
         ) : (
-          <div className="space-y-4">
-            {messages.map((m) => (
-              <Panel key={m.id} glow="blue">
-                <div className="flex flex-wrap items-baseline justify-between gap-2">
-                  <p className="font-display text-lg font-bold uppercase text-text-primary">{m.subject}</p>
-                  <p className="font-mono text-[10px] uppercase tracking-widest text-text-dim">
-                    {new Date(m.createdAt).toLocaleString()}
-                  </p>
-                </div>
-                <p className="mt-1 text-sm text-text-secondary">
-                  {m.name} ·{" "}
-                  <a href={`mailto:${m.email}`} className="text-blue hover:underline">{m.email}</a>
-                </p>
-                <p className="mt-3 whitespace-pre-wrap text-sm leading-relaxed text-text-primary">
-                  {m.message}
-                </p>
-              </Panel>
-            ))}
-          </div>
+          <MessagesPanel messages={messages} onChanged={() => void load()} />
         )}
       </div>
     </div>
