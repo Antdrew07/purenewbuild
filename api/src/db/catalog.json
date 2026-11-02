@@ -871,6 +871,22 @@
       "note": "Sleep & recovery blend, 4 mL vial: 5mg melatonin, 100mg L-arginine, 100mg L-theanine, 100mg GABA, 50mg histidine"
     },
     {
+      "name": "Tesa / MOTS-C Blend",
+      "dosage": "25mg/20mg",
+      "price": 90,
+      "category": "blends",
+      "status": "active",
+      "note": "25mg Tesamorelin, 20mg MOTS-c"
+    },
+    {
+      "name": "RT3 / TR3 Blend",
+      "dosage": "20mg/40mg",
+      "price": 125,
+      "category": "blends",
+      "status": "active",
+      "note": "20mg Retatrutide, 40mg Tirzepatide"
+    },
+    {
       "name": "SNAP-8",
       "dosage": "10mg",
       "price": 35,
