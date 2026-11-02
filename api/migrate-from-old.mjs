@@ -82,6 +82,7 @@ async function main() {
     )`);
     await pg.unsafe(`ALTER TABLE orders ADD COLUMN IF NOT EXISTS promo_code text, ADD COLUMN IF NOT EXISTS discount_cents integer NOT NULL DEFAULT 0,
     ADD COLUMN IF NOT EXISTS shipping_method text NOT NULL DEFAULT 'standard'`);
+  await pg.unsafe(`ALTER TABLE contact_messages ADD COLUMN IF NOT EXISTS admin_reply text, ADD COLUMN IF NOT EXISTS replied_at timestamp`);
   await pg.unsafe(`ALTER TABLE member_users ADD COLUMN IF NOT EXISTS points_balance integer NOT NULL DEFAULT 0,
     ADD COLUMN IF NOT EXISTS points_lifetime integer NOT NULL DEFAULT 0, ADD COLUMN IF NOT EXISTS points_seeded_at timestamp`);
   await pg.unsafe(`CREATE TABLE IF NOT EXISTS loyalty_transactions (
@@ -309,10 +310,10 @@ async function main() {
   for (const m of oldMsgs) {
     if (!DRY) {
       await pg.unsafe(
-        `INSERT INTO contact_messages (name,email,subject,message,handled,created_at)
-         SELECT $1,$2,$3,$4,$5,$6
+        `INSERT INTO contact_messages (name,email,subject,message,handled,created_at,admin_reply,replied_at)
+         SELECT $1,$2,$3,$4,$5,$6,$7,$8
          WHERE NOT EXISTS (SELECT 1 FROM contact_messages WHERE email=$2 AND created_at=$6)`,
-        [m.name, m.email, m.subject || "(no subject)", m.message, !!m.isRead, m.createdAt || new Date()]
+        [m.name, m.email, m.subject || "(no subject)", m.message, !!m.isRead, m.createdAt || new Date(), m.adminReply || null, m.repliedAt || null]
       );
     }
     counts.contact++;
