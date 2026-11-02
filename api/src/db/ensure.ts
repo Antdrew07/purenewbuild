@@ -12,11 +12,33 @@ export async function ensureSchema(): Promise<void> {
 
   await db.execute(sql`ALTER TABLE member_users
     ADD COLUMN IF NOT EXISTS reset_token text,
-    ADD COLUMN IF NOT EXISTS reset_token_expiry timestamp`);
+    ADD COLUMN IF NOT EXISTS reset_token_expiry timestamp,
+    ADD COLUMN IF NOT EXISTS points_balance integer NOT NULL DEFAULT 0,
+    ADD COLUMN IF NOT EXISTS points_lifetime integer NOT NULL DEFAULT 0,
+    ADD COLUMN IF NOT EXISTS points_seeded_at timestamp`);
 
   await db.execute(sql`ALTER TABLE orders
     ADD COLUMN IF NOT EXISTS promo_code text,
-    ADD COLUMN IF NOT EXISTS discount_cents integer NOT NULL DEFAULT 0`);
+    ADD COLUMN IF NOT EXISTS discount_cents integer NOT NULL DEFAULT 0,
+    ADD COLUMN IF NOT EXISTS shipping_method text NOT NULL DEFAULT 'standard',
+    ADD COLUMN IF NOT EXISTS points_redeemed integer NOT NULL DEFAULT 0,
+    ADD COLUMN IF NOT EXISTS points_discount_cents integer NOT NULL DEFAULT 0,
+    ADD COLUMN IF NOT EXISTS points_earned integer NOT NULL DEFAULT 0`);
+
+  await db.execute(sql`CREATE TABLE IF NOT EXISTS loyalty_transactions (
+    id serial PRIMARY KEY,
+    legacy_id integer,
+    email text NOT NULL,
+    order_number text,
+    type text NOT NULL,
+    points integer NOT NULL,
+    balance_after integer NOT NULL,
+    description text NOT NULL DEFAULT '',
+    created_at timestamp NOT NULL DEFAULT now()
+  )`);
+  await db.execute(sql`CREATE INDEX IF NOT EXISTS loyalty_tx_email_idx ON loyalty_transactions (email)`);
+  await db.execute(sql`CREATE UNIQUE INDEX IF NOT EXISTS loyalty_tx_legacy_idx
+    ON loyalty_transactions (legacy_id) WHERE legacy_id IS NOT NULL`);
 
   await db.execute(sql`CREATE TABLE IF NOT EXISTS promo_codes (
     id serial PRIMARY KEY,
@@ -72,6 +94,20 @@ export async function ensureSchema(): Promise<void> {
              round(coalesce(l.amount, 0) * 100)::int, round(coalesce(l.balance_after, 0) * 100)::int,
              coalesce(l.description, ''), coalesce(l.created_at, now())
       FROM legacy_affiliate_credit_transactions l
+      WHERE l.email IS NOT NULL
+      ON CONFLICT (legacy_id) WHERE legacy_id IS NOT NULL DO NOTHING`);
+
+    // Loyalty balances copy in once per member (points_seeded_at guards it), so
+    // points earned on this store are never overwritten by a later boot.
+    await db.execute(sql`UPDATE member_users m
+      SET points_balance = b.points_balance, points_lifetime = b.points_lifetime, points_seeded_at = now()
+      FROM legacy_loyalty_balances b
+      WHERE m.points_seeded_at IS NULL AND b.email IS NOT NULL AND lower(b.email) = lower(m.email)`);
+
+    await db.execute(sql`INSERT INTO loyalty_transactions (legacy_id, email, order_number, type, points, balance_after, description, created_at)
+      SELECT l.legacy_id, lower(l.email), l.order_number, coalesce(l.type, 'adjustment'),
+             coalesce(l.points, 0), coalesce(l.balance_after, 0), coalesce(l.description, ''), coalesce(l.created_at, now())
+      FROM legacy_loyalty_transactions l
       WHERE l.email IS NOT NULL
       ON CONFLICT (legacy_id) WHERE legacy_id IS NOT NULL DO NOTHING`);
   } catch (err) {

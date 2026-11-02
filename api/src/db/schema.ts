@@ -70,6 +70,10 @@ export const memberUsers = pgTable("member_users", {
   ageVerifiedAt: timestamp("age_verified_at").notNull(),
   /** Password reset: single-use token + expiry; null when nothing is pending. */
   resetToken: text("reset_token"),
+  pointsBalance: integer("points_balance").notNull().default(0),
+  pointsLifetime: integer("points_lifetime").notNull().default(0),
+  /** Set once the previous store's balance has been copied in, so a re-sync never overwrites live points. */
+  pointsSeededAt: timestamp("points_seeded_at"),
   resetTokenExpiry: timestamp("reset_token_expiry"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
@@ -119,6 +123,12 @@ export const orders = pgTable("orders", {
   /** Promo code applied at checkout (uppercase) and the discount it produced. */
   promoCode: text("promo_code"),
   discountCents: integer("discount_cents").notNull().default(0),
+  /** standard | next_day */
+  shippingMethod: text("shipping_method").notNull().default("standard"),
+  /** Loyalty points: redeemed at 1¢ each at checkout, earned on the final total. */
+  pointsRedeemed: integer("points_redeemed").notNull().default(0),
+  pointsDiscountCents: integer("points_discount_cents").notNull().default(0),
+  pointsEarned: integer("points_earned").notNull().default(0),
   totalCents: integer("total_cents").notNull(),
 
   status: orderStatus("status").notNull().default("awaiting_payment"),
@@ -198,3 +208,18 @@ export const affiliateCreditTransactions = pgTable("affiliate_credit_transaction
 }));
 
 export type PromoCode = typeof promoCodes.$inferSelect;
+
+/** Loyalty point movements: earn (positive), redeem (negative), adjustment. */
+export const loyaltyTransactions = pgTable("loyalty_transactions", {
+  id: serial("id").primaryKey(),
+  legacyId: integer("legacy_id"),
+  email: text("email").notNull(),
+  orderNumber: text("order_number"),
+  type: text("type").notNull(),
+  points: integer("points").notNull(),
+  balanceAfter: integer("balance_after").notNull(),
+  description: text("description").notNull().default(""),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+}, (t) => ({
+  emailIdx: index("loyalty_tx_email_idx").on(t.email),
+}));

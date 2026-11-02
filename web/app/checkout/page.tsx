@@ -5,7 +5,8 @@ import { validatePromo, type PromoInfo } from "@/lib/promo-client";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { formatCents, useCart } from "@/lib/cart";
-import { OrderError, ordersApiConfigured, placeOrder, type PlacedOrder } from "@/lib/orders-client";
+import { OrderError, ordersApiConfigured, placeOrder, shippingCentsFor, type PlacedOrder, type ShippingMethod } from "@/lib/orders-client";
+import { myLoyalty, pointsEarnedFor } from "@/lib/loyalty-client";
 import { PaymentPanel } from "@/components/cart/PaymentPanel";
 import { useMember } from "@/lib/member";
 
@@ -44,6 +45,32 @@ export default function CheckoutPage() {
   const discountCents = promo?.valid && promo.discountPercent
     ? Math.min(subtotalCents, Math.max(0, Math.round((subtotalCents * promo.discountPercent) / 100)))
     : 0;
+
+  const [shippingMethod, setShippingMethod] = useState<ShippingMethod>("standard");
+  const shippingCents = shippingCentsFor(subtotalCents, shippingMethod);
+  const afterPromoCents = Math.max(0, subtotalCents - discountCents + shippingCents);
+
+  // Loyalty points: 1 point = 1¢, capped at the balance and at the amount due.
+  const [pointsBalance, setPointsBalance] = useState(0);
+  const [pointsInput, setPointsInput] = useState("");
+  const [appliedPoints, setAppliedPoints] = useState(0);
+  useEffect(() => {
+    if (!token) { setPointsBalance(0); return; }
+    myLoyalty(token).then((l) => setPointsBalance(l.balance)).catch(() => setPointsBalance(0));
+  }, [token]);
+  const pointsRedeemed = Math.min(appliedPoints, pointsBalance, afterPromoCents);
+  const totalCents = Math.max(0, afterPromoCents - pointsRedeemed);
+  const pointsToEarn = pointsEarnedFor(totalCents);
+
+  function applyPoints() {
+    const pts = parseInt(pointsInput, 10);
+    if (!Number.isFinite(pts) || pts <= 0) { toast.error("Enter a number of points to redeem"); return; }
+    if (pts > pointsBalance) { toast.error(`You have ${pointsBalance.toLocaleString()} points available`); return; }
+    const capped = Math.min(pts, afterPromoCents);
+    setAppliedPoints(capped);
+    setPointsInput("");
+    toast.success(capped < pts ? `Applied ${capped.toLocaleString()} points (the most this order can use)` : `${capped.toLocaleString()} points applied — saving ${formatCents(capped)}`);
+  }
 
   async function applyPromo() {
     const code = promoInput.trim();
@@ -118,6 +145,8 @@ export default function CheckoutPage() {
         postalCode: form.postalCode.trim(),
         customerNote: form.customerNote.trim() || undefined,
         promoCode: promo?.valid && promo.code ? promo.code : undefined,
+        shippingMethod,
+        redeemPoints: pointsRedeemed > 0 ? pointsRedeemed : undefined,
         items: lines.map((l) => ({ slug: l.slug, quantity: l.quantity })),
       }, token);
       // Only clear once the server has the order — a failed request must not
@@ -172,6 +201,40 @@ export default function CheckoutPage() {
               <FieldBox key={f} f={f} form={form} set={set} errors={errors} cls={inputCls(f)} />
             ))}
           </div>
+          <fieldset className="rounded-2xl border border-border-hair bg-bg-elevated p-4">
+            <legend className="px-1 font-mono text-[10px] uppercase tracking-widest text-text-dim">Shipping method</legend>
+            <div className="mt-1 grid gap-2 sm:grid-cols-2">
+              {([
+                { value: "standard", label: "Standard", note: "2–5 business days", price: subtotalCents >= 20_000 ? "Free" : "$15.00", hint: "Free on orders $200+" },
+                { value: "next_day", label: "Next-day", note: "Order by 2pm ET", price: "$65.00", hint: "Overnight within the US" },
+              ] as const).map((opt) => {
+                const active = shippingMethod === opt.value;
+                return (
+                  <label
+                    key={opt.value}
+                    className={`flex cursor-pointer items-start gap-3 rounded-xl border p-3 transition-colors ${active ? "border-red bg-red/5" : "border-border-hair hover:border-red/40"}`}
+                  >
+                    <input
+                      type="radio"
+                      name="shippingMethod"
+                      value={opt.value}
+                      checked={active}
+                      onChange={() => setShippingMethod(opt.value)}
+                      className="mt-1 accent-[var(--red,#E8121C)]"
+                    />
+                    <span className="min-w-0 flex-1">
+                      <span className="flex items-center justify-between gap-2">
+                        <span className="text-sm font-semibold text-text-primary">{opt.label}</span>
+                        <span className="text-sm font-bold tabular-nums text-text-primary">{opt.price}</span>
+                      </span>
+                      <span className="block text-xs text-text-secondary">{opt.note}</span>
+                      <span className="block text-[11px] text-text-dim">{opt.hint}</span>
+                    </span>
+                  </label>
+                );
+              })}
+            </div>
+          </fieldset>
           <div>
             <label htmlFor="customerNote" className="mb-1.5 block font-mono text-[10px] uppercase tracking-widest text-text-dim">
               {LABELS.customerNote}
@@ -230,6 +293,48 @@ export default function CheckoutPage() {
             )}
           </div>
 
+          {member && pointsBalance > 0 && (
+            <div className="mt-4 rounded-xl border border-border-hair bg-bg-base/60 p-3">
+              <div className="flex items-center justify-between">
+                <span className="font-mono text-[10px] uppercase tracking-widest text-text-dim">Redeem points</span>
+                <span className="text-[11px] text-text-secondary">{pointsBalance.toLocaleString()} available</span>
+              </div>
+              {pointsRedeemed > 0 ? (
+                <div className="mt-2 flex items-center justify-between rounded-lg border border-violet-300/60 bg-violet-500/10 px-3 py-2">
+                  <div>
+                    <p className="text-xs font-bold text-violet-600">{pointsRedeemed.toLocaleString()} points applied</p>
+                    <p className="text-[11px] text-violet-500">Saving {formatCents(pointsRedeemed)}</p>
+                  </div>
+                  <button type="button" onClick={() => setAppliedPoints(0)} className="min-h-9 rounded-lg px-2 text-xs font-semibold text-violet-600 hover:bg-violet-500/10">Remove</button>
+                </div>
+              ) : (
+                <div className="mt-2 flex gap-2">
+                  <input
+                    type="number"
+                    min={1}
+                    max={pointsBalance}
+                    inputMode="numeric"
+                    value={pointsInput}
+                    onChange={(e) => setPointsInput(e.target.value)}
+                    onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); applyPoints(); } }}
+                    placeholder={`Max ${Math.min(pointsBalance, afterPromoCents).toLocaleString()}`}
+                    aria-label="Points to redeem"
+                    className="commerce-input min-h-11 w-full rounded-xl border border-border-hair bg-bg-base/60 px-4 py-2.5 text-sm text-text-primary placeholder:text-text-dim focus:border-red/60 focus:outline-none"
+                  />
+                  <button
+                    type="button"
+                    onClick={applyPoints}
+                    disabled={!pointsInput}
+                    className="min-h-11 shrink-0 rounded-xl border border-border-hair px-4 text-xs font-semibold uppercase tracking-wider text-text-secondary transition-colors hover:border-red/50 hover:text-red disabled:opacity-50"
+                  >
+                    Apply
+                  </button>
+                </div>
+              )}
+              <p className="mt-2 text-[10px] text-text-dim">200 pts = $2.00 off</p>
+            </div>
+          )}
+
           <dl className="mt-4 space-y-1.5 border-t border-border-hair pt-4 text-sm">
             <div className="flex justify-between">
               <dt className="text-text-secondary">Subtotal</dt>
@@ -241,13 +346,28 @@ export default function CheckoutPage() {
                 <dd className="tabular-nums text-emerald-600">−{formatCents(discountCents)}</dd>
               </div>
             )}
+            {pointsRedeemed > 0 && (
+              <div className="flex justify-between">
+                <dt className="text-violet-600">Loyalty points</dt>
+                <dd className="tabular-nums text-violet-600">−{formatCents(pointsRedeemed)}</dd>
+              </div>
+            )}
+            <div className="flex justify-between">
+              <dt className="text-text-secondary">Shipping{shippingMethod === "next_day" ? " (next-day)" : ""}</dt>
+              <dd className="tabular-nums text-text-primary">{shippingCents > 0 ? formatCents(shippingCents) : "Free"}</dd>
+            </div>
           </dl>
           <div className="mt-3 flex justify-between border-t border-border-hair pt-4">
             <span className="font-bold text-text-primary">Total</span>
             <span className="font-display text-2xl font-black tabular-nums text-text-primary">
-              {formatCents(subtotalCents - discountCents)}
+              {formatCents(totalCents)}
             </span>
           </div>
+          {member && pointsToEarn > 0 && (
+            <p className="mt-2 rounded-lg border border-emerald-300/60 bg-emerald-500/10 px-3 py-2 text-[11px] font-semibold text-emerald-700">
+              You&apos;ll earn +{pointsToEarn} points on this order
+            </p>
+          )}
 
           <button
             type="submit"

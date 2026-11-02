@@ -31,12 +31,26 @@ export function OrderSummaryCard({ order }: { order: MemberOrder }) {
           </li>
         ))}
       </ul>
-      {order.discountCents ? (
-        <p className="flex justify-between py-2.5 text-sm">
-          <span className="text-emerald-600">Promo {order.promoCode}</span>
-          <span className="tabular-nums text-emerald-600">−{formatCents(order.discountCents)}</span>
-        </p>
-      ) : null}
+      <div className="space-y-1 py-2.5 text-sm">
+        {order.discountCents ? (
+          <p className="flex justify-between">
+            <span className="text-emerald-600">Promo {order.promoCode}</span>
+            <span className="tabular-nums text-emerald-600">−{formatCents(order.discountCents)}</span>
+          </p>
+        ) : null}
+        {order.pointsDiscountCents ? (
+          <p className="flex justify-between">
+            <span className="text-violet-600">Loyalty points</span>
+            <span className="tabular-nums text-violet-600">−{formatCents(order.pointsDiscountCents)}</span>
+          </p>
+        ) : null}
+        {order.shippingCents !== undefined && (
+          <p className="flex justify-between">
+            <span className="text-text-secondary">Shipping{order.shippingMethod === "next_day" ? " (next-day)" : ""}</span>
+            <span className="tabular-nums text-text-primary">{order.shippingCents > 0 ? formatCents(order.shippingCents) : "Free"}</span>
+          </p>
+        )}
+      </div>
 
       {order.trackingNumber && (
         <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border-hair bg-bg-base/60 px-4 py-3">
