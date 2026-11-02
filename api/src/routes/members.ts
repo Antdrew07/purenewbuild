@@ -65,6 +65,7 @@ membersRouter.post(
       action: "member_register",
     });
 
+    await ensureResetColumns(db);
     const existing = await db.select({ id: schema.memberUsers.id })
       .from(schema.memberUsers).where(eq(schema.memberUsers.email, body.email)).limit(1);
     if (existing[0]) throw new HttpError(409, "An account already exists for this email. Sign in instead.");
@@ -97,6 +98,7 @@ membersRouter.post(
     // Compare a dummy hash when missing so account existence is not exposed by timing.
     const DUMMY_HASH = "$2a$10$invalidinvalidinvalidinvalidinvalidinvalidinvalidinvalidin";
 
+    await ensureResetColumns(db);
     const rows = await db.select().from(schema.memberUsers).where(eq(schema.memberUsers.email, body.email)).limit(1);
     const user = rows[0];
     const valid = await bcrypt.compare(body.password, user?.passwordHash ?? DUMMY_HASH);
