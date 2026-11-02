@@ -119,6 +119,7 @@ export interface AdminOrder {
   shippingMethod?: string;
   shippingCents?: number;
   pointsDiscountCents?: number;
+  creditDiscountCents?: number;
   totalCents: number;
   totalFormatted: string;
   trackingNumber: string | null;
@@ -160,6 +161,7 @@ export interface PromoInput {
   affiliateEmail?: string | null;
   discountPercent: number;
   commissionPercent: number;
+  exclusive?: boolean;
 }
 
 export interface AffiliateStat {
@@ -170,13 +172,15 @@ export interface AffiliateStat {
   discountPercent: number;
   commissionPercent: number;
   isActive: boolean;
+  exclusive: boolean;
   createdAt: string;
   totalOrders: number;
+  selfOrders: number;
   revenueCents: number;
   discountCents: number;
-  commissionOwedCents: number;
-  commissionCreditedCents: number;
-  orders: { id: number; orderNumber: string; name: string; status: string; totalCents: number; discountCents: number; createdAt: string }[];
+  commissionCents: number;
+  creditBalanceCents: number;
+  orders: { id: number; orderNumber: string; name: string; status: string; totalCents: number; discountCents: number; createdAt: string; isSelf: boolean }[];
 }
 
 export interface ApproveResult {
@@ -209,6 +213,10 @@ export const adminApi = {
   savePromo: (input: PromoInput) => request<AffiliateStat>("/api/admin/promos", { method: "POST", body: JSON.stringify(input) }),
   togglePromo: (id: number, isActive: boolean) =>
     request<AffiliateStat>(`/api/admin/promos/${id}`, { method: "PATCH", body: JSON.stringify({ isActive }) }),
+  clearPromoCredit: (id: number, note?: string) =>
+    request<{ clearedCents: number }>(`/api/admin/promos/${id}/clear-credit`, { method: "POST", body: JSON.stringify({ note }) }),
+  adjustPromoCredit: (id: number, amountCents: number, description: string) =>
+    request<{ balanceAfterCents: number }>(`/api/admin/promos/${id}/credit`, { method: "POST", body: JSON.stringify({ amountCents, description }) }),
 
   listOrders: (status?: string) =>
     request<AdminOrder[]>(`/api/admin/orders${status ? `?status=${encodeURIComponent(status)}` : ""}`),

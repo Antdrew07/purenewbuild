@@ -15,7 +15,8 @@ export async function ensureSchema(): Promise<void> {
     ADD COLUMN IF NOT EXISTS reset_token_expiry timestamp,
     ADD COLUMN IF NOT EXISTS points_balance integer NOT NULL DEFAULT 0,
     ADD COLUMN IF NOT EXISTS points_lifetime integer NOT NULL DEFAULT 0,
-    ADD COLUMN IF NOT EXISTS points_seeded_at timestamp`);
+    ADD COLUMN IF NOT EXISTS points_seeded_at timestamp,
+    ADD COLUMN IF NOT EXISTS affiliate_code text`);
 
   await db.execute(sql`ALTER TABLE orders
     ADD COLUMN IF NOT EXISTS promo_code text,
@@ -23,7 +24,8 @@ export async function ensureSchema(): Promise<void> {
     ADD COLUMN IF NOT EXISTS shipping_method text NOT NULL DEFAULT 'standard',
     ADD COLUMN IF NOT EXISTS points_redeemed integer NOT NULL DEFAULT 0,
     ADD COLUMN IF NOT EXISTS points_discount_cents integer NOT NULL DEFAULT 0,
-    ADD COLUMN IF NOT EXISTS points_earned integer NOT NULL DEFAULT 0`);
+    ADD COLUMN IF NOT EXISTS points_earned integer NOT NULL DEFAULT 0,
+    ADD COLUMN IF NOT EXISTS credit_discount_cents integer NOT NULL DEFAULT 0`);
 
   await db.execute(sql`ALTER TABLE contact_messages
     ADD COLUMN IF NOT EXISTS admin_reply text,
@@ -55,6 +57,9 @@ export async function ensureSchema(): Promise<void> {
     created_at timestamp NOT NULL DEFAULT now()
   )`);
   await db.execute(sql`CREATE UNIQUE INDEX IF NOT EXISTS promo_codes_code_idx ON promo_codes (code)`);
+  await db.execute(sql`ALTER TABLE promo_codes ADD COLUMN IF NOT EXISTS exclusive boolean NOT NULL DEFAULT false`);
+  // The Halloween store-wide code was exclusive on the previous store; keep that rule.
+  await db.execute(sql`UPDATE promo_codes SET exclusive = true WHERE code = 'SPOOKY35' AND exclusive = false`);
 
   await db.execute(sql`CREATE TABLE IF NOT EXISTS affiliate_credit_transactions (
     id serial PRIMARY KEY,
@@ -107,6 +112,13 @@ export async function ensureSchema(): Promise<void> {
       SET points_balance = b.points_balance, points_lifetime = b.points_lifetime, points_seeded_at = now()
       FROM legacy_loyalty_balances b
       WHERE m.points_seeded_at IS NULL AND b.email IS NOT NULL AND lower(b.email) = lower(m.email)`);
+
+    // The affiliate link (which code a member owns) copies in where the member has none yet.
+    await db.execute(sql`UPDATE member_users m
+      SET affiliate_code = upper(trim(b.affiliate_code))
+      FROM legacy_loyalty_balances b
+      WHERE m.affiliate_code IS NULL AND b.affiliate_code IS NOT NULL AND trim(b.affiliate_code) <> ''
+        AND b.email IS NOT NULL AND lower(b.email) = lower(m.email)`);
 
     await db.execute(sql`INSERT INTO loyalty_transactions (legacy_id, email, order_number, type, points, balance_after, description, created_at)
       SELECT l.legacy_id, lower(l.email), l.order_number, coalesce(l.type, 'adjustment'),

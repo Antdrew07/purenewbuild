@@ -200,9 +200,9 @@ export function OrderTable({
                         </button>
                       )}
                     </div>
-                    {o.shippingMethod === "next_day" && <p className="mt-1 text-right text-[11px] font-semibold text-amber-600">Next-day shipping</p>}
                     {o.promoCode && <p className="mt-1 text-right text-[11px] text-emerald-600">Promo {o.promoCode} −${((o.discountCents ?? 0) / 100).toFixed(2)}</p>}
                     {(o.pointsDiscountCents ?? 0) > 0 && <p className="mt-1 text-right text-[11px] text-violet-600">Points −${((o.pointsDiscountCents ?? 0) / 100).toFixed(2)}</p>}
+                    {(o.creditDiscountCents ?? 0) > 0 && <p className="mt-1 text-right text-[11px] text-emerald-600">Credit −${((o.creditDiscountCents ?? 0) / 100).toFixed(2)}</p>}
                     {o.adminNote && <p className="mt-1 text-right text-[11px] text-amber-600">{o.adminNote}</p>}
                   </td>
                 </tr>

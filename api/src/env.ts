@@ -18,10 +18,15 @@ export const env = {
   TURNSTILE_SECRET_KEY: process.env.TURNSTILE_SECRET_KEY ?? "",
   TURNSTILE_EXPECTED_HOSTNAME: process.env.TURNSTILE_EXPECTED_HOSTNAME ?? "",
 
+  /* Storefront AI assistant (the chat bubble). Hidden until the key is set. */
+  ANTHROPIC_API_KEY: process.env.ANTHROPIC_API_KEY ?? "",
+
   /* Manual payment destinations. Not secrets, but configurable so they can be
      changed without a deploy — and so the wrong business's handle can never be
      baked into a build. */
-  CASHAPP_PAYMENT_URL: process.env.CASHAPP_PAYMENT_URL ?? "https://cash.app/$purepep26",
+  /* Venmo is the sole manual payment destination, as on the previous store.
+     Cash App only appears if a URL is explicitly configured. */
+  CASHAPP_PAYMENT_URL: process.env.CASHAPP_PAYMENT_URL ?? "",
   VENMO_PAYMENT_URL: process.env.VENMO_PAYMENT_URL ?? "https://venmo.com/u/Adrianza-Walker",
 
   /* Shippo */
@@ -42,6 +47,7 @@ export const isEmailConfigured = Boolean(env.RESEND_API_KEY && env.OWNER_EMAIL);
 export const isAuthConfigured = Boolean(env.JWT_SECRET);
 export const isShippoConfigured = Boolean(env.SHIPPO_API_KEY);
 export const isTurnstileConfigured = Boolean(env.TURNSTILE_SECRET_KEY);
+export const isChatConfigured = Boolean(env.ANTHROPIC_API_KEY);
 
 if (!isAuthConfigured && env.NODE_ENV === "production") {
   throw new Error("JWT_SECRET is required in production");

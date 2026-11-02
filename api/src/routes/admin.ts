@@ -8,6 +8,7 @@ import { asyncHandler, HttpError } from "../middleware/error.js";
 import { validateBody } from "../middleware/validate.js";
 import { sendContactReply } from "../lib/email.js";
 import { normalizeCode } from "../lib/promo.js";
+import { adjustCredit, affiliateEmailForCode, clearCredit, getCreditBalanceCents, statsForCode } from "../lib/affiliate.js";
 import { sql } from "drizzle-orm";
 
 export const adminRouter = Router();
@@ -176,58 +177,68 @@ adminRouter.post(
 
 /* ─────────────────────────── promo codes / affiliates ─────────────────────────── */
 
-/** GET /api/admin/promos — every code with its order stats and ledger total. */
+/** GET /api/admin/promos — every code with its order stats, self-orders and spendable credit owed. */
 adminRouter.get(
   "/promos",
   asyncHandler(async (_req, res) => {
     const d = requireDb();
     const codes = await d.select().from(schema.promoCodes).orderBy(desc(schema.promoCodes.createdAt));
-    const orders = await d
-      .select({
-        id: schema.orders.id,
-        orderNumber: schema.orders.orderNumber,
-        name: schema.orders.name,
-        promoCode: schema.orders.promoCode,
-        status: schema.orders.status,
-        totalCents: schema.orders.totalCents,
-        discountCents: schema.orders.discountCents,
-        createdAt: schema.orders.createdAt,
-      })
-      .from(schema.orders)
-      .where(sql`${schema.orders.promoCode} IS NOT NULL`)
-      .orderBy(desc(schema.orders.createdAt));
-    const credited = await d
-      .select({ email: schema.affiliateCreditTransactions.email, cents: sql<number>`coalesce(sum(${schema.affiliateCreditTransactions.amountCents}), 0)` })
-      .from(schema.affiliateCreditTransactions)
-      .where(eq(schema.affiliateCreditTransactions.type, "earn"))
-      .groupBy(schema.affiliateCreditTransactions.email);
-    const creditedByEmail = new Map(credited.map((c) => [c.email.toLowerCase(), Number(c.cents)]));
-
-    const data = codes.map((c) => {
-      const mine = orders.filter((o) => o.promoCode === c.code);
-      const live = mine.filter((o) => o.status !== "cancelled");
-      const revenueCents = live.reduce((s, o) => s + o.totalCents, 0);
-      const discountCents = live.reduce((s, o) => s + o.discountCents, 0);
-      return {
+    const data = [];
+    for (const c of codes) {
+      const s = await statsForCode(d, c.code);
+      const affiliateEmail = s?.affiliateEmail ?? null;
+      const creditBalanceCents = affiliateEmail ? await getCreditBalanceCents(d, affiliateEmail) : 0;
+      data.push({
         id: c.id,
         code: c.code,
         affiliateName: c.affiliateName,
-        affiliateEmail: c.affiliateEmail,
+        affiliateEmail,
         discountPercent: c.discountPercent,
         commissionPercent: c.commissionPercent,
         isActive: c.isActive,
+        exclusive: c.exclusive,
         createdAt: c.createdAt,
-        totalOrders: live.length,
-        revenueCents,
-        discountCents,
-        // Same formula as before: revenue × commission%, over every non-cancelled order.
-        commissionOwedCents: Math.round((revenueCents * c.commissionPercent) / 100),
-        // What the live ledger has actually credited (earned on approval).
-        commissionCreditedCents: c.affiliateEmail ? creditedByEmail.get(c.affiliateEmail.toLowerCase()) ?? 0 : 0,
-        orders: mine.slice(0, 50),
-      };
-    });
+        totalOrders: s?.stats.totalOrders ?? 0,
+        selfOrders: s?.stats.selfOrders ?? 0,
+        revenueCents: s?.stats.totalRevenueCents ?? 0,
+        discountCents: s?.stats.totalDiscountCents ?? 0,
+        commissionCents: s?.stats.totalCommissionCents ?? 0,
+        creditBalanceCents,
+        orders: s?.orders.slice(0, 50) ?? [],
+      });
+    }
     res.json({ data });
+  }),
+);
+
+const CreditAdjustBody = z.object({ amountCents: z.number().int(), description: z.string().trim().min(1).max(256) });
+
+/** POST /api/admin/promos/:id/credit — manual adjustment to the affiliate's spendable credit. */
+adminRouter.post(
+  "/promos/:id/credit",
+  validateBody(CreditAdjustBody),
+  asyncHandler(async (req, res) => {
+    const d = requireDb();
+    const [promo] = await d.select().from(schema.promoCodes).where(eq(schema.promoCodes.id, Number(req.params.id))).limit(1);
+    if (!promo) throw new HttpError(404, "Promo code not found");
+    const email = await affiliateEmailForCode(d, promo.code, promo.affiliateEmail);
+    if (!email) throw new HttpError(400, "No member account is linked to this code");
+    const { amountCents, description } = req.body as z.infer<typeof CreditAdjustBody>;
+    res.json({ data: await adjustCredit(d, email, amountCents, description) });
+  }),
+);
+
+/** POST /api/admin/promos/:id/clear-credit — zero the balance after paying the affiliate out. */
+adminRouter.post(
+  "/promos/:id/clear-credit",
+  asyncHandler(async (req, res) => {
+    const d = requireDb();
+    const [promo] = await d.select().from(schema.promoCodes).where(eq(schema.promoCodes.id, Number(req.params.id))).limit(1);
+    if (!promo) throw new HttpError(404, "Promo code not found");
+    const email = await affiliateEmailForCode(d, promo.code, promo.affiliateEmail);
+    if (!email) throw new HttpError(400, "No member account is linked to this code");
+    const note = typeof req.body?.note === "string" && req.body.note.trim() ? String(req.body.note).trim().slice(0, 256) : `Commission cleared / paid out by admin (code ${promo.code})`;
+    res.json({ data: await clearCredit(d, email, note) });
   }),
 );
 
@@ -237,6 +248,7 @@ const PromoBody = z.object({
   affiliateEmail: z.string().trim().email().max(200).nullable().optional(),
   discountPercent: z.number().min(0).max(100).default(10),
   commissionPercent: z.number().min(0).max(100).default(20),
+  exclusive: z.boolean().default(false),
 });
 
 /** POST /api/admin/promos — create, or update an existing code in place. */
@@ -256,6 +268,7 @@ adminRouter.post(
         affiliateEmail: b.affiliateEmail ? b.affiliateEmail.toLowerCase() : null,
         discountPercent: b.discountPercent,
         commissionPercent: b.commissionPercent,
+        exclusive: b.exclusive,
         isActive: true,
       })
       .onConflictDoUpdate({
@@ -265,10 +278,15 @@ adminRouter.post(
           affiliateEmail: b.affiliateEmail ? b.affiliateEmail.toLowerCase() : null,
           discountPercent: b.discountPercent,
           commissionPercent: b.commissionPercent,
+          exclusive: b.exclusive,
           isActive: true,
         },
       })
       .returning();
+    if (b.affiliateEmail) {
+      await d.update(schema.memberUsers).set({ affiliateCode: code })
+        .where(sql`lower(${schema.memberUsers.email}) = ${b.affiliateEmail.toLowerCase()}`);
+    }
     res.status(201).json({ data: row });
   }),
 );

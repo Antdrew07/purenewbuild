@@ -2,11 +2,10 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "";
 
 export const ordersApiConfigured = Boolean(API_URL);
 
-export type ShippingMethod = "standard" | "next_day";
+export type ShippingMethod = "standard";
 
-/** Same shipping rules as the API: $15 standard, free from $200 (before discounts), $65 next-day. */
-export function shippingCentsFor(subtotalCents: number, method: ShippingMethod): number {
-  if (method === "next_day") return 6_500;
+/** Same shipping rule as the API: $15 standard, free from $200 (before discounts). */
+export function shippingCentsFor(subtotalCents: number, _method: ShippingMethod = "standard"): number {
   return subtotalCents >= 20_000 ? 0 : 1_500;
 }
 
@@ -22,6 +21,7 @@ export interface PlacedOrder {
   shippingMethod?: ShippingMethod;
   pointsRedeemed?: number;
   pointsDiscountCents?: number;
+  creditDiscountCents?: number;
   pointsEarned?: number;
   items: { name: string; dosage: string; quantity: number; lineTotalCents: number }[];
   payment: { cashapp: string; venmo: string; cashappHandle: string; venmoHandle: string };
@@ -41,6 +41,7 @@ export interface PlaceOrderInput {
   promoCode?: string;
   shippingMethod?: ShippingMethod;
   redeemPoints?: number;
+  redeemCreditCents?: number;
   items: { slug: string; quantity: number }[];
 }
 
@@ -103,6 +104,7 @@ export interface MemberOrder {
   shippingCents?: number;
   pointsRedeemed?: number;
   pointsDiscountCents?: number;
+  creditDiscountCents?: number;
   pointsEarned?: number;
   totalCents: number;
   totalFormatted: string;

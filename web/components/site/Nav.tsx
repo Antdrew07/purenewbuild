@@ -23,7 +23,7 @@ export function Nav() {
   const { member } = useMember();
   const links = [
     ...LINKS,
-    ...(member ? [{ href: "/account", label: "Account" }] : []),
+    ...(member ? [{ href: "/account", label: "Account" }, { href: "/affiliate", label: "Affiliate" }] : []),
     ...(member?.isAdmin ? [{ href: "/admin", label: "Admin" }] : []),
   ];
   const [open, setOpen] = useState(false);
