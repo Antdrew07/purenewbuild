@@ -838,6 +838,15 @@
       "note": "RT3 30mg · Cagrilintide 5mg"
     },
     {
+      "name": "Inferno X",
+      "dosage": "10ml",
+      "price": 70,
+      "category": "blends",
+      "status": "active",
+      "form": "vial",
+      "note": "Advanced fat burner blend, 10 mL vial. Per mL: 400mg carnitine, 300mg ALCAR, 2mg albuterol, 5mg yohimbine, 1.5% benzyl alcohol"
+    },
+    {
       "name": "SNAP-8",
       "dosage": "10mg",
       "price": 35,
