@@ -557,6 +557,15 @@
       "form": "pen"
     },
     {
+      "name": "V2 Injection Pen Set",
+      "dosage": "4 cartridges / 10 needles",
+      "price": 65,
+      "category": "accessories",
+      "status": "active",
+      "form": "pen",
+      "note": "Reusable V2 pen with precise dosing, 4 cartridges, 10 needles and a zip case. Colours: pink, blue, purple, green or black (tell us your colour in the order notes)"
+    },
+    {
       "name": "ARA 290",
       "dosage": "40mg",
       "price": 95,
