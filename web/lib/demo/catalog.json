@@ -887,6 +887,14 @@
       "note": "20mg Retatrutide, 40mg Tirzepatide"
     },
     {
+      "name": "Fantastic Four Blend",
+      "dosage": "60mg",
+      "price": 105,
+      "category": "blends",
+      "status": "active",
+      "note": "Healing & performance blend, 60mg total: 12mg BPC-157, 12mg TB-500, 12mg KPV, 24mg Cartalax"
+    },
+    {
       "name": "SNAP-8",
       "dosage": "10mg",
       "price": 35,
