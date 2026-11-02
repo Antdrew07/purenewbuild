@@ -15,3 +15,11 @@ export const STATUS_LABEL: Record<string, string> = {
   coming_soon: "Coming soon",
   unavailable: "Enquire",
 };
+
+/** Customer-facing order status copy. Keys mirror the API's order_status enum. */
+export const ORDER_STATUS_LABEL: Record<string, string> = {
+  awaiting_payment: "Awaiting payment",
+  paid: "Paid — being packed",
+  shipped: "Shipped",
+  cancelled: "Cancelled",
+};

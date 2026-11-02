@@ -12,6 +12,9 @@ export const env = {
   RESEND_API_KEY: process.env.RESEND_API_KEY ?? "",
   OWNER_EMAIL: process.env.OWNER_EMAIL ?? "",
   CORS_ORIGIN: (process.env.CORS_ORIGIN ?? "http://localhost:3000").split(","),
+  /* Public storefront origin for links in email (password reset). Falls back
+     to the first CORS origin, which is the storefront in every deployment. */
+  SITE_URL: process.env.SITE_URL ?? "",
   TURNSTILE_SECRET_KEY: process.env.TURNSTILE_SECRET_KEY ?? "",
   TURNSTILE_EXPECTED_HOSTNAME: process.env.TURNSTILE_EXPECTED_HOSTNAME ?? "",
 

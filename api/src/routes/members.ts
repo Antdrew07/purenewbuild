@@ -2,12 +2,16 @@ import { Router } from "express";
 import bcrypt from "bcryptjs";
 import rateLimit from "express-rate-limit";
 import { eq } from "drizzle-orm";
+import { ensureSchema } from "../db/ensure.js";
+import { randomBytes } from "node:crypto";
 import { z } from "zod";
 import { db, schema } from "../db/index.js";
 import { signAdminToken, signMemberToken } from "../middleware/auth.js";
 import { asyncHandler, HttpError } from "../middleware/error.js";
 import { validateBody } from "../middleware/validate.js";
 import { verifyTurnstile } from "../lib/turnstile.js";
+import { sendPasswordReset } from "../lib/email.js";
+import { env } from "../env.js";
 
 export const membersRouter = Router();
 
@@ -62,6 +66,7 @@ membersRouter.post(
       action: "member_register",
     });
 
+    await ensureResetColumns(db);
     const existing = await db.select({ id: schema.memberUsers.id })
       .from(schema.memberUsers).where(eq(schema.memberUsers.email, body.email)).limit(1);
     if (existing[0]) throw new HttpError(409, "An account already exists for this email. Sign in instead.");
@@ -94,6 +99,7 @@ membersRouter.post(
     // Compare a dummy hash when missing so account existence is not exposed by timing.
     const DUMMY_HASH = "$2a$10$invalidinvalidinvalidinvalidinvalidinvalidinvalidinvalidin";
 
+    await ensureResetColumns(db);
     const rows = await db.select().from(schema.memberUsers).where(eq(schema.memberUsers.email, body.email)).limit(1);
     const user = rows[0];
     const valid = await bcrypt.compare(body.password, user?.passwordHash ?? DUMMY_HASH);
@@ -116,5 +122,74 @@ membersRouter.post(
         adminToken: signAdminToken({ sub: String(admin.id), email: admin.email }),
       },
     });
+  }),
+);
+
+/* ── password reset ─────────────────────────────────────────────────────── */
+
+/* Columns are created at boot by ensureSchema(); this keeps the call sites as a
+   cheap belt-and-braces for a process that raced the ensure. */
+function ensureResetColumns(_database: NonNullable<typeof db>) {
+  return ensureSchema();
+}
+
+const ForgotBody = Credentials.omit({ password: true });
+const ResetBody = Credentials.pick({ password: true }).extend({
+  token: z.string().min(32).max(200),
+});
+
+/** POST /api/members/forgot — always 200, so addresses cannot be enumerated. */
+membersRouter.post(
+  "/forgot",
+  loginLimiter,
+  validateBody(ForgotBody),
+  asyncHandler(async (req, res) => {
+    if (!db) throw new HttpError(503, "Member accounts require a configured database");
+    const body = req.body as z.infer<typeof ForgotBody>;
+    await verifyTurnstile({
+      token: body.turnstileToken,
+      remoteIp: requestIp(req.headers["cf-connecting-ip"] ?? req.headers["x-forwarded-for"], req.ip),
+      action: "member_forgot",
+    });
+    await ensureResetColumns(db);
+
+    const rows = await db.select({ id: schema.memberUsers.id, email: schema.memberUsers.email })
+      .from(schema.memberUsers).where(eq(schema.memberUsers.email, body.email)).limit(1);
+    const user = rows[0];
+    if (user) {
+      const token = randomBytes(32).toString("hex");
+      const expiry = new Date(Date.now() + 60 * 60_000);
+      await db.update(schema.memberUsers)
+        .set({ resetToken: token, resetTokenExpiry: expiry, updatedAt: new Date() })
+        .where(eq(schema.memberUsers.id, user.id));
+      const origin = (env.SITE_URL || env.CORS_ORIGIN[0] || "").replace(/\/+$/, "");
+      // Fire-and-forget like every other email: a Resend hiccup must not leak
+      // whether the address exists through a different response.
+      void sendPasswordReset({ email: user.email, resetUrl: `${origin}/?reset=${token}` });
+    }
+    res.json({ data: { ok: true } });
+  }),
+);
+
+/** POST /api/members/reset — consumes the token and signs the member in. */
+membersRouter.post(
+  "/reset",
+  loginLimiter,
+  validateBody(ResetBody),
+  asyncHandler(async (req, res) => {
+    if (!db) throw new HttpError(503, "Member accounts require a configured database");
+    const body = req.body as z.infer<typeof ResetBody>;
+    await ensureResetColumns(db);
+
+    const rows = await db.select().from(schema.memberUsers).where(eq(schema.memberUsers.resetToken, body.token)).limit(1);
+    const user = rows[0];
+    if (!user || !user.resetTokenExpiry || user.resetTokenExpiry < new Date()) {
+      throw new HttpError(400, "This reset link is invalid or has expired. Request a new one.");
+    }
+    const passwordHash = await bcrypt.hash(body.password, 12);
+    await db.update(schema.memberUsers)
+      .set({ passwordHash, resetToken: null, resetTokenExpiry: null, updatedAt: new Date() })
+      .where(eq(schema.memberUsers.id, user.id));
+    res.json({ data: sessionFor(user) });
   }),
 );

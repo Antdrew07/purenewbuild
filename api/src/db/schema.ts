@@ -1,5 +1,5 @@
 import {
-  pgTable, serial, text, integer, boolean, timestamp, pgEnum, index, uniqueIndex,
+  pgTable, serial, text, integer, boolean, timestamp, pgEnum, index, uniqueIndex, doublePrecision,
 } from "drizzle-orm/pg-core";
 
 export const productStatus = pgEnum("product_status", [
@@ -68,6 +68,9 @@ export const memberUsers = pgTable("member_users", {
   email: text("email").notNull(),
   passwordHash: text("password_hash").notNull(),
   ageVerifiedAt: timestamp("age_verified_at").notNull(),
+  /** Password reset: single-use token + expiry; null when nothing is pending. */
+  resetToken: text("reset_token"),
+  resetTokenExpiry: timestamp("reset_token_expiry"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 }, (t) => ({
@@ -113,6 +116,9 @@ export const orders = pgTable("orders", {
   /** Always recomputed server-side from the catalog — never trusted from the client. */
   subtotalCents: integer("subtotal_cents").notNull(),
   shippingCents: integer("shipping_cents").notNull().default(0),
+  /** Promo code applied at checkout (uppercase) and the discount it produced. */
+  promoCode: text("promo_code"),
+  discountCents: integer("discount_cents").notNull().default(0),
   totalCents: integer("total_cents").notNull(),
 
   status: orderStatus("status").notNull().default("awaiting_payment"),
@@ -157,3 +163,38 @@ export const orderItems = pgTable("order_items", {
 
 export type Order = typeof orders.$inferSelect;
 export type OrderItem = typeof orderItems.$inferSelect;
+
+/* ─────────────────────────── promo codes & affiliate credit ─────────────────────────── */
+
+/** Affiliate / sale codes. Codes are stored uppercase; lookups normalise the same way. */
+export const promoCodes = pgTable("promo_codes", {
+  id: serial("id").primaryKey(),
+  code: text("code").notNull(),
+  affiliateName: text("affiliate_name").notNull().default(""),
+  /** Member email the commission is credited to; null for house codes (e.g. a sale). */
+  affiliateEmail: text("affiliate_email"),
+  discountPercent: doublePrecision("discount_percent").notNull().default(10),
+  commissionPercent: doublePrecision("commission_percent").notNull().default(20),
+  isActive: boolean("is_active").notNull().default(true),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+}, (t) => ({
+  codeIdx: uniqueIndex("promo_codes_code_idx").on(t.code),
+}));
+
+/** Dollar-denominated affiliate store credit, one row per movement (carried over from the previous store). */
+export const affiliateCreditTransactions = pgTable("affiliate_credit_transactions", {
+  id: serial("id").primaryKey(),
+  legacyId: integer("legacy_id"),
+  email: text("email").notNull(),
+  orderNumber: text("order_number"),
+  /** earn | redeem | adjustment */
+  type: text("type").notNull(),
+  amountCents: integer("amount_cents").notNull(),
+  balanceAfterCents: integer("balance_after_cents").notNull(),
+  description: text("description").notNull().default(""),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+}, (t) => ({
+  emailIdx: index("affiliate_credit_email_idx").on(t.email),
+}));
+
+export type PromoCode = typeof promoCodes.$inferSelect;

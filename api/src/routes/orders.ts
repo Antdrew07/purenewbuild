@@ -1,6 +1,6 @@
 import { Router } from "express";
 import rateLimit from "express-rate-limit";
-import { and, eq } from "drizzle-orm";
+import { and, desc, eq, inArray, sql } from "drizzle-orm";
 import { z } from "zod";
 import { db, schema } from "../db/index.js";
 import { asyncHandler, HttpError } from "../middleware/error.js";
@@ -8,6 +8,7 @@ import { validateBody } from "../middleware/validate.js";
 import { requireMember } from "../middleware/auth.js";
 import { priceCart, reserveOrderNumber, paymentLinks, money } from "../lib/orders.js";
 import { sendOrderPlaced, sendOwnerNewOrder } from "../lib/email.js";
+import { discountCentsFor, findActivePromo } from "../lib/promo.js";
 
 export const ordersRouter = Router();
 
@@ -31,6 +32,7 @@ const PlaceBody = z.object({
   postalCode: z.string().trim().min(3, "ZIP is required").max(20),
   country: z.string().trim().length(2).default("US"),
   customerNote: z.string().trim().max(2000).optional(),
+  promoCode: z.string().trim().max(64).optional(),
   // Only slug + quantity is accepted. Prices are always looked up server-side.
   items: z
     .array(z.object({ slug: z.string().trim().min(1).max(200), quantity: z.number().int().min(1).max(99) }))
@@ -52,6 +54,19 @@ ordersRouter.post(
       throw new HttpError(403, "Use the email address associated with your member account");
     }
     const priced = await priceCart(b.items);
+
+    // Promo codes are validated here, never trusted from the client; the
+    // discount comes off the subtotal exactly as the previous store did.
+    let promo: { code: string; discountPercent: number } | null = null;
+    if (b.promoCode?.trim()) {
+      if (!db) throw new HttpError(503, "Promo codes require a configured database");
+      const found = await findActivePromo(db, b.promoCode);
+      if (!found) throw new HttpError(400, "Invalid or expired promo code");
+      promo = { code: found.code, discountPercent: found.discountPercent };
+    }
+    const discountCents = promo ? discountCentsFor(priced.subtotalCents, promo.discountPercent) : 0;
+    const totalCents = priced.subtotalCents - discountCents + priced.shippingCents;
+
     const orderNumber = await reserveOrderNumber();
 
     let orderId: number | null = null;
@@ -71,7 +86,9 @@ ordersRouter.post(
           country: b.country,
           subtotalCents: priced.subtotalCents,
           shippingCents: priced.shippingCents,
-          totalCents: priced.totalCents,
+          totalCents,
+          promoCode: promo?.code ?? null,
+          discountCents,
           customerNote: b.customerNote ?? null,
         })
         .returning({ id: schema.orders.id });
@@ -95,7 +112,9 @@ ordersRouter.post(
       orderNumber,
       name: b.name,
       email: b.email,
-      totalCents: priced.totalCents,
+      totalCents,
+      discountCents,
+      promoCode: promo?.code ?? null,
       items: priced.items,
     };
     // Never let a mail failure fail the order — the customer already owes us money.
@@ -110,8 +129,10 @@ ordersRouter.post(
         status: "awaiting_payment",
         subtotalCents: priced.subtotalCents,
         shippingCents: priced.shippingCents,
-        totalCents: priced.totalCents,
-        totalFormatted: money(priced.totalCents),
+        promoCode: promo?.code ?? null,
+        discountCents,
+        totalCents,
+        totalFormatted: money(totalCents),
         items: priced.items,
         payment: paymentLinks(),
       },
@@ -127,6 +148,47 @@ ordersRouter.post(
  * not treated as a secret — the caller must also present the matching email
  * before any address or contact detail is returned.
  */
+/** GET /api/orders/mine — every order under the signed-in member's email, newest first. */
+ordersRouter.get(
+  "/mine",
+  requireMember,
+  asyncHandler(async (req, res) => {
+    const email = req.member?.email;
+    if (!email) throw new HttpError(401, "Member sign-in is required");
+    if (!db) throw new HttpError(503, "Order history requires a database");
+
+    // Case-insensitive: orders carried over from the previous store kept the
+    // email exactly as the customer typed it at the time.
+    const orders = await db
+      .select()
+      .from(schema.orders)
+      .where(sql`lower(${schema.orders.email}) = ${email.toLowerCase()}`)
+      .orderBy(desc(schema.orders.createdAt))
+      .limit(100);
+    const ids = orders.map((o) => o.id);
+    const items = ids.length
+      ? await db.select().from(schema.orderItems).where(inArray(schema.orderItems.orderId, ids))
+      : [];
+
+    res.json({
+      data: orders.map((o) => ({
+        orderNumber: o.orderNumber,
+        status: o.status,
+        promoCode: o.promoCode,
+        discountCents: o.discountCents,
+        totalCents: o.totalCents,
+        totalFormatted: money(o.totalCents),
+        trackingNumber: o.trackingNumber,
+        trackingUrl: o.trackingUrl,
+        createdAt: o.createdAt,
+        items: items
+          .filter((i) => i.orderId === o.id)
+          .map((i) => ({ name: i.name, dosage: i.dosage, quantity: i.quantity, lineTotalCents: i.lineTotalCents })),
+      })),
+    });
+  }),
+);
+
 ordersRouter.get(
   "/:orderNumber",
   asyncHandler(async (req, res) => {
@@ -155,6 +217,8 @@ ordersRouter.get(
       data: {
         orderNumber: order.orderNumber,
         status: order.status,
+        promoCode: order.promoCode,
+        discountCents: order.discountCents,
         totalCents: order.totalCents,
         totalFormatted: money(order.totalCents),
         trackingNumber: order.trackingNumber,

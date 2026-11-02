@@ -200,6 +200,7 @@ export function OrderTable({
                         </button>
                       )}
                     </div>
+                    {o.promoCode && <p className="mt-1 text-right text-[11px] text-emerald-600">Promo {o.promoCode} −${((o.discountCents ?? 0) / 100).toFixed(2)}</p>}
                     {o.adminNote && <p className="mt-1 text-right text-[11px] text-amber-600">{o.adminNote}</p>}
                   </td>
                 </tr>

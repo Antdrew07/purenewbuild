@@ -12,7 +12,7 @@ export class MemberAuthError extends Error {
   }
 }
 
-async function request(path: "/register" | "/login", body: Record<string, unknown>): Promise<MemberSession> {
+async function request(path: "/register" | "/login" | "/reset", body: Record<string, unknown>): Promise<MemberSession> {
   if (!API_URL) throw new MemberAuthError(503, "Member access is not configured yet.");
   let response: Response;
   try {
@@ -36,4 +36,27 @@ export function registerMember(input: { email: string; password: string; turnsti
 
 export function signInMember(input: { email: string; password: string; turnstileToken: string }) {
   return request("/login", input);
+}
+
+/** Always resolves on a 2xx — the API deliberately does not say whether the address exists. */
+export async function forgotPassword(input: { email: string; turnstileToken: string }): Promise<void> {
+  if (!API_URL) throw new MemberAuthError(503, "Member access is not configured yet.");
+  let response: Response;
+  try {
+    response = await fetch(`${API_URL}/api/members/forgot`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(input),
+    });
+  } catch {
+    throw new MemberAuthError(0, "Could not reach member access. Please try again.");
+  }
+  if (!response.ok) {
+    const json = (await response.json().catch(() => null)) as { error?: string } | null;
+    throw new MemberAuthError(response.status, json?.error ?? "Could not send the reset email.");
+  }
+}
+
+export function resetPassword(input: { token: string; password: string }) {
+  return request("/reset", input);
 }

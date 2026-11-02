@@ -9,6 +9,8 @@ export interface PlacedOrder {
   shippingCents: number;
   totalCents: number;
   totalFormatted: string;
+  promoCode?: string | null;
+  discountCents?: number;
   items: { name: string; dosage: string; quantity: number; lineTotalCents: number }[];
   payment: { cashapp: string; venmo: string; cashappHandle: string; venmoHandle: string };
 }
@@ -24,6 +26,7 @@ export interface PlaceOrderInput {
   postalCode: string;
   country?: string;
   customerNote?: string;
+  promoCode?: string;
   items: { slug: string; quantity: number }[];
 }
 
@@ -75,4 +78,31 @@ export async function lookupOrder(orderNumber: string, email: string) {
   const json = (await res.json().catch(() => null)) as { data?: unknown; error?: string } | null;
   if (!res.ok || !json?.data) throw new OrderError(res.status, json?.error ?? "Order not found");
   return json.data as PlacedOrder & { trackingNumber?: string | null; trackingUrl?: string | null };
+}
+
+export interface MemberOrder {
+  orderNumber: string;
+  status: string;
+  promoCode?: string | null;
+  discountCents?: number;
+  totalCents: number;
+  totalFormatted: string;
+  trackingNumber: string | null;
+  trackingUrl: string | null;
+  createdAt: string;
+  items: { name: string; dosage: string; quantity: number; lineTotalCents: number }[];
+}
+
+/** The signed-in member's order history, newest first. */
+export async function myOrders(memberToken: string): Promise<MemberOrder[]> {
+  if (!API_URL) throw new OrderError(503, "Order history is not available yet.");
+  let res: Response;
+  try {
+    res = await fetch(`${API_URL}/api/orders/mine`, { headers: { Authorization: `Bearer ${memberToken}` } });
+  } catch {
+    throw new OrderError(0, "Could not reach the server. Check your connection and try again.");
+  }
+  const json = (await res.json().catch(() => null)) as { data?: MemberOrder[]; error?: string } | null;
+  if (!res.ok || !json?.data) throw new OrderError(res.status, json?.error ?? "Could not load your orders");
+  return json.data;
 }

@@ -13,6 +13,8 @@ import { adminRouter } from "./routes/admin.js";
 import { ordersRouter } from "./routes/orders.js";
 import { adminOrdersRouter } from "./routes/adminOrders.js";
 import { membersRouter } from "./routes/members.js";
+import { promoRouter } from "./routes/promo.js";
+import { ensureSchema } from "./db/ensure.js";
 import { errorHandler, notFound } from "./middleware/error.js";
 
 const app = express();
@@ -37,6 +39,7 @@ app.use("/api/categories", categoriesRouter);
 app.use("/api/contact", contactRouter);
 app.use("/api/orders", ordersRouter);
 app.use("/api/members", membersRouter);
+app.use("/api/promo", promoRouter);
 app.use("/api/admin", authRouter);
 app.use("/api/admin", adminRouter);
 app.use("/api/admin", adminOrdersRouter);
@@ -44,9 +47,15 @@ app.use("/api/admin", adminOrdersRouter);
 app.use(notFound);
 app.use(errorHandler);
 
-app.listen(env.PORT, () => {
-  console.log(`[api] listening on :${env.PORT} (${repo.mode} mode)`);
-  if (repo.mode === "demo") {
-    console.log("[api] no DATABASE_URL — serving the seed catalog read-only");
-  }
-});
+// Schema catch-up runs before the first request; a failure is logged loudly
+// but still lets the process come up so the deploy's logs explain itself.
+ensureSchema()
+  .catch((err) => console.error("[db] schema ensure failed:", err))
+  .finally(() => {
+    app.listen(env.PORT, () => {
+      console.log(`[api] listening on :${env.PORT} (${repo.mode} mode)`);
+      if (repo.mode === "demo") {
+        console.log("[api] no DATABASE_URL — serving the seed catalog read-only");
+      }
+    });
+  });

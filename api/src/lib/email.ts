@@ -58,6 +58,8 @@ export interface OrderEmailData {
   name: string;
   email: string;
   totalCents: number;
+  discountCents?: number;
+  promoCode?: string | null;
   items: { name: string; dosage: string; quantity: number; lineTotalCents: number }[];
 }
 
@@ -84,7 +86,11 @@ export async function sendOrderPlaced(o: OrderEmailData): Promise<boolean> {
       <div style="color:#6b7280;font-size:12px;margin-top:6px;">Without it we cannot match your payment to this order.</div>
     </div>
 
-    <table style="width:100%;border-collapse:collapse;font-size:14px;margin-bottom:8px;">${rows}</table>
+    <table style="width:100%;border-collapse:collapse;font-size:14px;margin-bottom:8px;">${rows}${
+      o.discountCents && o.discountCents > 0
+        ? `<tr><td style="padding:6px 0;color:#047857;">Promo ${o.promoCode ?? ""}</td><td style="padding:6px 0;text-align:right;color:#047857;font-weight:600;">−${money(o.discountCents)}</td></tr>`
+        : ""
+    }</table>
     <table style="width:100%;border-collapse:collapse;font-size:16px;border-top:1px solid #e5e7eb;">
       <tr><td style="padding:10px 0;font-weight:700;color:#111827;">Total to send</td>
           <td style="padding:10px 0;text-align:right;font-weight:800;color:#111827;">${money(o.totalCents)}</td></tr>
@@ -111,6 +117,7 @@ export async function sendOrderPlaced(o: OrderEmailData): Promise<boolean> {
     `Total to send: ${money(o.totalCents)}\n\n` +
     `Cash App: ${pay.cashapp}\nVenmo: ${pay.venmo}\n\n` +
     o.items.map((i) => `  ${i.name}${i.dosage ? ` ${i.dosage}` : ""} x${i.quantity}  ${money(i.lineTotalCents)}`).join("\n") +
+    (o.discountCents && o.discountCents > 0 ? `\n  Promo ${o.promoCode ?? ""}  -${money(o.discountCents)}` : "") +
     `\n\nOnce we verify the transfer we will approve the order and email your tracking number.\n` +
     `Research use only — not for human consumption.`;
 
@@ -164,7 +171,7 @@ export async function sendOwnerNewOrder(o: OrderEmailData): Promise<boolean> {
   return send({
     to: [env.OWNER_EMAIL],
     replyTo: o.email,
-    subject: `New order ${o.orderNumber} — ${money(o.totalCents)}`,
+    subject: `New order ${o.orderNumber} — ${money(o.totalCents)}${o.promoCode ? ` (promo ${o.promoCode})` : ""}`,
     html: shell(
       `<p style="color:#111827;font-weight:700;">New order ${o.orderNumber} — ${money(o.totalCents)}</p>` +
         `<p style="color:#4b5563;">${o.name} &lt;${o.email}&gt;</p>` +
@@ -173,4 +180,23 @@ export async function sendOwnerNewOrder(o: OrderEmailData): Promise<boolean> {
     ),
     text: `New order ${o.orderNumber} — ${money(o.totalCents)}\n${o.name} <${o.email}>\n\n${lines}\n`,
   });
+}
+
+/** Single-use reset link. Sent only when the address has an account; the API
+ *  answers the same either way so addresses cannot be enumerated. */
+export async function sendPasswordReset(o: { email: string; resetUrl: string }): Promise<boolean> {
+  const html = shell(`
+    <p style="margin:0 0 6px;color:#111827;font-size:18px;font-weight:700;">Reset your password</p>
+    <p style="margin:0 0 20px;color:#4b5563;line-height:1.6;">
+      Someone asked to reset the password for this Pure Peptide account. The link below works once and expires in one hour.
+    </p>
+    <a href="${o.resetUrl}" style="display:inline-block;background:#000;color:#fff;text-decoration:none;padding:14px 22px;border-radius:10px;font-weight:700;">Choose a new password</a>
+    <p style="margin:22px 0 0;color:#6b7280;font-size:13px;line-height:1.6;">
+      If you did not request this, you can ignore this email — your password will not change.
+    </p>
+  `);
+  const text =
+    `Reset your Pure Peptide password (the link works once and expires in one hour):\n${o.resetUrl}\n\n` +
+    `If you did not request this, ignore this email — your password will not change.`;
+  return send({ to: [o.email], subject: "Reset your Pure Peptide password", html, text });
 }
