@@ -15,6 +15,7 @@ import { adminOrdersRouter } from "./routes/adminOrders.js";
 import { membersRouter } from "./routes/members.js";
 import { promoRouter } from "./routes/promo.js";
 import { loyaltyRouter } from "./routes/loyalty.js";
+import { chatRouter } from "./routes/chat.js";
 import { ensureSchema } from "./db/ensure.js";
 import { errorHandler, notFound } from "./middleware/error.js";
 
@@ -42,6 +43,7 @@ app.use("/api/orders", ordersRouter);
 app.use("/api/members", membersRouter);
 app.use("/api/promo", promoRouter);
 app.use("/api/loyalty", loyaltyRouter);
+app.use("/api/chat", chatRouter);
 app.use("/api/admin", authRouter);
 app.use("/api/admin", adminRouter);
 app.use("/api/admin", adminOrdersRouter);

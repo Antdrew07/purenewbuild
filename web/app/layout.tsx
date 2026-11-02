@@ -3,6 +3,7 @@ import { Inter, JetBrains_Mono, Saira_Condensed } from "next/font/google";
 import { Nav } from "@/components/site/Nav";
 import { Footer } from "@/components/site/Footer";
 import { ReturnToTop } from "@/components/site/ReturnToTop";
+import { ChatWidget } from "@/components/site/ChatWidget";
 import { PageTransition } from "@/components/fx/PageTransition";
 import { MemberAccessGate } from "@/components/site/MemberAccessGate";
 import { Providers } from "./providers";
@@ -73,6 +74,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <main id="main"><PageTransition>{children}</PageTransition></main>
             <Footer />
             <ReturnToTop />
+            <ChatWidget />
           </MemberAccessGate>
         </Providers>
       </body>
