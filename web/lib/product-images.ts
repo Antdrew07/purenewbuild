@@ -7,6 +7,7 @@ export const CUSTOM_PRODUCT_IMAGES: Record<string, string> = {
   "ghk-cu-face-serum-30ml": "/products/ghk-cu-face-serum.png",
   "ghk-cu-snap-8-face-cream": "/products/ghk-cu-snap8-face-cream.png",
   "ghk-cu-snap-8-methylene-blue-balm": "/products/ghk-cu-snap8-methylene-blue-balm.png",
+  "dragon-blood-anti-aging-face-cream-50g": "/products/dragon-blood-face-cream.png",
 };
 
 export function productImage(p: { slug: string; imageUrl?: string | null }): string | null {

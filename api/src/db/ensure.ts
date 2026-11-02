@@ -1,5 +1,6 @@
 import { sql } from "drizzle-orm";
-import { db } from "./index.js";
+import { db, schema } from "./index.js";
+import { CATALOG, describe, slugify } from "../lib/catalog.js";
 
 /**
  * Idempotent schema catch-up, run once at boot. The project has no migration
@@ -9,6 +10,8 @@ import { db } from "./index.js";
  */
 export async function ensureSchema(): Promise<void> {
   if (!db) return;
+
+  await ensureCatalogAdditions();
 
   await db.execute(sql`ALTER TABLE member_users
     ADD COLUMN IF NOT EXISTS reset_token text,
@@ -128,5 +131,46 @@ export async function ensureSchema(): Promise<void> {
       ON CONFLICT (legacy_id) WHERE legacy_id IS NOT NULL DO NOTHING`);
   } catch (err) {
     console.warn("[db] legacy promo/credit carry-over skipped:", (err as Error).message);
+  }
+}
+
+/**
+ * New entries in catalog.json are inserted on boot so a product added in git
+ * shows up in the live store without a manual seed. Rows that already exist
+ * are never touched: prices, status and images edited in the admin panel win.
+ */
+async function ensureCatalogAdditions(): Promise<void> {
+  if (!db) return;
+  try {
+    const cats = await db.select({ id: schema.categories.id, slug: schema.categories.slug }).from(schema.categories);
+    const catIds = new Map(cats.map((c) => [c.slug, c.id]));
+    for (const [i, c] of CATALOG.categories.entries()) {
+      if (catIds.has(c.slug)) continue;
+      const [row] = await db.insert(schema.categories).values({ slug: c.slug, name: c.name, blurb: c.blurb, sortOrder: i })
+        .onConflictDoNothing().returning({ id: schema.categories.id });
+      if (row) catIds.set(c.slug, row.id);
+    }
+    const existing = new Set((await db.select({ slug: schema.products.slug }).from(schema.products)).map((r) => r.slug));
+    let added = 0;
+    for (const p of CATALOG.products) {
+      const slug = slugify(p.name, p.dosage);
+      if (existing.has(slug)) continue;
+      await db.insert(schema.products).values({
+        slug,
+        name: p.name,
+        dosage: p.dosage,
+        priceCents: p.price === null ? null : Math.round(p.price * 100),
+        categoryId: catIds.get(p.category) ?? null,
+        status: p.status,
+        featured: Boolean(p.featured),
+        form: p.form ?? "vial",
+        note: p.note ?? null,
+        description: describe(p),
+      }).onConflictDoNothing();
+      added++;
+    }
+    if (added) console.log(`[db] catalog: added ${added} new product(s) from catalog.json`);
+  } catch (err) {
+    console.warn("[db] catalog catch-up skipped:", (err as Error).message);
   }
 }
