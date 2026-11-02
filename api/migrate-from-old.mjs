@@ -80,7 +80,8 @@ async function main() {
       type text, points integer, balance_after integer,
       description text, created_at timestamp
     )`);
-    await pg.unsafe(`CREATE TABLE IF NOT EXISTS legacy_promo_codes (
+    await pg.unsafe(`ALTER TABLE orders ADD COLUMN IF NOT EXISTS promo_code text, ADD COLUMN IF NOT EXISTS discount_cents integer NOT NULL DEFAULT 0`);
+  await pg.unsafe(`CREATE TABLE IF NOT EXISTS legacy_promo_codes (
       legacy_id integer PRIMARY KEY,
       code text, affiliate_name text,
       discount_percent numeric, commission_percent numeric,
@@ -156,6 +157,8 @@ async function main() {
     if (rawPm !== "venmo" && rawPm !== "cashapp") noteBits.push(`paid via ${rawPm}`);
     if (o.paypalOrderId) noteBits.push(`paypal ${o.paypalOrderId}`);
     const adminNote = noteBits.join(" · ");
+    const promoCode = o.promoCode ? String(o.promoCode).toUpperCase().replace(/\s+/g, "") : null;
+    const discountCents = o.promoCode ? centsOf(o.discountAmount) : 0;
     const paid = status === "paid" || status === "shipped";
     const params = [
       o.orderNumber,
@@ -184,13 +187,15 @@ async function main() {
       status === "shipped" ? o.updatedAt || o.createdAt : null,
       o.createdAt || new Date(),
       o.updatedAt || o.createdAt || new Date(),
+      promoCode,
+      discountCents,
     ];
     if (!DRY) {
       const rows = await pg.unsafe(
         `INSERT INTO orders (order_number,email,name,phone,address1,address2,city,state,postal_code,country,
            subtotal_cents,shipping_cents,total_cents,status,payment_method,customer_note,admin_note,
-           shippo_transaction_id,tracking_number,tracking_url,label_url,approved_at,approved_by,shipped_at,created_at,updated_at)
-         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14::order_status,$15::payment_method,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26)
+           shippo_transaction_id,tracking_number,tracking_url,label_url,approved_at,approved_by,shipped_at,created_at,updated_at,promo_code,discount_cents)
+         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14::order_status,$15::payment_method,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26,$27,$28)
          ON CONFLICT (order_number) DO UPDATE SET
            email=EXCLUDED.email,name=EXCLUDED.name,address1=EXCLUDED.address1,city=EXCLUDED.city,state=EXCLUDED.state,
            postal_code=EXCLUDED.postal_code,country=EXCLUDED.country,subtotal_cents=EXCLUDED.subtotal_cents,
@@ -198,7 +203,8 @@ async function main() {
            payment_method=EXCLUDED.payment_method,customer_note=EXCLUDED.customer_note,admin_note=EXCLUDED.admin_note,
            shippo_transaction_id=EXCLUDED.shippo_transaction_id,tracking_number=EXCLUDED.tracking_number,
            label_url=EXCLUDED.label_url,approved_at=EXCLUDED.approved_at,approved_by=EXCLUDED.approved_by,
-           shipped_at=EXCLUDED.shipped_at,created_at=EXCLUDED.created_at,updated_at=EXCLUDED.updated_at
+           shipped_at=EXCLUDED.shipped_at,created_at=EXCLUDED.created_at,updated_at=EXCLUDED.updated_at,
+           promo_code=EXCLUDED.promo_code,discount_cents=EXCLUDED.discount_cents
          RETURNING id`,
         params
       );
