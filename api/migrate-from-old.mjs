@@ -84,7 +84,8 @@ async function main() {
     ADD COLUMN IF NOT EXISTS shipping_method text NOT NULL DEFAULT 'standard'`);
   await pg.unsafe(`ALTER TABLE contact_messages ADD COLUMN IF NOT EXISTS admin_reply text, ADD COLUMN IF NOT EXISTS replied_at timestamp`);
   await pg.unsafe(`ALTER TABLE member_users ADD COLUMN IF NOT EXISTS points_balance integer NOT NULL DEFAULT 0,
-    ADD COLUMN IF NOT EXISTS points_lifetime integer NOT NULL DEFAULT 0, ADD COLUMN IF NOT EXISTS points_seeded_at timestamp`);
+    ADD COLUMN IF NOT EXISTS points_lifetime integer NOT NULL DEFAULT 0, ADD COLUMN IF NOT EXISTS points_seeded_at timestamp,
+    ADD COLUMN IF NOT EXISTS affiliate_code text`);
   await pg.unsafe(`CREATE TABLE IF NOT EXISTS loyalty_transactions (
     id serial PRIMARY KEY, legacy_id integer, email text NOT NULL, order_number text, type text NOT NULL,
     points integer NOT NULL, balance_after integer NOT NULL, description text NOT NULL DEFAULT '', created_at timestamp NOT NULL DEFAULT now())`);
@@ -130,11 +131,12 @@ async function main() {
     const ph = u.passwordHash || "legacy-no-password-reset-required";
     if (!DRY) {
       await pg.unsafe(
-        `INSERT INTO member_users (email, password_hash, age_verified_at, created_at, updated_at, points_balance, points_lifetime, points_seeded_at)
-         VALUES ($1,$2,$3,$4,$4,$5,$6,now())
+        `INSERT INTO member_users (email, password_hash, age_verified_at, created_at, updated_at, points_balance, points_lifetime, points_seeded_at, affiliate_code)
+         VALUES ($1,$2,$3,$4,$4,$5,$6,now(),$7)
          ON CONFLICT (email) DO UPDATE SET password_hash=EXCLUDED.password_hash, age_verified_at=EXCLUDED.age_verified_at,
-           points_balance=EXCLUDED.points_balance, points_lifetime=EXCLUDED.points_lifetime, points_seeded_at=now()`,
-        [u.email, ph, ageVerified, u.createdAt || new Date(), Number(u.pointsBalance ?? 0), Number(u.pointsLifetime ?? 0)]
+           points_balance=EXCLUDED.points_balance, points_lifetime=EXCLUDED.points_lifetime, points_seeded_at=now(),
+           affiliate_code=coalesce(EXCLUDED.affiliate_code, member_users.affiliate_code)`,
+        [u.email, ph, ageVerified, u.createdAt || new Date(), Number(u.pointsBalance ?? 0), Number(u.pointsLifetime ?? 0), u.affiliateCode ? String(u.affiliateCode).toUpperCase().trim() : null]
       );
       await pg.unsafe(
         `INSERT INTO legacy_loyalty_balances (legacy_user_id,email,name,points_balance,points_lifetime,created_at,affiliate_code)
