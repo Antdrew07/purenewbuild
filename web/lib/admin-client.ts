@@ -114,6 +114,8 @@ export interface AdminOrder {
   name: string;
   email: string;
   status: "awaiting_payment" | "paid" | "shipped" | "cancelled";
+  promoCode?: string | null;
+  discountCents?: number;
   totalCents: number;
   totalFormatted: string;
   trackingNumber: string | null;

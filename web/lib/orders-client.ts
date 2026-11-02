@@ -9,6 +9,8 @@ export interface PlacedOrder {
   shippingCents: number;
   totalCents: number;
   totalFormatted: string;
+  promoCode?: string | null;
+  discountCents?: number;
   items: { name: string; dosage: string; quantity: number; lineTotalCents: number }[];
   payment: { cashapp: string; venmo: string; cashappHandle: string; venmoHandle: string };
 }
@@ -24,6 +26,7 @@ export interface PlaceOrderInput {
   postalCode: string;
   country?: string;
   customerNote?: string;
+  promoCode?: string;
   items: { slug: string; quantity: number }[];
 }
 
@@ -80,6 +83,8 @@ export async function lookupOrder(orderNumber: string, email: string) {
 export interface MemberOrder {
   orderNumber: string;
   status: string;
+  promoCode?: string | null;
+  discountCents?: number;
   totalCents: number;
   totalFormatted: string;
   trackingNumber: string | null;

@@ -8,6 +8,7 @@ import { validateBody } from "../middleware/validate.js";
 import { money } from "../lib/orders.js";
 import { buyLabel } from "../lib/shippo.js";
 import { sendOrderApproved } from "../lib/email.js";
+import { creditAffiliateCommission } from "../lib/promo.js";
 
 export const adminOrdersRouter = Router();
 
@@ -36,6 +37,8 @@ adminOrdersRouter.get(
         name: o.name,
         email: o.email,
         status: o.status,
+        promoCode: o.promoCode,
+        discountCents: o.discountCents,
         totalCents: o.totalCents,
         totalFormatted: money(o.totalCents),
         trackingNumber: o.trackingNumber,
@@ -108,6 +111,14 @@ adminOrdersRouter.post(
       })
       .where(eq(schema.orders.id, id));
 
+    // Payment confirmed: the affiliate behind the code (if any) earns now.
+    const commission = await creditAffiliateCommission(d, {
+      orderNumber: order.orderNumber,
+      email: order.email,
+      totalCents: order.totalCents,
+      promoCode: order.promoCode,
+    });
+
     let label: Awaited<ReturnType<typeof buyLabel>> = { ok: false, reason: "skipped" };
     if (!body.skipLabel) {
       label = await buyLabel({
@@ -172,6 +183,7 @@ adminOrdersRouter.post(
         labelPurchased: label.ok,
         labelError: label.ok ? null : label.reason,
         emailed,
+        commissionCents: commission.creditedCents,
       },
     });
   }),

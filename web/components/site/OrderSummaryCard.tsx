@@ -31,6 +31,12 @@ export function OrderSummaryCard({ order }: { order: MemberOrder }) {
           </li>
         ))}
       </ul>
+      {order.discountCents ? (
+        <p className="flex justify-between py-2.5 text-sm">
+          <span className="text-emerald-600">Promo {order.promoCode}</span>
+          <span className="tabular-nums text-emerald-600">−{formatCents(order.discountCents)}</span>
+        </p>
+      ) : null}
 
       {order.trackingNumber && (
         <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border-hair bg-bg-base/60 px-4 py-3">

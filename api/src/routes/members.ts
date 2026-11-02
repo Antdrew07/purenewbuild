@@ -1,7 +1,8 @@
 import { Router } from "express";
 import bcrypt from "bcryptjs";
 import rateLimit from "express-rate-limit";
-import { eq, sql } from "drizzle-orm";
+import { eq } from "drizzle-orm";
+import { ensureSchema } from "../db/ensure.js";
 import { randomBytes } from "node:crypto";
 import { z } from "zod";
 import { db, schema } from "../db/index.js";
@@ -126,16 +127,10 @@ membersRouter.post(
 
 /* ── password reset ─────────────────────────────────────────────────────── */
 
-/* The reset columns are added on first use: the project has no migration runner
-   yet and ADD COLUMN IF NOT EXISTS is idempotent, so this is safe to repeat. */
-let resetColumnsReady: Promise<void> | null = null;
-function ensureResetColumns(database: NonNullable<typeof db>) {
-  resetColumnsReady ??= database
-    .execute(sql`ALTER TABLE member_users
-      ADD COLUMN IF NOT EXISTS reset_token text,
-      ADD COLUMN IF NOT EXISTS reset_token_expiry timestamp`)
-    .then(() => undefined);
-  return resetColumnsReady;
+/* Columns are created at boot by ensureSchema(); this keeps the call sites as a
+   cheap belt-and-braces for a process that raced the ensure. */
+function ensureResetColumns(_database: NonNullable<typeof db>) {
+  return ensureSchema();
 }
 
 const ForgotBody = Credentials.omit({ password: true });

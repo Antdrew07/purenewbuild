@@ -81,6 +81,12 @@ export function PaymentPanel({ order }: { order: PlacedOrder }) {
             </li>
           ))}
         </ul>
+        {order.discountCents ? (
+          <p className="mt-2 flex justify-between border-t border-border-hair pt-2 text-sm">
+            <span className="text-emerald-600">Promo {order.promoCode}</span>
+            <span className="tabular-nums text-emerald-600">−{formatCents(order.discountCents)}</span>
+          </p>
+        ) : null}
 
         <div className="mt-6 space-y-3">
           <a

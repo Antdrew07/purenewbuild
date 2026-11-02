@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { validatePromo, type PromoInfo } from "@/lib/promo-client";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { formatCents, useCart } from "@/lib/cart";
@@ -36,6 +37,30 @@ export default function CheckoutPage() {
   const [errors, setErrors] = useState<Partial<Record<Field, string>>>({});
   const [pending, setPending] = useState(false);
   const [placed, setPlaced] = useState<PlacedOrder | null>(null);
+  const [promoInput, setPromoInput] = useState("");
+  const [promo, setPromo] = useState<PromoInfo | null>(null);
+  const [promoBusy, setPromoBusy] = useState(false);
+  const [promoMessage, setPromoMessage] = useState("");
+  const discountCents = promo?.valid && promo.discountPercent
+    ? Math.min(subtotalCents, Math.max(0, Math.round((subtotalCents * promo.discountPercent) / 100)))
+    : 0;
+
+  async function applyPromo() {
+    const code = promoInput.trim();
+    if (!code) return;
+    setPromoBusy(true);
+    setPromoMessage("");
+    try {
+      const info = await validatePromo(code);
+      setPromo(info.valid ? info : null);
+      setPromoMessage(info.message);
+    } catch (err) {
+      setPromo(null);
+      setPromoMessage(err instanceof Error ? err.message : "Could not check that code right now.");
+    } finally {
+      setPromoBusy(false);
+    }
+  }
 
   useEffect(() => {
     if (member?.email) setForm((current) => ({ ...current, email: member.email }));
@@ -92,6 +117,7 @@ export default function CheckoutPage() {
         state: form.state.trim(),
         postalCode: form.postalCode.trim(),
         customerNote: form.customerNote.trim() || undefined,
+        promoCode: promo?.valid && promo.code ? promo.code : undefined,
         items: lines.map((l) => ({ slug: l.slug, quantity: l.quantity })),
       }, token);
       // Only clear once the server has the order — a failed request must not
@@ -176,10 +202,50 @@ export default function CheckoutPage() {
               </li>
             ))}
           </ul>
-          <div className="mt-4 flex justify-between border-t border-border-hair pt-4">
+          <div className="mt-4 border-t border-border-hair pt-4">
+            <label htmlFor="promoCode" className="mb-1.5 block font-mono text-[10px] uppercase tracking-widest text-text-dim">
+              Promo code
+            </label>
+            <div className="flex gap-2">
+              <input
+                id="promoCode"
+                value={promoInput}
+                onChange={(e) => setPromoInput(e.target.value.toUpperCase())}
+                onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); void applyPromo(); } }}
+                placeholder="Optional"
+                autoComplete="off"
+                className="commerce-input min-h-11 w-full rounded-xl border border-border-hair bg-bg-base/60 px-4 py-2.5 text-sm uppercase text-text-primary placeholder:normal-case placeholder:text-text-dim focus:border-red/60 focus:outline-none"
+              />
+              <button
+                type="button"
+                onClick={() => void applyPromo()}
+                disabled={promoBusy || !promoInput.trim()}
+                className="min-h-11 shrink-0 rounded-xl border border-border-hair px-4 text-xs font-semibold uppercase tracking-wider text-text-secondary transition-colors hover:border-red/50 hover:text-red disabled:opacity-50"
+              >
+                {promoBusy ? "Checking…" : "Apply"}
+              </button>
+            </div>
+            {promoMessage && (
+              <p role="status" className={`mt-2 text-xs ${promo?.valid ? "text-emerald-600" : "text-red"}`}>{promoMessage}</p>
+            )}
+          </div>
+
+          <dl className="mt-4 space-y-1.5 border-t border-border-hair pt-4 text-sm">
+            <div className="flex justify-between">
+              <dt className="text-text-secondary">Subtotal</dt>
+              <dd className="tabular-nums text-text-primary">{formatCents(subtotalCents)}</dd>
+            </div>
+            {discountCents > 0 && (
+              <div className="flex justify-between">
+                <dt className="text-emerald-600">Promo {promo?.code}</dt>
+                <dd className="tabular-nums text-emerald-600">−{formatCents(discountCents)}</dd>
+              </div>
+            )}
+          </dl>
+          <div className="mt-3 flex justify-between border-t border-border-hair pt-4">
             <span className="font-bold text-text-primary">Total</span>
             <span className="font-display text-2xl font-black tabular-nums text-text-primary">
-              {formatCents(subtotalCents)}
+              {formatCents(subtotalCents - discountCents)}
             </span>
           </div>
 
