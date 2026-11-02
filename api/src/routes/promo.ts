@@ -22,7 +22,7 @@ promoRouter.get(
     if (!db) throw new HttpError(503, "Promo codes require a configured database");
     const promo = await findActivePromo(db, String(req.query.code ?? ""));
     if (!promo) {
-      res.json({ data: { valid: false, code: null, discountPercent: null, affiliateName: null, message: "Invalid or expired promo code" } });
+      res.json({ data: { valid: false, code: null, discountPercent: null, affiliateName: null, exclusive: false, message: "Invalid or expired promo code" } });
       return;
     }
     res.json({
@@ -31,6 +31,7 @@ promoRouter.get(
         code: promo.code,
         discountPercent: promo.discountPercent,
         affiliateName: promo.affiliateName,
+        exclusive: promo.exclusive,
         message: `${promo.code} — ${promo.discountPercent}% off applied!`,
       },
     });

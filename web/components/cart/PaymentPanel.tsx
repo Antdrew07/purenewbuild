@@ -9,7 +9,7 @@ import type { PlacedOrder } from "@/lib/orders-client";
 /**
  * Post-checkout payment step.
  *
- * The order number is the only link between a Venmo/Cash App transfer and the
+ * The order number is the only link between a Venmo transfer and the
  * order, so it is the loudest element on the page and is copyable in one tap —
  * a mistyped note means a payment nobody can match.
  */
@@ -94,8 +94,14 @@ export function PaymentPanel({ order }: { order: PlacedOrder }) {
               <span className="tabular-nums text-violet-600">−{formatCents(order.pointsDiscountCents)}</span>
             </p>
           ) : null}
+          {order.creditDiscountCents ? (
+            <p className="flex justify-between">
+              <span className="text-emerald-600">Affiliate credit</span>
+              <span className="tabular-nums text-emerald-600">−{formatCents(order.creditDiscountCents)}</span>
+            </p>
+          ) : null}
           <p className="flex justify-between">
-            <span className="text-text-secondary">Shipping{order.shippingMethod === "next_day" ? " (next-day)" : ""}</span>
+            <span className="text-text-secondary">Shipping</span>
             <span className="tabular-nums text-text-primary">{order.shippingCents > 0 ? formatCents(order.shippingCents) : "Free"}</span>
           </p>
           {order.pointsEarned ? (
@@ -104,16 +110,18 @@ export function PaymentPanel({ order }: { order: PlacedOrder }) {
         </div>
 
         <div className="mt-6 space-y-3">
-          <a
-            href={order.payment.cashapp}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-[#00B841] px-5 text-sm font-bold text-white transition-all hover:brightness-110"
-          >
-            Pay {order.totalFormatted} with Cash App
-            <span className="font-mono opacity-90">{order.payment.cashappHandle}</span>
-            <span className="sr-only">(opens in a new tab)</span>
-          </a>
+          {order.payment.cashapp ? (
+            <a
+              href={order.payment.cashapp}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-[#00B841] px-5 text-sm font-bold text-white transition-all hover:brightness-110"
+            >
+              Pay {order.totalFormatted} with Cash App
+              <span className="font-mono opacity-90">{order.payment.cashappHandle}</span>
+              <span className="sr-only">(opens in a new tab)</span>
+            </a>
+          ) : null}
           <a
             href={order.payment.venmo}
             target="_blank"
@@ -132,7 +140,7 @@ export function PaymentPanel({ order }: { order: PlacedOrder }) {
           What happens next
         </h2>
         <ol className="mt-3 space-y-2">
-          <li><strong className="text-text-primary">1.</strong> Send {order.totalFormatted} using either option above, with <strong className="text-text-primary">{order.orderNumber}</strong> in the note.</li>
+          <li><strong className="text-text-primary">1.</strong> Send {order.totalFormatted} with Venmo above, with <strong className="text-text-primary">{order.orderNumber}</strong> in the note.</li>
           <li><strong className="text-text-primary">2.</strong> We verify the transfer and approve your order.</li>
           <li><strong className="text-text-primary">3.</strong> You get an email with your tracking number.</li>
         </ol>

@@ -66,6 +66,7 @@ export interface OrderEmailData {
   shippingCents?: number;
   shippingMethod?: string;
   pointsDiscountCents?: number;
+  creditDiscountCents?: number;
   items: { name: string; dosage: string; quantity: number; lineTotalCents: number }[];
 }
 
@@ -83,7 +84,7 @@ export async function sendOrderPlaced(o: OrderEmailData): Promise<boolean> {
   const html = shell(`
     <p style="margin:0 0 6px;color:#111827;font-size:18px;font-weight:700;">Thanks, ${o.name} — your order is in.</p>
     <p style="margin:0 0 22px;color:#4b5563;line-height:1.6;">
-      We are holding it until payment lands. Send the total using either option below.
+      We are holding it until payment lands. Send the total with Venmo below and put your order number in the note.
     </p>
 
     <div style="border:2px solid #E8121C;background:#fff6f6;border-radius:12px;padding:16px;text-align:center;margin-bottom:22px;">
@@ -101,6 +102,10 @@ export async function sendOrderPlaced(o: OrderEmailData): Promise<boolean> {
         ? `<tr><td style="padding:6px 0;color:#6d28d9;">Loyalty points</td><td style="padding:6px 0;text-align:right;color:#6d28d9;font-weight:600;">−${money(o.pointsDiscountCents)}</td></tr>`
         : ""
     }${
+      o.creditDiscountCents && o.creditDiscountCents > 0
+        ? `<tr><td style="padding:6px 0;color:#047857;">Affiliate credit</td><td style="padding:6px 0;text-align:right;color:#047857;font-weight:600;">−${money(o.creditDiscountCents)}</td></tr>`
+        : ""
+    }${
       o.shippingCents !== undefined
         ? `<tr><td style="padding:6px 0;color:#374151;">Shipping${o.shippingMethod === "next_day" ? " (next-day)" : ""}</td><td style="padding:6px 0;text-align:right;color:#111827;font-weight:600;">${o.shippingCents > 0 ? money(o.shippingCents) : "Free"}</td></tr>`
         : ""
@@ -110,10 +115,11 @@ export async function sendOrderPlaced(o: OrderEmailData): Promise<boolean> {
           <td style="padding:10px 0;text-align:right;font-weight:800;color:#111827;">${money(o.totalCents)}</td></tr>
     </table>
 
-    <div style="margin-top:22px;">
-      <a href="${pay.cashapp}" style="display:block;background:#00B841;color:#ffffff;text-decoration:none;text-align:center;padding:14px;border-radius:10px;font-weight:700;margin-bottom:10px;">
-        Pay ${money(o.totalCents)} with Cash App — ${pay.cashappHandle}
-      </a>
+    <div style="margin-top:22px;">${
+      pay.cashapp
+        ? `<a href="${pay.cashapp}" style="display:block;background:#00B841;color:#ffffff;text-decoration:none;text-align:center;padding:14px;border-radius:10px;font-weight:700;margin-bottom:10px;">Pay ${money(o.totalCents)} with Cash App — ${pay.cashappHandle}</a>`
+        : ""
+    }
       <a href="${pay.venmo}" style="display:block;background:#008CFF;color:#ffffff;text-decoration:none;text-align:center;padding:14px;border-radius:10px;font-weight:700;">
         Pay ${money(o.totalCents)} with Venmo — ${pay.venmoHandle}
       </a>
@@ -129,10 +135,11 @@ export async function sendOrderPlaced(o: OrderEmailData): Promise<boolean> {
     `Thanks, ${o.name} — your order is in.\n\n` +
     `PAYMENT NOTE: ${o.orderNumber}  (required — we match payments on this)\n` +
     `Total to send: ${money(o.totalCents)}\n\n` +
-    `Cash App: ${pay.cashapp}\nVenmo: ${pay.venmo}\n\n` +
+    `${pay.cashapp ? `Cash App: ${pay.cashapp}\n` : ""}Venmo: ${pay.venmo} (${pay.venmoHandle})\n\n` +
     o.items.map((i) => `  ${i.name}${i.dosage ? ` ${i.dosage}` : ""} x${i.quantity}  ${money(i.lineTotalCents)}`).join("\n") +
     (o.discountCents && o.discountCents > 0 ? `\n  Promo ${o.promoCode ?? ""}  -${money(o.discountCents)}` : "") +
     (o.pointsDiscountCents && o.pointsDiscountCents > 0 ? `\n  Loyalty points  -${money(o.pointsDiscountCents)}` : "") +
+    (o.creditDiscountCents && o.creditDiscountCents > 0 ? `\n  Affiliate credit  -${money(o.creditDiscountCents)}` : "") +
     (o.shippingCents !== undefined ? `\n  Shipping${o.shippingMethod === "next_day" ? " (next-day)" : ""}  ${o.shippingCents > 0 ? money(o.shippingCents) : "Free"}` : "") +
     `\n\nOnce we verify the transfer we will approve the order and email your tracking number.\n` +
     `Research use only — not for human consumption.`;
@@ -228,7 +235,7 @@ export async function sendWelcome(o: { email: string; siteUrl: string }): Promis
     </p>
     <a href="${o.siteUrl}/products" style="display:inline-block;background:#E8121C;color:#ffffff;text-decoration:none;padding:13px 22px;border-radius:10px;font-weight:700;">Browse the catalog</a>
     <p style="margin:22px 0 0;color:#6b7280;font-size:13px;line-height:1.6;">
-      Orders are paid by Cash App or Venmo; the instructions arrive the moment you place one.
+      Orders are paid by Venmo; the instructions arrive the moment you place one.
     </p>
   `);
   const text =

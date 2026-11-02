@@ -10,7 +10,7 @@ import { Panel } from "@/components/ui/Panel";
 const INPUT =
   "admin-input w-full rounded-xl border border-border-hair bg-bg-base/60 px-4 py-2.5 text-sm text-text-primary focus:border-red/60 focus:outline-none";
 
-const EMPTY: PromoInput = { code: "", affiliateName: "", affiliateEmail: "", discountPercent: 10, commissionPercent: 20 };
+const EMPTY: PromoInput = { code: "", affiliateName: "", affiliateEmail: "", discountPercent: 10, commissionPercent: 20, exclusive: false };
 
 /** Promo / affiliate codes with their order stats; create, edit and toggle. */
 export function AffiliatesPanel({ promos, onChanged }: { promos: AffiliateStat[]; onChanged: () => void }) {
@@ -18,10 +18,22 @@ export function AffiliatesPanel({ promos, onChanged }: { promos: AffiliateStat[]
   const [saving, setSaving] = useState(false);
   const [open, setOpen] = useState<number | null>(null);
 
+  const [confirmClear, setConfirmClear] = useState<AffiliateStat | null>(null);
   const totals = promos.reduce(
-    (t, p) => ({ orders: t.orders + p.totalOrders, revenue: t.revenue + p.revenueCents, owed: t.owed + p.commissionOwedCents }),
-    { orders: 0, revenue: 0, owed: 0 },
+    (t, p) => ({ orders: t.orders + p.totalOrders, revenue: t.revenue + p.revenueCents, commission: t.commission + p.commissionCents, owed: t.owed + p.creditBalanceCents }),
+    { orders: 0, revenue: 0, commission: 0, owed: 0 },
   );
+
+  async function clearCredit(p: AffiliateStat) {
+    try {
+      const r = await adminApi.clearPromoCredit(p.id);
+      toast.success(`Cleared ${formatCents(r.clearedCents)} of commission credit`);
+      setConfirmClear(null);
+      onChanged();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Could not clear credit");
+    }
+  }
 
   async function save() {
     if (!form.code.trim() || !form.affiliateName.trim()) { toast.error("Code and affiliate name are required"); return; }
@@ -49,11 +61,12 @@ export function AffiliatesPanel({ promos, onChanged }: { promos: AffiliateStat[]
 
   return (
     <div className="space-y-6">
-      <div className="grid gap-3 sm:grid-cols-3">
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         {[
           ["Affiliate orders", String(totals.orders)],
-          ["Affiliate revenue", formatCents(totals.revenue)],
-          ["Commission owed", formatCents(totals.owed)],
+          ["Revenue via codes", formatCents(totals.revenue)],
+          ["Commission earned", formatCents(totals.commission)],
+          ["Credit owed (unpaid)", formatCents(totals.owed)],
         ].map(([label, value]) => (
           <div key={label} className="admin-stat admin-stat--neutral">
             <p className="font-mono text-[10px] uppercase tracking-widest text-text-dim">{label}</p>
@@ -86,6 +99,10 @@ export function AffiliatesPanel({ promos, onChanged }: { promos: AffiliateStat[]
             <input type="number" min={0} max={100} step={0.5} value={form.commissionPercent} onChange={(e) => setForm({ ...form, commissionPercent: Number(e.target.value) })} className={INPUT} />
           </label>
         </div>
+        <label className="mt-3 flex items-center gap-2 text-xs text-text-secondary">
+          <input type="checkbox" checked={Boolean(form.exclusive)} onChange={(e) => setForm({ ...form, exclusive: e.target.checked })} />
+          Store-wide sale code — cannot be combined with points or affiliate credit
+        </label>
         <div className="mt-4 flex gap-3">
           <Button onClick={() => void save()} disabled={saving}>{saving ? "Saving…" : "Save code"}</Button>
           <Button variant="outline" onClick={() => setForm(EMPTY)}>Clear</Button>
@@ -104,6 +121,8 @@ export function AffiliatesPanel({ promos, onChanged }: { promos: AffiliateStat[]
                     <span className="rounded-lg bg-text-primary px-2.5 py-1 font-mono text-xs font-bold tracking-wider text-bg-base">{p.code}</span>
                     <span className="font-display text-lg font-bold text-text-primary">{p.affiliateName}</span>
                     <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${p.isActive ? "bg-emerald-500/15 text-emerald-600" : "bg-text-dim/20 text-text-secondary"}`}>{p.isActive ? "Active" : "Inactive"}</span>
+                    {p.exclusive && <span className="rounded-full bg-amber-500/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-amber-600">Sale · no stacking</span>}
+                    {p.creditBalanceCents > 0 && <span className="rounded-full bg-red/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-red">Owed {formatCents(p.creditBalanceCents)}</span>}
                   </div>
                   <p className="mt-1 text-xs text-text-secondary">
                     {p.discountPercent}% customer discount · <span className="text-amber-600">{p.commissionPercent}% commission</span>
@@ -111,17 +130,27 @@ export function AffiliatesPanel({ promos, onChanged }: { promos: AffiliateStat[]
                   </p>
                 </div>
                 <div className="flex gap-2">
-                  <Button variant="outline" onClick={() => setForm({ code: p.code, affiliateName: p.affiliateName, affiliateEmail: p.affiliateEmail ?? "", discountPercent: p.discountPercent, commissionPercent: p.commissionPercent })}>Edit</Button>
+                  {p.creditBalanceCents > 0 && <Button variant="outline" onClick={() => setConfirmClear(p)}>Clear credit</Button>}
+                  <Button variant="outline" onClick={() => setForm({ code: p.code, affiliateName: p.affiliateName, affiliateEmail: p.affiliateEmail ?? "", discountPercent: p.discountPercent, commissionPercent: p.commissionPercent, exclusive: p.exclusive })}>Edit</Button>
                   <Button variant="outline" onClick={() => void toggle(p)}>{p.isActive ? "Deactivate" : "Activate"}</Button>
                 </div>
               </div>
+              {confirmClear?.id === p.id && (
+                <div className="mt-3 rounded-xl border border-red/40 bg-red/5 px-4 py-3 text-sm text-text-primary">
+                  Clear <strong>{formatCents(p.creditBalanceCents)}</strong> of spendable credit for <strong>{p.affiliateName}</strong>? This sets their balance to $0 and is recorded in the ledger. Do this after you have paid them out.
+                  <div className="mt-2 flex gap-2">
+                    <Button variant="outline" onClick={() => setConfirmClear(null)}>Cancel</Button>
+                    <Button onClick={() => void clearCredit(p)}>Yes, clear it</Button>
+                  </div>
+                </div>
+              )}
               <div className="mt-4 grid gap-3 sm:grid-cols-5">
                 {[
-                  ["Orders", String(p.totalOrders), ""],
+                  ["Orders", `${p.totalOrders}${p.selfOrders ? ` (${p.selfOrders} own)` : ""}`, ""],
                   ["Revenue", formatCents(p.revenueCents), ""],
                   ["Discounts given", formatCents(p.discountCents), ""],
-                  ["Commission owed", formatCents(p.commissionOwedCents), "text-amber-600"],
-                  ["Credited to ledger", formatCents(p.commissionCreditedCents), "text-emerald-600"],
+                  ["Commission earned", formatCents(p.commissionCents), "text-amber-600"],
+                  ["Credit owed", formatCents(p.creditBalanceCents), "text-red"],
                 ].map(([label, value, tone]) => (
                   <div key={label} className="rounded-xl border border-border-hair bg-bg-base/60 px-3 py-2">
                     <p className="font-mono text-[10px] uppercase tracking-widest text-text-dim">{label}</p>
@@ -140,7 +169,7 @@ export function AffiliatesPanel({ promos, onChanged }: { promos: AffiliateStat[]
                         <li key={o.id} className="flex flex-wrap items-center justify-between gap-2 py-2">
                           <span className="font-mono text-xs text-text-primary">{o.orderNumber}</span>
                           <span className="text-text-secondary">{o.name}</span>
-                          <span className="text-[10px] uppercase tracking-wider text-text-dim">{o.status.replace("_", " ")}</span>
+                          <span className="text-[10px] uppercase tracking-wider text-text-dim">{o.status.replace("_", " ")}{o.isSelf ? " · self" : ""}</span>
                           <span className="tabular-nums text-text-primary">{formatCents(o.totalCents)} <span className="text-emerald-600">(−{formatCents(o.discountCents)})</span></span>
                           <span className="text-xs text-text-dim">{new Date(o.createdAt).toLocaleDateString()}</span>
                         </li>

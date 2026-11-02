@@ -44,9 +44,15 @@ export function OrderSummaryCard({ order }: { order: MemberOrder }) {
             <span className="tabular-nums text-violet-600">−{formatCents(order.pointsDiscountCents)}</span>
           </p>
         ) : null}
+        {order.creditDiscountCents ? (
+          <p className="flex justify-between">
+            <span className="text-emerald-600">Affiliate credit</span>
+            <span className="tabular-nums text-emerald-600">−{formatCents(order.creditDiscountCents)}</span>
+          </p>
+        ) : null}
         {order.shippingCents !== undefined && (
           <p className="flex justify-between">
-            <span className="text-text-secondary">Shipping{order.shippingMethod === "next_day" ? " (next-day)" : ""}</span>
+            <span className="text-text-secondary">Shipping</span>
             <span className="tabular-nums text-text-primary">{order.shippingCents > 0 ? formatCents(order.shippingCents) : "Free"}</span>
           </p>
         )}

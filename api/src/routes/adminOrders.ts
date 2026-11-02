@@ -42,6 +42,7 @@ adminOrdersRouter.get(
         shippingMethod: o.shippingMethod,
         shippingCents: o.shippingCents,
         pointsDiscountCents: o.pointsDiscountCents,
+        creditDiscountCents: o.creditDiscountCents,
         totalCents: o.totalCents,
         totalFormatted: money(o.totalCents),
         trackingNumber: o.trackingNumber,

@@ -61,8 +61,8 @@ IMPORTANT RULES:
 COMPANY INFO:
 - Pure Peptide LLC (purepeptide.us), premium research peptides and compounds
 - Every product is third-party tested; Certificates of Analysis are available on request (see /lab-results)
-- Shipping: standard $15, free on orders of $200 or more; next-day $65. United States only.
-- Payment: Cash App or Venmo after placing the order. Members earn 2 loyalty points per $100 spent (1 point = 1¢ at checkout).
+- Shipping: standard $15, free on orders of $200 or more. United States only.
+- Payment: Venmo after placing the order (order number in the note). Members earn 2 loyalty points per $100 spent (1 point = 1¢ at checkout).
 - Address: 30 N Gould St, Ste R, Sheridan, WY 82801 · Phone: (307) 204-5373 · Email: info@purepeptide.us`;
 
 /** POST /api/chat — one reply for the conversation so far. */

@@ -116,7 +116,7 @@ export default function CartPage() {
               Checkout
             </Link>
             <p className="mt-3 text-center text-xs leading-relaxed text-text-dim">
-              Pay by Cash App or Venmo after checkout. Reconstitution liquid included.
+              Pay by Venmo after checkout. Reconstitution liquid included.
             </p>
           </aside>
         </div>

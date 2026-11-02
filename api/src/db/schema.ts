@@ -76,6 +76,8 @@ export const memberUsers = pgTable("member_users", {
   pointsLifetime: integer("points_lifetime").notNull().default(0),
   /** Set once the previous store's balance has been copied in, so a re-sync never overwrites live points. */
   pointsSeededAt: timestamp("points_seeded_at"),
+  /** Promo code this member owns as an affiliate (commission lands on their store credit). */
+  affiliateCode: text("affiliate_code"),
   resetTokenExpiry: timestamp("reset_token_expiry"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
@@ -131,6 +133,8 @@ export const orders = pgTable("orders", {
   pointsRedeemed: integer("points_redeemed").notNull().default(0),
   pointsDiscountCents: integer("points_discount_cents").notNull().default(0),
   pointsEarned: integer("points_earned").notNull().default(0),
+  /** Affiliate store credit spent on this order. */
+  creditDiscountCents: integer("credit_discount_cents").notNull().default(0),
   totalCents: integer("total_cents").notNull(),
 
   status: orderStatus("status").notNull().default("awaiting_payment"),
@@ -188,6 +192,8 @@ export const promoCodes = pgTable("promo_codes", {
   discountPercent: doublePrecision("discount_percent").notNull().default(10),
   commissionPercent: doublePrecision("commission_percent").notNull().default(20),
   isActive: boolean("is_active").notNull().default(true),
+  /** Store-wide sale codes cannot be combined with points or affiliate credit. */
+  exclusive: boolean("exclusive").notNull().default(false),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 }, (t) => ({
   codeIdx: uniqueIndex("promo_codes_code_idx").on(t.code),

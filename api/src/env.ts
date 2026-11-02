@@ -24,7 +24,9 @@ export const env = {
   /* Manual payment destinations. Not secrets, but configurable so they can be
      changed without a deploy — and so the wrong business's handle can never be
      baked into a build. */
-  CASHAPP_PAYMENT_URL: process.env.CASHAPP_PAYMENT_URL ?? "https://cash.app/$purepep26",
+  /* Venmo is the sole manual payment destination, as on the previous store.
+     Cash App only appears if a URL is explicitly configured. */
+  CASHAPP_PAYMENT_URL: process.env.CASHAPP_PAYMENT_URL ?? "",
   VENMO_PAYMENT_URL: process.env.VENMO_PAYMENT_URL ?? "https://venmo.com/u/Adrianza-Walker",
 
   /* Shippo */

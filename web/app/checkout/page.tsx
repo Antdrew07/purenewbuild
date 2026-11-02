@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { formatCents, useCart } from "@/lib/cart";
 import { OrderError, ordersApiConfigured, placeOrder, shippingCentsFor, type PlacedOrder, type ShippingMethod } from "@/lib/orders-client";
 import { myLoyalty, pointsEarnedFor } from "@/lib/loyalty-client";
+import { myAffiliate } from "@/lib/affiliate-client";
 import { PaymentPanel } from "@/components/cart/PaymentPanel";
 import { useMember } from "@/lib/member";
 
@@ -46,21 +47,43 @@ export default function CheckoutPage() {
     ? Math.min(subtotalCents, Math.max(0, Math.round((subtotalCents * promo.discountPercent) / 100)))
     : 0;
 
-  const [shippingMethod, setShippingMethod] = useState<ShippingMethod>("standard");
+  const shippingMethod: ShippingMethod = "standard";
   const shippingCents = shippingCentsFor(subtotalCents, shippingMethod);
   const afterPromoCents = Math.max(0, subtotalCents - discountCents + shippingCents);
+  // Store-wide sale codes can't be combined with points or affiliate credit.
+  const saleExclusive = Boolean(promo?.valid && promo.exclusive);
 
   // Loyalty points: 1 point = 1¢, capped at the balance and at the amount due.
   const [pointsBalance, setPointsBalance] = useState(0);
   const [pointsInput, setPointsInput] = useState("");
   const [appliedPoints, setAppliedPoints] = useState(0);
+  const [creditBalance, setCreditBalance] = useState(0);
+  const [creditInput, setCreditInput] = useState("");
+  const [appliedCredit, setAppliedCredit] = useState(0);
   useEffect(() => {
-    if (!token) { setPointsBalance(0); return; }
+    if (!token) { setPointsBalance(0); setCreditBalance(0); return; }
     myLoyalty(token).then((l) => setPointsBalance(l.balance)).catch(() => setPointsBalance(0));
+    myAffiliate(token).then((a) => setCreditBalance(a.balanceCents)).catch(() => setCreditBalance(0));
   }, [token]);
-  const pointsRedeemed = Math.min(appliedPoints, pointsBalance, afterPromoCents);
-  const totalCents = Math.max(0, afterPromoCents - pointsRedeemed);
+  useEffect(() => {
+    if (saleExclusive) { setAppliedPoints(0); setAppliedCredit(0); }
+  }, [saleExclusive]);
+  const pointsRedeemed = saleExclusive ? 0 : Math.min(appliedPoints, pointsBalance, afterPromoCents);
+  const afterPointsCents = Math.max(0, afterPromoCents - pointsRedeemed);
+  // Credit absorbs only what's left after promo + points, capped to the balance.
+  const creditRedeemed = saleExclusive ? 0 : Math.min(appliedCredit, creditBalance, afterPointsCents);
+  const totalCents = Math.max(0, afterPointsCents - creditRedeemed);
   const pointsToEarn = pointsEarnedFor(totalCents);
+
+  function applyCredit() {
+    const dollars = Number.parseFloat(creditInput);
+    const cents = Math.round((Number.isFinite(dollars) ? dollars : 0) * 100);
+    if (cents <= 0) { toast.error("Enter a credit amount"); return; }
+    if (cents > creditBalance) { toast.error(`You have ${formatCents(creditBalance)} in credit`); return; }
+    setAppliedCredit(cents);
+    setCreditInput("");
+    toast.success(`${formatCents(Math.min(cents, afterPointsCents))} credit applied`);
+  }
 
   function applyPoints() {
     const pts = parseInt(pointsInput, 10);
@@ -147,6 +170,7 @@ export default function CheckoutPage() {
         promoCode: promo?.valid && promo.code ? promo.code : undefined,
         shippingMethod,
         redeemPoints: pointsRedeemed > 0 ? pointsRedeemed : undefined,
+        redeemCreditCents: creditRedeemed > 0 ? creditRedeemed : undefined,
         items: lines.map((l) => ({ slug: l.slug, quantity: l.quantity })),
       }, token);
       // Only clear once the server has the order — a failed request must not
@@ -201,40 +225,6 @@ export default function CheckoutPage() {
               <FieldBox key={f} f={f} form={form} set={set} errors={errors} cls={inputCls(f)} />
             ))}
           </div>
-          <fieldset className="rounded-2xl border border-border-hair bg-bg-elevated p-4">
-            <legend className="px-1 font-mono text-[10px] uppercase tracking-widest text-text-dim">Shipping method</legend>
-            <div className="mt-1 grid gap-2 sm:grid-cols-2">
-              {([
-                { value: "standard", label: "Standard", note: "2–5 business days", price: subtotalCents >= 20_000 ? "Free" : "$15.00", hint: "Free on orders $200+" },
-                { value: "next_day", label: "Next-day", note: "Order by 2pm ET", price: "$65.00", hint: "Overnight within the US" },
-              ] as const).map((opt) => {
-                const active = shippingMethod === opt.value;
-                return (
-                  <label
-                    key={opt.value}
-                    className={`flex cursor-pointer items-start gap-3 rounded-xl border p-3 transition-colors ${active ? "border-red bg-red/5" : "border-border-hair hover:border-red/40"}`}
-                  >
-                    <input
-                      type="radio"
-                      name="shippingMethod"
-                      value={opt.value}
-                      checked={active}
-                      onChange={() => setShippingMethod(opt.value)}
-                      className="mt-1 accent-[var(--red,#E8121C)]"
-                    />
-                    <span className="min-w-0 flex-1">
-                      <span className="flex items-center justify-between gap-2">
-                        <span className="text-sm font-semibold text-text-primary">{opt.label}</span>
-                        <span className="text-sm font-bold tabular-nums text-text-primary">{opt.price}</span>
-                      </span>
-                      <span className="block text-xs text-text-secondary">{opt.note}</span>
-                      <span className="block text-[11px] text-text-dim">{opt.hint}</span>
-                    </span>
-                  </label>
-                );
-              })}
-            </div>
-          </fieldset>
           <div>
             <label htmlFor="customerNote" className="mb-1.5 block font-mono text-[10px] uppercase tracking-widest text-text-dim">
               {LABELS.customerNote}
@@ -293,7 +283,51 @@ export default function CheckoutPage() {
             )}
           </div>
 
-          {member && pointsBalance > 0 && (
+          {member && saleExclusive && (pointsBalance > 0 || creditBalance > 0) && (
+            <p className="mt-4 rounded-xl border border-amber-300/60 bg-amber-500/10 px-3 py-2 text-xs leading-relaxed text-amber-700">
+              <strong>{promo?.code}</strong> is a sale code — it can&apos;t be combined with points or affiliate credit. Remove the code to use those instead.
+            </p>
+          )}
+
+          {member && creditBalance > 0 && !saleExclusive && (
+            <div className="mt-4 rounded-xl border border-border-hair bg-bg-base/60 p-3">
+              <div className="flex items-center justify-between">
+                <span className="font-mono text-[10px] uppercase tracking-widest text-text-dim">Affiliate credit</span>
+                <span className="text-[11px] text-text-secondary">{formatCents(creditBalance)} available</span>
+              </div>
+              {creditRedeemed > 0 ? (
+                <div className="mt-2 flex items-center justify-between rounded-lg border border-emerald-300/60 bg-emerald-500/10 px-3 py-2">
+                  <p className="text-xs font-bold text-emerald-700">{formatCents(creditRedeemed)} credit applied</p>
+                  <button type="button" onClick={() => setAppliedCredit(0)} className="min-h-9 rounded-lg px-2 text-xs font-semibold text-emerald-700 hover:bg-emerald-500/10">Remove</button>
+                </div>
+              ) : (
+                <div className="mt-2 flex gap-2">
+                  <input
+                    type="number"
+                    min={0.01}
+                    step={0.01}
+                    inputMode="decimal"
+                    value={creditInput}
+                    onChange={(e) => setCreditInput(e.target.value)}
+                    onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); applyCredit(); } }}
+                    placeholder={`Up to ${formatCents(Math.min(creditBalance, afterPointsCents))}`}
+                    aria-label="Credit to apply in dollars"
+                    className="commerce-input min-h-11 w-full rounded-xl border border-border-hair bg-bg-base/60 px-4 py-2.5 text-sm text-text-primary placeholder:text-text-dim focus:border-red/60 focus:outline-none"
+                  />
+                  <button
+                    type="button"
+                    onClick={applyCredit}
+                    disabled={!creditInput}
+                    className="min-h-11 shrink-0 rounded-xl border border-border-hair px-4 text-xs font-semibold uppercase tracking-wider text-text-secondary transition-colors hover:border-red/50 hover:text-red disabled:opacity-50"
+                  >
+                    Apply
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+
+          {member && pointsBalance > 0 && !saleExclusive && (
             <div className="mt-4 rounded-xl border border-border-hair bg-bg-base/60 p-3">
               <div className="flex items-center justify-between">
                 <span className="font-mono text-[10px] uppercase tracking-widest text-text-dim">Redeem points</span>
@@ -352,8 +386,14 @@ export default function CheckoutPage() {
                 <dd className="tabular-nums text-violet-600">−{formatCents(pointsRedeemed)}</dd>
               </div>
             )}
+            {creditRedeemed > 0 && (
+              <div className="flex justify-between">
+                <dt className="text-emerald-600">Affiliate credit</dt>
+                <dd className="tabular-nums text-emerald-600">−{formatCents(creditRedeemed)}</dd>
+              </div>
+            )}
             <div className="flex justify-between">
-              <dt className="text-text-secondary">Shipping{shippingMethod === "next_day" ? " (next-day)" : ""}</dt>
+              <dt className="text-text-secondary">Shipping <span className="text-text-dim">(free over $200)</span></dt>
               <dd className="tabular-nums text-text-primary">{shippingCents > 0 ? formatCents(shippingCents) : "Free"}</dd>
             </div>
           </dl>
@@ -377,7 +417,7 @@ export default function CheckoutPage() {
             {pending ? "Placing order…" : "Place order"}
           </button>
           <p className="mt-3 text-center text-xs leading-relaxed text-text-dim">
-            No payment is taken now. You will get Cash App and Venmo details on the next screen.
+            No payment is taken now. You will get the Venmo details on the next screen.
           </p>
         </aside>
       </form>

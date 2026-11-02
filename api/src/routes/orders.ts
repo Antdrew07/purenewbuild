@@ -10,6 +10,7 @@ import { priceCart, reserveOrderNumber, paymentLinks, money } from "../lib/order
 import { sendOrderPlaced, sendOwnerNewOrder } from "../lib/email.js";
 import { discountCentsFor, findActivePromo } from "../lib/promo.js";
 import { getLoyaltyBalance, movePoints, pointsEarnedFor } from "../lib/loyalty.js";
+import { getCreditBalanceCents, redeemCredit } from "../lib/affiliate.js";
 
 export const ordersRouter = Router();
 
@@ -34,8 +35,9 @@ const PlaceBody = z.object({
   country: z.string().trim().length(2).default("US"),
   customerNote: z.string().trim().max(2000).optional(),
   promoCode: z.string().trim().max(64).optional(),
-  shippingMethod: z.enum(["standard", "next_day"]).default("standard"),
+  shippingMethod: z.enum(["standard"]).default("standard"),
   redeemPoints: z.number().int().min(0).max(10_000_000).optional(),
+  redeemCreditCents: z.number().int().min(0).max(100_000_000).optional(),
   // Only slug + quantity is accepted. Prices are always looked up server-side.
   items: z
     .array(z.object({ slug: z.string().trim().min(1).max(200), quantity: z.number().int().min(1).max(99) }))
@@ -60,25 +62,36 @@ ordersRouter.post(
 
     // Promo codes are validated here, never trusted from the client; the
     // discount comes off the subtotal exactly as the previous store did.
-    let promo: { code: string; discountPercent: number } | null = null;
+    let promo: { code: string; discountPercent: number; exclusive: boolean } | null = null;
     if (b.promoCode?.trim()) {
       if (!db) throw new HttpError(503, "Promo codes require a configured database");
       const found = await findActivePromo(db, b.promoCode);
       if (!found) throw new HttpError(400, "Invalid or expired promo code");
-      promo = { code: found.code, discountPercent: found.discountPercent };
+      promo = { code: found.code, discountPercent: found.discountPercent, exclusive: found.exclusive };
     }
     const discountCents = promo ? discountCentsFor(priced.subtotalCents, promo.discountPercent) : 0;
     const afterPromoCents = priced.subtotalCents - discountCents + priced.shippingCents;
+    // Store-wide sale codes cannot be combined with points or affiliate credit.
+    const promoIsExclusive = Boolean(promo?.exclusive);
 
     // Loyalty points: 1 point = 1¢, capped at the balance and at the amount due.
     let pointsRedeemed = 0;
-    if (b.redeemPoints && b.redeemPoints > 0) {
+    if (!promoIsExclusive && b.redeemPoints && b.redeemPoints > 0) {
       if (!db) throw new HttpError(503, "Loyalty points require a configured database");
       const { balance } = await getLoyaltyBalance(db, b.email);
       pointsRedeemed = Math.max(0, Math.min(b.redeemPoints, balance, afterPromoCents));
     }
     const pointsDiscountCents = pointsRedeemed;
-    const totalCents = Math.max(0, afterPromoCents - pointsDiscountCents);
+    const afterPointsCents = Math.max(0, afterPromoCents - pointsDiscountCents);
+
+    // Affiliate store credit absorbs only what is left after promo + points.
+    let creditDiscountCents = 0;
+    if (!promoIsExclusive && b.redeemCreditCents && b.redeemCreditCents > 0) {
+      if (!db) throw new HttpError(503, "Store credit requires a configured database");
+      const balance = await getCreditBalanceCents(db, b.email);
+      creditDiscountCents = Math.max(0, Math.min(b.redeemCreditCents, balance, afterPointsCents));
+    }
+    const totalCents = Math.max(0, afterPointsCents - creditDiscountCents);
     const pointsEarned = pointsEarnedFor(totalCents);
 
     const orderNumber = await reserveOrderNumber();
@@ -107,6 +120,7 @@ ordersRouter.post(
           pointsRedeemed,
           pointsDiscountCents,
           pointsEarned,
+          creditDiscountCents,
           customerNote: b.customerNote ?? null,
         })
         .returning({ id: schema.orders.id });
@@ -129,6 +143,9 @@ ordersRouter.post(
       if (pointsRedeemed > 0) {
         await movePoints(db, { email: b.email, orderNumber, type: "redeem", points: -pointsRedeemed, description: `Redeemed on order ${orderNumber}` });
       }
+      if (creditDiscountCents > 0) {
+        await redeemCredit(db, b.email, creditDiscountCents, orderNumber);
+      }
       if (pointsEarned > 0) {
         await movePoints(db, { email: b.email, orderNumber, type: "earn", points: pointsEarned, description: `Earned on order ${orderNumber}` });
       }
@@ -144,6 +161,7 @@ ordersRouter.post(
       shippingCents: priced.shippingCents,
       shippingMethod: b.shippingMethod,
       pointsDiscountCents,
+      creditDiscountCents,
       items: priced.items,
     };
     // Never let a mail failure fail the order — the customer already owes us money.
@@ -163,6 +181,7 @@ ordersRouter.post(
         discountCents,
         pointsRedeemed,
         pointsDiscountCents,
+        creditDiscountCents,
         pointsEarned,
         totalCents,
         totalFormatted: money(totalCents),
@@ -213,6 +232,7 @@ ordersRouter.get(
         shippingCents: o.shippingCents,
         pointsRedeemed: o.pointsRedeemed,
         pointsDiscountCents: o.pointsDiscountCents,
+        creditDiscountCents: o.creditDiscountCents,
         pointsEarned: o.pointsEarned,
         totalCents: o.totalCents,
         totalFormatted: money(o.totalCents),
@@ -261,6 +281,7 @@ ordersRouter.get(
         shippingCents: order.shippingCents,
         pointsRedeemed: order.pointsRedeemed,
         pointsDiscountCents: order.pointsDiscountCents,
+        creditDiscountCents: order.creditDiscountCents,
         totalCents: order.totalCents,
         totalFormatted: money(order.totalCents),
         trackingNumber: order.trackingNumber,

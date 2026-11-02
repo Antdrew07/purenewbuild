@@ -21,15 +21,13 @@ export function generateOrderNumber(): string {
   return `PP-${out}`;
 }
 
-export type ShippingMethod = "standard" | "next_day";
+export type ShippingMethod = "standard";
 
-/** Standard is $15, free from $200 (before discounts); next-day is a flat $65. Same rules as the previous store. */
+/** Standard shipping is $15, free from $200 (before discounts). Same rule as the previous store. */
 export const FREE_SHIPPING_FROM_CENTS = 20_000;
 export const STANDARD_SHIPPING_CENTS = 1_500;
-export const NEXT_DAY_SHIPPING_CENTS = 6_500;
 
-export function shippingCentsFor(subtotalCents: number, method: ShippingMethod = "standard"): number {
-  if (method === "next_day") return NEXT_DAY_SHIPPING_CENTS;
+export function shippingCentsFor(subtotalCents: number, _method: ShippingMethod = "standard"): number {
   return subtotalCents >= FREE_SHIPPING_FROM_CENTS ? 0 : STANDARD_SHIPPING_CENTS;
 }
 
@@ -147,7 +145,7 @@ export function paymentLinks() {
   return {
     cashapp: env.CASHAPP_PAYMENT_URL,
     venmo: env.VENMO_PAYMENT_URL,
-    cashappHandle: env.CASHAPP_PAYMENT_URL.split("/").pop() ?? "",
+    cashappHandle: env.CASHAPP_PAYMENT_URL ? env.CASHAPP_PAYMENT_URL.split("/").pop() ?? "" : "",
     venmoHandle: env.VENMO_PAYMENT_URL.split("/").pop() ?? "",
   };
 }

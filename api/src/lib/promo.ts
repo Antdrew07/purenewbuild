@@ -1,5 +1,6 @@
 import { desc, eq } from "drizzle-orm";
 import { db, schema } from "../db/index.js";
+import { affiliateEmailForCode } from "./affiliate.js";
 
 type Db = NonNullable<typeof db>;
 
@@ -34,22 +35,24 @@ export async function creditAffiliateCommission(
   if (!order.promoCode) return { creditedCents: 0, reason: "no-promo" };
   const promo = await findPromo(database, order.promoCode);
   if (!promo) return { creditedCents: 0, reason: "unknown-code" };
-  if (!promo.affiliateEmail) return { creditedCents: 0, reason: "house-code" };
-  if (promo.affiliateEmail.toLowerCase() === order.email.toLowerCase()) return { creditedCents: 0, reason: "self-order" };
+  if (!promo.commissionPercent) return { creditedCents: 0, reason: "zero-commission" };
+  const affiliateEmail = await affiliateEmailForCode(database, promo.code, promo.affiliateEmail);
+  if (!affiliateEmail) return { creditedCents: 0, reason: "house-code" };
+  if (affiliateEmail === order.email.toLowerCase()) return { creditedCents: 0, reason: "self-order" };
   const amountCents = Math.round((order.totalCents * promo.commissionPercent) / 100);
   if (amountCents <= 0) return { creditedCents: 0, reason: "zero-amount" };
 
   const [last] = await database
     .select({ balance: schema.affiliateCreditTransactions.balanceAfterCents })
     .from(schema.affiliateCreditTransactions)
-    .where(eq(schema.affiliateCreditTransactions.email, promo.affiliateEmail))
+    .where(eq(schema.affiliateCreditTransactions.email, affiliateEmail))
     .orderBy(desc(schema.affiliateCreditTransactions.createdAt), desc(schema.affiliateCreditTransactions.id))
     .limit(1);
 
   const inserted = await database
     .insert(schema.affiliateCreditTransactions)
     .values({
-      email: promo.affiliateEmail,
+      email: affiliateEmail,
       orderNumber: order.orderNumber,
       type: "earn",
       amountCents,
