@@ -847,6 +847,14 @@
       "note": "Advanced fat burner blend, 10 mL vial. Per mL: 400mg carnitine, 300mg ALCAR, 2mg albuterol, 5mg yohimbine, 1.5% benzyl alcohol"
     },
     {
+      "name": "Beast 100",
+      "dosage": "100mg",
+      "price": 90,
+      "category": "blends",
+      "status": "active",
+      "note": "5-peptide blend, 100mg total: 50mg GHK-Cu, 10mg BPC-157, 10mg TB-500, 10mg KPV, 20mg Cartalax"
+    },
+    {
       "name": "SNAP-8",
       "dosage": "10mg",
       "price": 35,
