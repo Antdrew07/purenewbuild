@@ -40,17 +40,23 @@ const BOX = { cx: 524, top: 1013, bottom: 1096, maxW: 315 };
 /** All fixed label copy is overlaid too — the model misspelled it in one roll. */
 const LINES = { cx: 523, white: 1146, red: 1183, domain: 1218 };
 
+/* Advance widths calibrated to Saira ExtraBold (the label face), erring wide:
+   a name that is over-estimated shrinks a little, one that is under-estimated
+   overruns the white box. */
 function emWidth(ch: string): number {
-  if (/[MW]/.test(ch)) return 0.78;
-  if (/[A-Z]/.test(ch)) return 0.52;
-  if (/[0-9]/.test(ch)) return 0.52;
-  if (/[ijlI!.,']/.test(ch)) return 0.24;
-  if (/\s/.test(ch)) return 0.22;
-  if (/[-/+]/.test(ch)) return 0.3;
-  return 0.52;
+  if (/[MW]/.test(ch)) return 0.95;
+  if (/[ijlI!.,']/.test(ch)) return 0.32;
+  if (/[A-Z]/.test(ch)) return 0.66;
+  if (/[0-9]/.test(ch)) return 0.62;
+  if (/\s/.test(ch)) return 0.26;
+  if (/[-/+]/.test(ch)) return 0.38;
+  return 0.66;
 }
+const LETTER_SPACING = 1;
 const emLen = (t: string) => t.split("").reduce((a, c) => a + emWidth(c), 0);
-const fitSize = (t: string, max: number) => Math.min(max, BOX.maxW / Math.max(emLen(t), 0.001));
+const textWidth = (t: string, size: number) => emLen(t) * size + LETTER_SPACING * t.length;
+const fitSize = (t: string, max: number) =>
+  Math.min(max, (BOX.maxW - LETTER_SPACING * t.length) / Math.max(emLen(t), 0.001));
 
 interface TextLayout {
   lines: { text: string; size: number }[];
@@ -113,8 +119,7 @@ export function VialMockup({ name, dosage, className = "", style, priority }: Vi
         {/* Product title in the label's white box */}
         {lines.map((l) => {
           cursor += l.size * 1.08;
-          const w = emLen(l.text) * l.size;
-          const over = w > BOX.maxW;
+          const over = textWidth(l.text, l.size) > BOX.maxW;
           return (
             <text
               key={l.text}
@@ -125,7 +130,7 @@ export function VialMockup({ name, dosage, className = "", style, priority }: Vi
               fontFamily="var(--font-saira), 'Arial Narrow', sans-serif"
               fontWeight="800"
               fontSize={l.size}
-              letterSpacing="1"
+              letterSpacing={LETTER_SPACING}
               textLength={over ? BOX.maxW : undefined}
               lengthAdjust={over ? "spacingAndGlyphs" : undefined}
             >
