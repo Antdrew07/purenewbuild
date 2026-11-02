@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { PasswordField } from "@/components/ui/PasswordField";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useState, type FormEvent, type ReactNode } from "react";
@@ -196,14 +197,14 @@ export function MemberAccessGate({ children }: { children: ReactNode }) {
             </label>
             <label className="block">
               <span className="member-gate__label">Password</span>
-              <input type="password" autoComplete={mode === "register" ? "new-password" : "current-password"} value={password} onChange={(event) => setPassword(event.target.value)} minLength={12} required className="member-gate__input" />
+              <PasswordField autoComplete={mode === "register" ? "new-password" : "current-password"} value={password} onChange={(event) => setPassword(event.target.value)} minLength={12} required className="member-gate__input" />
               {mode === "register" && <span className="mt-1 block text-xs text-text-dim">Use 12 or more characters.</span>}
             </label>
             {mode === "register" && (
               <>
                 <label className="block">
                   <span className="member-gate__label">Confirm password</span>
-                  <input type="password" autoComplete="new-password" value={confirmation} onChange={(event) => setConfirmation(event.target.value)} minLength={12} required className="member-gate__input" />
+                  <PasswordField autoComplete="new-password" value={confirmation} onChange={(event) => setConfirmation(event.target.value)} minLength={12} required className="member-gate__input" />
                 </label>
                 <label className="member-gate__check">
                   <input type="checkbox" checked={ageConfirmed} onChange={(event) => setAgeConfirmed(event.target.checked)} />

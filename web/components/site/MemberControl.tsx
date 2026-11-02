@@ -14,7 +14,7 @@ export function MemberControl() {
       aria-label={`Sign out ${member.email}`}
       title={`Signed in as ${member.email}. Select to sign out.`}
     >
-      <span className="max-w-20 truncate">Member</span>
+      <span className="max-w-20 truncate">{member.isAdmin ? "Admin" : "Member"}</span>
       <span aria-hidden="true" className="text-red">Sign out</span>
     </button>
   );

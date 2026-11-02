@@ -4,7 +4,7 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "";
 export const membersApiConfigured = Boolean(API_URL);
 export const turnstileConfigured = Boolean(process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY);
 
-export type MemberSession = { token: string; member: Member };
+export type MemberSession = { token: string; member: Member; adminToken?: string };
 
 export class MemberAuthError extends Error {
   constructor(public status: number, message: string) {
