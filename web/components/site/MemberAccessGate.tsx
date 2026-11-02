@@ -140,7 +140,7 @@ export function MemberAccessGate({ children }: { children: ReactNode }) {
     return <div className="member-gate member-gate--loading" aria-busy="true"><span className="member-gate__loader" /></div>;
   }
   const onAdminRoute = pathname === "/admin" || pathname.startsWith("/admin/");
-  if (member || adminActive || onAdminRoute || ["/terms", "/privacy", "/shipping"].includes(pathname)) return <>{children}</>;
+  if (member || adminActive || onAdminRoute || ["/terms", "/privacy", "/shipping", "/track"].includes(pathname)) return <>{children}</>;
 
   const unavailable = !membersApiConfigured || !turnstileConfigured;
   const title =

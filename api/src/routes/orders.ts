@@ -1,6 +1,6 @@
 import { Router } from "express";
 import rateLimit from "express-rate-limit";
-import { and, eq } from "drizzle-orm";
+import { and, desc, eq, inArray, sql } from "drizzle-orm";
 import { z } from "zod";
 import { db, schema } from "../db/index.js";
 import { asyncHandler, HttpError } from "../middleware/error.js";
@@ -127,6 +127,45 @@ ordersRouter.post(
  * not treated as a secret — the caller must also present the matching email
  * before any address or contact detail is returned.
  */
+/** GET /api/orders/mine — every order under the signed-in member's email, newest first. */
+ordersRouter.get(
+  "/mine",
+  requireMember,
+  asyncHandler(async (req, res) => {
+    const email = req.member?.email;
+    if (!email) throw new HttpError(401, "Member sign-in is required");
+    if (!db) throw new HttpError(503, "Order history requires a database");
+
+    // Case-insensitive: orders carried over from the previous store kept the
+    // email exactly as the customer typed it at the time.
+    const orders = await db
+      .select()
+      .from(schema.orders)
+      .where(sql`lower(${schema.orders.email}) = ${email.toLowerCase()}`)
+      .orderBy(desc(schema.orders.createdAt))
+      .limit(100);
+    const ids = orders.map((o) => o.id);
+    const items = ids.length
+      ? await db.select().from(schema.orderItems).where(inArray(schema.orderItems.orderId, ids))
+      : [];
+
+    res.json({
+      data: orders.map((o) => ({
+        orderNumber: o.orderNumber,
+        status: o.status,
+        totalCents: o.totalCents,
+        totalFormatted: money(o.totalCents),
+        trackingNumber: o.trackingNumber,
+        trackingUrl: o.trackingUrl,
+        createdAt: o.createdAt,
+        items: items
+          .filter((i) => i.orderId === o.id)
+          .map((i) => ({ name: i.name, dosage: i.dosage, quantity: i.quantity, lineTotalCents: i.lineTotalCents })),
+      })),
+    });
+  }),
+);
+
 ordersRouter.get(
   "/:orderNumber",
   asyncHandler(async (req, res) => {

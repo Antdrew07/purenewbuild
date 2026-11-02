@@ -21,7 +21,11 @@ const LINKS = [
 export function Nav() {
   const pathname = usePathname();
   const { member } = useMember();
-  const links = member?.isAdmin ? [...LINKS, { href: "/admin", label: "Admin" }] : LINKS;
+  const links = [
+    ...LINKS,
+    ...(member ? [{ href: "/account", label: "Account" }] : []),
+    ...(member?.isAdmin ? [{ href: "/admin", label: "Admin" }] : []),
+  ];
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [hovered, setHovered] = useState<string | null>(null);
