@@ -969,6 +969,14 @@
       "status": "active",
       "form": "jar",
       "note": "Aqua, mineral oil, glycerin, glyceryl stearate, 1,2-hexanediol, carbomer, arginine, retinol, Daemonorops draco (dragon's blood) extract, Ganoderma atrum (mushroom) extract. 50 g / 1.76 oz jar"
+    },
+    {
+      "name": "Shira Yuki",
+      "dosage": "180,000mg",
+      "price": 40,
+      "category": "skincare",
+      "status": "active",
+      "note": "Glutathione and vitamin C skin-brightening blend, 180,000mg"
     }
   ]
 }
