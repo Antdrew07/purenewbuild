@@ -1,7 +1,7 @@
-import { env, isEmailConfigured } from "../env.js";
+import { env, isEmailConfigured, ownerEmails, ownerReplyTo } from "../env.js";
 import { money, paymentLinks } from "./orders.js";
 
-const FROM = "Pure Peptide <noreply@purepeptide.us>";
+const FROM = env.EMAIL_FROM;
 
 interface SendArgs {
   to: string[];
@@ -192,7 +192,7 @@ export async function sendOwnerNewOrder(o: OrderEmailData): Promise<boolean> {
     .map((i) => `  ${i.name}${i.dosage ? ` ${i.dosage}` : ""} x${i.quantity}  ${money(i.lineTotalCents)}`)
     .join("\n");
   return send({
-    to: [env.OWNER_EMAIL],
+    to: ownerEmails(),
     replyTo: o.email,
     subject: `New order ${o.orderNumber} — ${money(o.totalCents)}${o.promoCode ? ` (promo ${o.promoCode})` : ""}`,
     html: shell(
@@ -274,6 +274,6 @@ export async function sendContactReply(o: {
     subject: `Re: ${o.originalSubject || "Your message to Pure Peptide"}`,
     html,
     text,
-    replyTo: env.OWNER_EMAIL || undefined,
+    replyTo: ownerReplyTo(),
   });
 }

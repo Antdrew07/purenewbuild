@@ -10,7 +10,9 @@ export const env = {
   DATABASE_URL: process.env.DATABASE_URL ?? "",
   JWT_SECRET: process.env.JWT_SECRET ?? "",
   RESEND_API_KEY: process.env.RESEND_API_KEY ?? "",
+  /* Comma-separated: every address gets the owner notifications. */
   OWNER_EMAIL: process.env.OWNER_EMAIL ?? "",
+  EMAIL_FROM: process.env.EMAIL_FROM ?? "Pure Peptide <noreply@purepeptide.us>",
   CORS_ORIGIN: (process.env.CORS_ORIGIN ?? "http://localhost:3000").split(","),
   /* Public storefront origin for links in email (password reset). Falls back
      to the first CORS origin, which is the storefront in every deployment. */
@@ -44,6 +46,8 @@ export const env = {
 
 export const isDbConfigured = Boolean(env.DATABASE_URL);
 export const isEmailConfigured = Boolean(env.RESEND_API_KEY && env.OWNER_EMAIL);
+export const ownerEmails = () => env.OWNER_EMAIL.split(",").map((s) => s.trim()).filter(Boolean);
+export const ownerReplyTo = () => ownerEmails()[0];
 export const isAuthConfigured = Boolean(env.JWT_SECRET);
 export const isShippoConfigured = Boolean(env.SHIPPO_API_KEY);
 export const isTurnstileConfigured = Boolean(env.TURNSTILE_SECRET_KEY);

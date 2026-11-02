@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { z } from "zod";
 import { db, schema } from "../db/index.js";
-import { env, isEmailConfigured } from "../env.js";
+import { env, isEmailConfigured, ownerEmails } from "../env.js";
 import { asyncHandler } from "../middleware/error.js";
 import { validateBody } from "../middleware/validate.js";
 
@@ -36,8 +36,8 @@ contactRouter.post(
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          from: "Pure Peptide <noreply@purepeptide.us>",
-          to: [env.OWNER_EMAIL],
+          from: env.EMAIL_FROM,
+          to: ownerEmails(),
           reply_to: email,
           subject: `[Contact] ${subject}`,
           text: `From: ${name} <${email}>\n\n${message}`,
